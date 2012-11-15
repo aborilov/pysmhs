@@ -1,0 +1,86 @@
+[van2off]
+    [[conditions]]
+        plchandler_van4 = 0
+    [[actions]]
+        [[[setter]]]
+            plchandler_van2 = 0
+
+[tamboff]
+    [[conditions]]
+        plchandler_kor = 0
+    [[actions]]
+        [[[setter]]]
+            plchandler_tamb = 0
+
+[vkcSpa2]
+    [[conditions]]
+        plchandler_vkcSpa2 = 1
+    [[actions]]
+        [[[switcher]]]
+            plchandler_spal = 1
+
+[vkcSpa1]
+    [[conditions]]
+        plchandler_vkcSpa1 = 1
+    [[actions]]
+        [[[switcher]]]
+            plchandler_spal2 = 1
+
+[vkcZal]
+    [[conditions]]
+        plchandler_vkcZal = 1
+    [[actions]]
+        [[[switcher]]]
+            plchandler_zal = 1
+
+[vkcVan4]
+    [[conditions]]
+        plchandler_vkcVan4 = 1
+        plchandler_vkcVan1 = 1
+    [[actions]]
+        [[[switcher]]]
+            plchandler_van4 = 1
+
+[vkcGard]
+    [[conditions]]
+        plchandler_vkcGard = 1
+    [[actions]]
+        [[[switcher]]]
+            plchandler_gard = 1
+
+[vkcKor]
+    [[conditions]]
+        plchandler_vkcKor = 1
+        plchandler_vkcTamb1 = 1
+    [[actions]]
+        [[[switcher]]]
+            plchandler_kor = 1
+
+[vkcVan2]
+    [[conditions]]
+        plchandler_vkcVan2 = 1
+    [[actions]]
+        [[[switcher]]]
+            plchandler_van2 = 1
+
+[vkcKyh]
+    [[conditions]]
+        plchandler_vkcKyh = 1
+    [[actions]]
+        [[[switcher]]]
+            plchandler_kyhup = 1
+            plchandler_kyh = 1
+
+[vkcTamb3]
+    [[conditions]]
+        plchandler_vkcTamb3 = 1
+    [[actions]]
+        [[[switcher]]]
+            plchandler_tamb = 1
+
+[vkcTamb2]
+    [[conditions]]
+        plchandler_vkcTamb2 = 1
+    [[actions]]
+        [[[switcher]]]
+            plchandler_ylic = 1

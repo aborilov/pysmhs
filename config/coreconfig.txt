@@ -1,0 +1,38 @@
+[corehandler]
+    description = "Core handler"
+    [[params]]
+        configfile = "config/coreconfig.txt"
+        loglevel = "error"
+        logfile = "smhs.log"
+[plchandler]
+    description = "PLC handler"
+    [[params]]
+        configfile = config/tags_config.txt
+        [[[server]]]
+            fakeserver = 0
+            pollingTimeout = 0 
+            packetSize = 50
+        [[[port]]]
+            name = "/dev/plc"
+            data_length = 7
+            speed = 9600
+            parity = "E"
+            stop_bits = 1
+            station_address = 1
+            timeout = 0.03
+
+[webhandler]
+    description = "WebServer handler"
+    parent = "corehandler"
+    [[params]]
+        port = 8080
+        wwwPath = /opt/pysmhs/www
+
+[datehandler]
+    description = "date handler"
+
+[actionhandler]
+    description = "action handler"
+    parent = "corehandler"
+        [[params]]
+            configfile = "config/actions.txt"

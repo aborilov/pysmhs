@@ -1,0 +1,89 @@
+[output]
+	[[zal]]
+		address = 1307
+	
+	[[van4]]
+		address = 1303
+	
+	[[van2]]
+		address = 1302
+	
+	[[spal]]
+		address = 1308
+	
+	[[spal2]]
+		address = 1311
+	
+	[[krovat]]
+		address = 1304
+		
+	[[kyh]]
+		address = 1298
+	
+	[[tamb]]
+		address = 1309
+	
+	[[ylic]]
+		address = 1310
+	
+	[[gard]]
+		address = 1299
+	
+	[[kor]]
+		address = 1305
+
+	[[spalkrovatprav]]
+		address = 1300	
+
+	[[spalphil]]
+		address = 1306
+	
+	[[kyhvityagka]]
+		address = 1296
+
+	[[vanrozetka]]
+		address = 1312
+
+	[[kyhup]]
+		address = 1313
+
+[inputc]
+	[[vkcSpa2]]
+		address = 3593
+
+	[[vkcSpa1]]
+		address = 3592
+
+	[[vkcZal]]
+		address = 3594
+
+	[[vkcVan4]]
+		address = 3595
+
+	[[vkcGard]]
+		address = 3596
+
+	[[vkcKor]]
+		address = 3597
+
+	[[vkcVan1]]
+		address = 3599
+
+	[[vkcVan2]]
+		address = 3600
+
+	[[vkcKyh]]
+		address = 3598
+
+	[[vkcTamb3]]
+		address = 3603
+
+	[[vkcTamb2]]
+		address = 3602
+
+	[[vkcTamb1]]
+		address = 3601
+
+[memory]
+	[[pollingTag]]
+		address = 2057
