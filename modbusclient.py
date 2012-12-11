@@ -27,23 +27,13 @@ class ModbusClient(object):
     def read_address(self, address, count=1):
         rr = self.client.read_discrete_inputs(int(address), int(count))
         rv = []
-        try:
-            rv = list(rr.bits)
-        except:
-            #FIXME add asert!!
-            print "Error with address - " + address
-            return "0"
+        rv = list(rr.bits)
         return rv
 
     def read_register(self, address, count=1):
         rr = self.client.read_holding_registers(int(address), int(count))
         rv = []
-        try:
-            rv = list(rr.registers)
-        except:
-            #FIXME add asert!!
-            print "Error with address - " + address
-            return "0"
+        rv = list(rr.registers)
         return rv
 
     def write(self, address, value):
