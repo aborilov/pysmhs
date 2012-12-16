@@ -99,6 +99,7 @@ class plchandler(AbstractHandler):
                 addressMap = self._generate_address_map(addressList)
                 pollingList[t] = addressMap
         self.logger.debug("Polling list - %s" % pollingList)
+        self.logger.debug("Full address list - %s" % fullAddressList)
         while not self.stopFlag:
             #TODO write count coils in one packet
             self.writetags()
