@@ -27,12 +27,14 @@ class AbstractHandler(threading.Thread):
         self.parent = parent
         self._tags = {}
         self.events = []
-        loglevel = params.get("loglevel", "debug").upper()
-        filename = params.get("logfile", "smhs.log")
+        loglevel = params.get('loglevel', 'debug').upper()
+        filename = params.get('logfile', 'smhs.log')
+        logfiles_num = int(params.get('logfiles_num', 5))
+        logfile_size = int(params.get('logfile_size', 1048576))
         self.logger = logging.getLogger(self.__class__.__name__)
         self.logger.setLevel(getattr(logging, loglevel))
         handler = logging.handlers.RotatingFileHandler(
-            filename, maxBytes=1048576, backupCount=5)
+            filename, maxBytes=logfile_size, backupCount=logfiles_num)
         form = logging.Formatter(
             '%(asctime)s %(name)-12s %(levelname)s:%(message)s')
         handler.setFormatter(form)

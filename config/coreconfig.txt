@@ -4,13 +4,15 @@
         configfile = "config/coreconfig.txt"
         loglevel = "error"
         logfile = "smhs.log"
+        logfiles_num = 5
+        logfile_size = 1048576
 [plchandler]
     description = "PLC handler"
     [[params]]
         configfile = config/tags_config.txt
         [[[server]]]
             fakeserver = 0
-            pollingTimeout = 0 
+            pollingTimeout = 0
             packetSize = 50
         [[[port]]]
             name = "/dev/plc"
