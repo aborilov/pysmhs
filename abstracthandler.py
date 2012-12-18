@@ -43,7 +43,7 @@ class AbstractHandler(threading.Thread):
         self.logger.debug("Have parent - " + str(self.parent))
         self.loadtags()
 
-    def handler(self, signal, events):
+    def __handler(self, signal, events):
         '''
         method accept events from dispacher
         @param signal:
@@ -56,7 +56,6 @@ class AbstractHandler(threading.Thread):
         '''
         Method need to be implemented
         accept events, with list of changed tags
-        and polling object, that have methods getTag and setTag
         '''
         pass
 
