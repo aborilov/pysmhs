@@ -58,7 +58,6 @@ class corehandler(AbstractHandler):
         l = tag.split("_")
         if len(l) == 2:
             if l[0] == __name__:
-                self.logger.debug('%s = %s, compare with %s' % (l[1], self._tags[l[1]], value))
                 if self._tags[l[1]] != value:
                     self._set_listeners(l[1], value)
                     self._tags[l[1]] = value
@@ -70,7 +69,6 @@ class corehandler(AbstractHandler):
     def _set_listeners(self, tag, value):
         if tag in self.listeners:
             if value:
-                self.logger.debug('set listener %s to %s' % (tag, value))
                 self.listeners[tag].start()
             else:
                 self.listeners[tag].stop()
@@ -98,9 +96,9 @@ class corehandler(AbstractHandler):
         return tagslist
 
     def stop(self):
-        for listener in self.listeners.values():
-            if listener.isAlive():
-                listener.stop()
+        for listener in self.listeners:
+            self._set_listeners(listener, 0)
+        reactor.stop()
 
     def run(self):
         self.logger.debug("RUN")
@@ -110,8 +108,3 @@ class corehandler(AbstractHandler):
             if self._tags[listener] == '1':
                 self.listeners[listener].start()
         reactor.run(installSignalHandlers=0)
-        # while any(l.isAlive() for l in self.listeners.values()):
-        #     for l in self.listeners.values():
-        #         if l.isAlive():
-        #             l.join(1)
-        #             break

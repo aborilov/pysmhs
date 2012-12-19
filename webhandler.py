@@ -30,12 +30,11 @@ class webhandler(AbstractHandler):
     def run(self):
         AbstractHandler.run(self)
         self.port = reactor.listenTCP(int(self.params["port"]), self.site)
-        # reactor.run(installSignalHandlers=0)
 
     def stop(self):
         AbstractHandler.stop(self)
-        if port:
-            port.stopListening()
+        if self.port:
+            self.port.stopListening()
 
 
 class Simple(resource.Resource):

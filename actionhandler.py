@@ -40,17 +40,3 @@ class actionhandler(AbstractHandler):
             self.settag(tag, 1)
         else:
             self.settag(tag, 0)
-
-# print "Hello"
-# from configobj import ConfigObj
-# config = ConfigObj("config/actions.txt", indent_type="\t")
-# actionlist = {}
-# for name, params in config.items():
-#     for tag, value in params["conditions"].items():
-#         actionlist.setdefault(tag, {})[value] = params["actions"]
-
-# print actionlist
-# tag = "plchandler_kor"
-# value = "0"
-# if tag in actionlist and value in actionlist[tag]:
-#     print actionlist[tag][value]
