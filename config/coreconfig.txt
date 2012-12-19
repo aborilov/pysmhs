@@ -9,8 +9,8 @@
     [[params]]
         configfile = config/tags_config.txt
         [[[server]]]
-            fakeserver = 0
-            pollingTimeout = 0 
+            fakeserver = 1
+            pollingTimeout = 0
             packetSize = 50
         [[[port]]]
             name = "/dev/plc"
@@ -25,7 +25,7 @@
     description = "WebServer handler"
     parent = "corehandler"
     [[params]]
-        port = 80
+        port = 8080
         wwwPath = /opt/pysmhs/www
 
 [datehandler]
@@ -34,5 +34,6 @@
 [actionhandler]
     description = "action handler"
     parent = "corehandler"
+    run = 0
         [[params]]
             configfile = "config/actions.txt"
