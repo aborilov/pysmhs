@@ -70,18 +70,20 @@ class plchandler(AbstractHandler):
         s = maxAddress - minAddress + 1
         c, d = divmod(s, self.packetSize)
         l = maxAddress - d + 1
-        addressMap = {}
+        addressMap = []
         for x in range(0, c):
             curAddress = minAddress + self.packetSize * x
-            addressMap[curAddress] = self.packetSize
+            addressMap.append((curAddress, self.packetSize,))
         if (d > 0):
-            addressMap[l] = d
-        return addressMap
+            addressMap.append((l, d,))
+        return tuple(addressMap)
 
     def run(self):
         '''
         Thread for polling, sending tags and events
         '''
+        self.logger.debug('tagslist: %s' % self.tagslist)
+        self.logger.debug('config: %s' % self.config)
         AbstractHandler.run(self)
         self.stopFlag = False
         fullAddressList = {}
@@ -96,8 +98,7 @@ class plchandler(AbstractHandler):
                 for x in self.config[t]:
                     address = self.tagslist[x]["address"]
                     addressList[address] = x
-                addressMap = self._generate_address_map(addressList)
-                pollingList[t] = addressMap
+                pollingList[t] = self._generate_address_map(addressList)
         self.logger.debug("Polling list - %s" % pollingList)
         self.logger.debug("Full address list - %s" % fullAddressList)
         while not self.stopFlag:
@@ -106,15 +107,15 @@ class plchandler(AbstractHandler):
             self.write_polling_tag()
             for t in pollingList:
                 addressMap = pollingList[t]
-                for curAddress in addressMap:
+                for curAddress, size in addressMap:
                     if t == "inputc":
                         value \
                             = self._get_register_by_address(
-                                str(curAddress), addressMap[curAddress])
+                                str(curAddress), size)
                     else:
                         value \
                             = self._get_tag_by_address(
-                                str(curAddress), addressMap[curAddress])
+                                str(curAddress), size)
                     for v in range(len(value)):
                         if str(curAddress + v) in fullAddressList:
                             tagname = fullAddressList[str(curAddress + v)]
@@ -182,7 +183,7 @@ class plchandler(AbstractHandler):
         return self.mClient.read_address(address, size)
 
     def _get_register_by_address(self, address, size=1):
-        return self.mClient.read_input_regis
+        return self.mClient.read_input_register(address, size)
 
     def _get_register_by_address(self, address, count=1):
         return self.mClient.read_register(address, count)

@@ -21,7 +21,7 @@ class webhandler(AbstractHandler):
         resource = File(params["wwwPath"])
         root = Resource()
         root.putChild("www", resource)
-        root.putChild("get", Simple(parent))
+        root.putChild("get", smhs_web(parent))
         self.site = server.Site(root)
 
     def loadtags(self):
@@ -37,7 +37,7 @@ class webhandler(AbstractHandler):
             self.port.stopListening()
 
 
-class Simple(resource.Resource):
+class smhs_web(resource.Resource):
     isLeaf = True
     action_get_json = "getJson"
     actionStopServer = "stopServer"

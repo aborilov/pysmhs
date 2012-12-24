@@ -34,6 +34,5 @@
 [actionhandler]
     description = "action handler"
     parent = "corehandler"
-    run = 0
         [[params]]
             configfile = "config/actions.txt"
