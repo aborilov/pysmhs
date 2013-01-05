@@ -38,7 +38,8 @@ class SMHSProtocol(ModbusClientProtocol):
 
     def start_next_cycle(self, response, register):
         self.logger.error("readed register %s" % (register,))
-        self.logger.error(response.getRegister(0))
+        for i in range(0, register[1] - 1):
+            self.logger.error(response.getRegister(i))
         reactor.callLater(3, self.fetch_holding_registers)
 
     def error_handler(self, failure):
