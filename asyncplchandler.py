@@ -114,8 +114,8 @@ class asyncplchandler(AbstractHandler):
         return tuple(addressMap)
 
     def reader(self, register):
-        for addr, val in register:
-            self.logger.error("in plchandler %d:%d" % (addr, val))
+        for addr in register:
+            self.logger.error("in plchandler %d:%d" % (addr, register(addr)))
 
     def run(self):
         AbstractHandler.run(self)
