@@ -1,4 +1,5 @@
 from twisted.internet import serialport, reactor
+from twisted.internet import defer
 from twisted.internet.protocol import ClientFactory
 from pymodbus.factory import ClientDecoder
 from pymodbus.client.async import ModbusClientProtocol
@@ -13,7 +14,7 @@ from pydispatch import dispatcher
 
 class SMHSProtocol(ModbusClientProtocol):
 
-    def __init__(self, framer, pol_list, logger, reader):
+    def __init__(self, framer, pol_list, logger, reader, writepool):
         ''' Initializes our custom protocol
 
         :param framer: The decoder to use to process messages
@@ -23,75 +24,85 @@ class SMHSProtocol(ModbusClientProtocol):
         self.pol_list = pol_list
         self.logger = logger
         self.reader = reader
+        self.writepool = writepool
         self.rr_count = 0
+        self.wr_count = 0
         self.logger.debug("Begining the processing loop")
-        reactor.callLater(3, self.fetch_holding_registers)
+        d = defer.Deferred()
+        d.addCallback(self.fetch_holding_registers, count=0)
+        d.callback('start new cycle')
 
-    def fetch_holding_registers(self):
-        for t in self.pol_list:
-            self.logger.debug("have type = %s" % t)
-            if t in ["inputc"]:
-                address_map = self.pol_list[t]
-                for registers in address_map:
-                    self.logger.error("Read registers: %s" % (registers,))
-                    self.rr_count += 1
-                    d = self.read_holding_registers(*registers)
-                    d.addCallback(
-                        self.send_registers, register=registers, t=t)
-                    d.addErrback(self.error_handler)
+    def fetch_holding_registers(self, response, count):
+        self.logger.debug("response = %s" % response)
+        address_map = self.pol_list["inputc"]
+        registers = address_map[count]
+        d = self.read_holding_registers(*registers)
+        count += 1
+        if count == len(self.pol_list["inputc"]):
+            d.addCallback(self.fetch_coils, count=0)
+        else:
+            d.addCallback(self.fetch_holding_registers, count=count)
 
-    def fetch_coils(self):
-        for t in self.pol_list:
-            self.logger.debug("have type = %s" % t)
-            if t in ["input", "output"]:
-                address_map = self.pol_list[t]
-                for registers in address_map:
-                    self.logger.error("Read coil: %s" % (registers,))
-                    self.rr_count += 1
-                    d = self.read_coils(*registers)
-                    d.addCallback(self.send_coils, register=registers, t=t)
-                    d.addErrback(self.error_handler)
+    def fetch_coils(self, response, count):
+        if not count:
+            register = self.pol_list["inputc"][0]
+            val = {}
+            for i in range(0, register[1]):
+                val[register[0] + i] = response.getRegister(i)
+            self.reader(val, "inputc")
+        address_map = self.pol_list["output"]
+        registers = address_map[count]
+        d = self.read_coils(*registers)
+        count += 1
+        if count == len(self.pol_list["output"]):
+            d.addCallback(self.write_tags)
+        else:
+            d.addCallback(self.fetch_coils, count=count)
 
-    def send_coils(self, response, register, t):
-        self.logger.error("readed coils %s" % (register,))
-        val = {}
-        for i in range(0, register[1] - 1):
-            val[register[0] + i] = response.getBit(i)
-        self.reader(val, t)
-        self.rr_count -= 1
-        self.logger.error("count=%d" % self.rr_count)
-        if not self.rr_count:
-            reactor.callLater(3, self.fetch_holding_registers)
+    def write_tags(self, response, item=None):
+        if not item:
+            register = self.pol_list["output"][0]
+            val = {}
+            for i in range(0, register[1]):
+                val[register[0] + i] = response.getBit(i)
+            self.reader(val, "output")
+        dl = []
+        if len(self.writepool):
+            self.logger.debug("writepool len = %d" % len(self.writepool))
+            for x in self.writepool.keys():
+                val = int(self.writepool.pop(x))
+                self.logger.debug(
+                    "writting tag %s to %d" % (x, val))
+                if val:
+                    val = 0xFF00
+                else:
+                    val = 0x0000
+                d = self.write_coil(x, val)
+                dl.append[d]
+        deflist = defer.DeferredList(dl)
+        deflist.addCallbacks(self.fetch_holding_registers)
 
-    def send_registers(self, response, register, t):
-        self.logger.error("readed register %s" % (register,))
-        val = {}
-        for i in range(0, register[1] - 1):
-            val[register[0] + i] = response.getRegister(i)
-        self.reader(val, t)
-        self.rr_count -= 1
-        self.logger.error("count=%d" % self.rr_count)
-        if not self.rr_count:
-            reactor.callLater(3, self.fetch_coils)
-
-    def error_handler(self, failure):
-        self.logger.error(failure)
-        self.rr_count -= 1
+    def write_polling_tag(self, response):
+        self.logger.debug("Response - %s" % response)
+        d = self.write_coil(2057, 0xFF00)
+        d.addCallback(self.fetch_holding_registers, count=0)
 
 
 class SMHSFactory(ClientFactory):
 
     protocol = SMHSProtocol
 
-    def __init__(self, framer, pol_list, logger, reader):
+    def __init__(self, framer, pol_list, logger, reader, writepool):
         self.framer = framer
         self.pol_list = pol_list
         self.logger = logger
         self.reader = reader
+        self.writepool = writepool
 
     def buildProtocol(self, _):
         proto = self.protocol(
-            self.framer, self.pol_list, self.logger, self.reader)
+            self.framer,
+            self.pol_list, self.logger, self.reader, self.writepool)
         proto.factory = self
         return proto
 
@@ -114,6 +125,7 @@ class plchandler(AbstractHandler):
         self.pollint = serverconfig["pollingTimeout"]
         self.packetSize = int(serverconfig["packetSize"])
         self.tagslist = {}
+        self.writepool = {}
         self._inputctags = {}
         #fill tagslist with tags from all types
         for tagtype in self.config:
@@ -125,6 +137,10 @@ class plchandler(AbstractHandler):
                 address = self.tagslist[x]["address"]
                 self.full_address_list[int(address)] = x
         self.logger.debug("Full address list - %s" % self.full_address_list)
+
+    def _settag(self, name, value):
+        self.logger.debug("set tag %s to %s" % (name, value))
+        self.writepool[int(self.tagslist[name]["address"])] = value
 
     def _generate_address_map(self, addressList):
         '''
@@ -155,9 +171,7 @@ class plchandler(AbstractHandler):
                     self.__addinputctag(tagname, tagstate)
                 else:
                     self.__addtag(tagname, tagstate)
-                self.logger.error(
-                    "in plchandler %s:%d" %
-                    (self.full_address_list[addr], register[addr]))
+        self.sendevents()
 
     def __addtag(self, tag, value, addevent=True):
         '''
@@ -202,12 +216,13 @@ class plchandler(AbstractHandler):
                     address = self.tagslist[x]["address"]
                     address_list[address] = x
                 pol_list[t] = self._generate_address_map(address_list)
-        factory = SMHSFactory(framer, pol_list, self.logger, self.reader)
+        factory = SMHSFactory(
+            framer, pol_list, self.logger, self.reader, self.writepool)
         SerialModbusClient(
             factory, "/dev/plc",
             reactor, baudrate=9600,
             parity=PARITY_EVEN, bytesize=SEVENBITS,
-            stopbits=STOPBITS_TWO, timeout=3)
+            stopbits=STOPBITS_TWO, timeout=0)
 
     def stop(self):
         AbstractHandler.stop(self)
