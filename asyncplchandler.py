@@ -28,11 +28,12 @@ class SMHSProtocol(ModbusClientProtocol):
 
     def fetch_holding_registers(self):
         for t in self.pol_list:
-            address_map = self.pol_list[t]
-            for registers in address_map:
-		self.logger.error("Read registers: %s" % (registers,))
-                d = self.read_holding_registers(*registers)
-                d.addCallbacks(self.start_next_cycle, self.error_handler)
+            if t in ["inputc"]:
+                address_map = self.pol_list[t]
+                for registers in address_map:
+		    self.logger.error("Read registers: %s" % (registers,))
+                    d = self.read_holding_registers(*registers)
+                    d.addCallbacks(self.start_next_cycle, self.error_handler)
 
     def start_next_cycle(self, response):
         self.logger.error(response.getRegister(0))
