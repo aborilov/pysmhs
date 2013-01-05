@@ -13,7 +13,7 @@ from pydispatch import dispatcher
 
 class SMHSProtocol(ModbusClientProtocol):
 
-    def __init__(self, framer, pol_list, logger):
+    def __init__(self, framer, pol_list, logger, reader):
         ''' Initializes our custom protocol
 
         :param framer: The decoder to use to process messages
@@ -22,6 +22,7 @@ class SMHSProtocol(ModbusClientProtocol):
         ModbusClientProtocol.__init__(self, framer)
         self.pol_list = pol_list
         self.logger = logger
+        self.reader = reader
         self.logger.debug("Beggining the processing loop")
         reactor.callLater(3, self.fetch_holding_registers)
 
@@ -31,6 +32,7 @@ class SMHSProtocol(ModbusClientProtocol):
                 address_map = self.pol_list[t]
                 for registers in address_map:
                     self.logger.error("Read registers: %s" % (registers,))
+                    self.reader(registers)
                     d = self.read_holding_registers(*registers)
                     d.addCallback(self.start_next_cycle, register=registers)
                     d.addErrback(self.error_handler)
@@ -49,14 +51,15 @@ class SMHSFactory(ClientFactory):
 
     protocol = SMHSProtocol
 
-    def __init__(self, framer, pol_list, logger):
+    def __init__(self, framer, pol_list, logger, reader):
         self.framer = framer
         self.pol_list = pol_list
         self.logger = logger
+        self.reader = reader
 
     def buildProtocol(self, _):
         proto = self.protocol(
-            self.framer, self.pol_list, self.logger)
+            self.framer, self.pol_list, self.logger, self.reader)
         proto.factory = self
         return proto
 
@@ -103,7 +106,7 @@ class asyncplchandler(AbstractHandler):
             addressMap.append((l, d,))
         return tuple(addressMap)
 
-    def readed(self, register):
+    def reader(self, register):
         self.logger.error("in plchandler %s" % (register,))
 
     def run(self):
@@ -122,7 +125,7 @@ class asyncplchandler(AbstractHandler):
                     address = self.tagslist[x]["address"]
                     address_list[address] = x
                 pol_list[t] = self._generate_address_map(address_list)
-        factory = SMHSFactory(framer, pol_list, self.logger)
+        factory = SMHSFactory(framer, pol_list, self.logger, self.reader)
         SerialModbusClient(
             factory, "/dev/plc",
             reactor, baudrate=9600,
