@@ -5,6 +5,7 @@ from pymodbus.client.async import ModbusClientProtocol
 from serial import PARITY_NONE, PARITY_EVEN, PARITY_ODD
 from serial import STOPBITS_ONE, STOPBITS_TWO
 from serial import FIVEBITS, SIXBITS, SEVENBITS, EIGHTBITS
+from pymodbus.transaction import ModbusAsciiFramer as ModbusFramer
 
 from abstracthandler import AbstractHandler
 from pydispatch import dispatcher
@@ -68,7 +69,7 @@ class LoggingLineReader(object):
         log.info("Read Data: %d" % response)
 
 
-class async_plchandler(AbstractHandler):
+class asyncplchandler(AbstractHandler):
 
     def __init__(self, parent=None, params={}):
         AbstractHandler.__init__(self, parent, params)
