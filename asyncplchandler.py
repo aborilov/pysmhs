@@ -29,7 +29,7 @@ class SMHSProtocol(ModbusClientProtocol):
     def fetch_holding_registers(self):
         for t in self.pol_list:
             address_map = self.pol_list[t]
-            for registers in self.address_map:
+            for registers in address_map:
                 d = self.read_holding_registers(*registers)
                 d.addCallBacks(self.start_next_cycle, self.error_handler)
 
