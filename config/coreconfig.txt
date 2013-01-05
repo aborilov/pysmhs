@@ -9,7 +9,7 @@
     [[params]]
         configfile = config/tags_config.txt
         [[[server]]]
-            fakeserver = 1
+            fakeserver = 0
             pollingTimeout = 0
             packetSize = 50
         [[[port]]]
@@ -25,7 +25,7 @@
     description = "WebServer handler"
     parent = "corehandler"
     [[params]]
-        port = 8080
+        port = 80
         wwwPath = /opt/pysmhs/www
 
 [datehandler]
