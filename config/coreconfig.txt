@@ -4,7 +4,7 @@
         configfile = "config/coreconfig.txt"
         loglevel = "error"
         logfile = "smhs.log"
-[asyncplchandler]
+[plchandler]
     description = "Async PLC handler"
     [[params]]
         configfile = config/tags_config.txt

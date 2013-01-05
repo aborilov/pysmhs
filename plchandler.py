@@ -1,62 +1,130 @@
-'''
-'''
+from twisted.internet import serialport, reactor
+from twisted.internet.protocol import ClientFactory
+from pymodbus.factory import ClientDecoder
+from pymodbus.client.async import ModbusClientProtocol
+from serial import PARITY_NONE, PARITY_EVEN, PARITY_ODD
+from serial import STOPBITS_ONE, STOPBITS_TWO
+from serial import FIVEBITS, SIXBITS, SEVENBITS, EIGHTBITS
+from pymodbus.transaction import ModbusAsciiFramer as ModbusFramer
+
 from abstracthandler import AbstractHandler
 from pydispatch import dispatcher
-import time
-from modbusclient import ModbusClient
-from modbusclientstub import ModbusClientStub
+
+
+class SMHSProtocol(ModbusClientProtocol):
+
+    def __init__(self, framer, pol_list, logger, reader):
+        ''' Initializes our custom protocol
+
+        :param framer: The decoder to use to process messages
+        :param endpoint: The endpoint to send results to
+        '''
+        ModbusClientProtocol.__init__(self, framer)
+        self.pol_list = pol_list
+        self.logger = logger
+        self.reader = reader
+        self.rr_count = 0
+        self.logger.debug("Begining the processing loop")
+        reactor.callLater(3, self.fetch_holding_registers)
+
+    def fetch_holding_registers(self):
+        for t in self.pol_list:
+            self.logger.debug("have type = %s" % t)
+            if t in ["inputc"]:
+                address_map = self.pol_list[t]
+                for registers in address_map:
+                    self.logger.error("Read registers: %s" % (registers,))
+                    self.rr_count += 1
+                    d = self.read_holding_registers(*registers)
+                    d.addCallback(
+                        self.send_registers, register=registers, t=t)
+                    d.addErrback(self.error_handler)
+
+    def fetch_coils(self):
+        for t in self.pol_list:
+            self.logger.debug("have type = %s" % t)
+            if t in ["input", "output"]:
+                address_map = self.pol_list[t]
+                for registers in address_map:
+                    self.logger.error("Read coil: %s" % (registers,))
+                    self.rr_count += 1
+                    d = self.read_coils(*registers)
+                    d.addCallback(self.send_coils, register=registers, t=t)
+                    d.addErrback(self.error_handler)
+
+    def send_coils(self, response, register, t):
+        self.logger.error("readed coils %s" % (register,))
+        val = {}
+        for i in range(0, register[1] - 1):
+            val[register[0] + i] = response.getBit(i)
+        self.reader(val, t)
+        self.rr_count -= 1
+        self.logger.error("count=%d" % self.rr_count)
+        if not self.rr_count:
+            reactor.callLater(3, self.fetch_holding_registers)
+
+    def send_registers(self, response, register, t):
+        self.logger.error("readed register %s" % (register,))
+        val = {}
+        for i in range(0, register[1] - 1):
+            val[register[0] + i] = response.getRegister(i)
+        self.reader(val, t)
+        self.rr_count -= 1
+        self.logger.error("count=%d" % self.rr_count)
+        if not self.rr_count:
+            reactor.callLater(3, self.fetch_coils)
+
+    def error_handler(self, failure):
+        self.logger.error(failure)
+        self.rr_count -= 1
+
+
+class SMHSFactory(ClientFactory):
+
+    protocol = SMHSProtocol
+
+    def __init__(self, framer, pol_list, logger, reader):
+        self.framer = framer
+        self.pol_list = pol_list
+        self.logger = logger
+        self.reader = reader
+
+    def buildProtocol(self, _):
+        proto = self.protocol(
+            self.framer, self.pol_list, self.logger, self.reader)
+        proto.factory = self
+        return proto
+
+
+class SerialModbusClient(serialport.SerialPort):
+
+    def __init__(self, factory, *args, **kwargs):
+        protocol = factory.buildProtocol(None)
+        self.decoder = ClientDecoder()
+        serialport.SerialPort.__init__(self, protocol, *args, **kwargs)
 
 
 class plchandler(AbstractHandler):
-    """PLC handler"""
 
     def __init__(self, parent=None, params={}):
         AbstractHandler.__init__(self, parent, params)
-        self.logger.info("Init plc handler")
-        self.stopFlag = False
-        self.writepool = {}
-        self._inputctags = {}
+        self.logger.info("Init async_plchandler")
         serverconfig = params["server"]
-        self.polling = serverconfig["pollingTimeout"]
+        self.serial_port = params["port"]
+        self.pollint = serverconfig["pollingTimeout"]
         self.packetSize = int(serverconfig["packetSize"])
         self.tagslist = {}
+        self._inputctags = {}
+        #fill tagslist with tags from all types
         for tagtype in self.config:
             self.tagslist.update(self.config[tagtype])
-
-        if (serverconfig['fakeserver'] == '1'):
-            self.mClient = ModbusClientStub()
-        else:
-            self.mClient = ModbusClient(params["port"])
-        self.mClient.connect()
-
-    def write_polling_tag(self):
-        self._settag_by_name("pollingTag", 1)
-
-    def writetags(self):
-        '''
-        save tag, that need to send to controller to pool
-        and send it in run method
-        '''
-        #FIXME Write pool of tags
-        for x in self.writepool.keys():
-            self._settag_by_name(x, self.writepool.pop(x))
-
-    def _settag(self, name, value):
-        self.logger.debug("set tag %s to %s" % (name, value))
-        self.writepool[name] = value
-
-    def invertTag(self, name):
-        '''
-        invert binary value of tag
-        if current tag value = 1, then set to 0
-        and vice versa
-        @param name:
-        '''
-        if name in self._tags:
-            if self._tags[name] == 0:
-                self.settag(name, 1)
-            else:
-                self.settag(name, 0)
+        #fill address list
+        self.full_address_list = {}
+        for x in self.tagslist:
+            if "address" in self.tagslist[x]:
+                address = self.tagslist[x]["address"]
+                self.full_address_list[int(address)] = x
+        self.logger.debug("Full address list - %s" % self.full_address_list)
 
     def _generate_address_map(self, addressList):
         '''
@@ -78,59 +146,18 @@ class plchandler(AbstractHandler):
             addressMap.append((l, d,))
         return tuple(addressMap)
 
-    def run(self):
-        '''
-        Thread for polling, sending tags and events
-        '''
-        self.logger.debug('tagslist: %s' % self.tagslist)
-        self.logger.debug('config: %s' % self.config)
-        AbstractHandler.run(self)
-        self.stopFlag = False
-        fullAddressList = {}
-        for x in self.tagslist:
-            if "address" in self.tagslist[x]:
-                address = self.tagslist[x]["address"]
-                fullAddressList[address] = x
-        pollingList = {}
-        for t in self.config.keys():
-            if t == "output" or t == "input" or t == "inputc":
-                addressList = {}
-                for x in self.config[t]:
-                    address = self.tagslist[x]["address"]
-                    addressList[address] = x
-                pollingList[t] = self._generate_address_map(addressList)
-        self.logger.debug("Polling list - %s" % pollingList)
-        self.logger.debug("Full address list - %s" % fullAddressList)
-        while not self.stopFlag:
-            #TODO write count coils in one packet
-            self.writetags()
-            self.write_polling_tag()
-            for t in pollingList:
-                addressMap = pollingList[t]
-                for curAddress, size in addressMap:
-                    if t == "inputc":
-                        value \
-                            = self._get_register_by_address(
-                                str(curAddress), size)
-                    else:
-                        value \
-                            = self._get_tag_by_address(
-                                str(curAddress), size)
-                    for v in range(len(value)):
-                        if str(curAddress + v) in fullAddressList:
-                            tagname = fullAddressList[str(curAddress + v)]
-                            tagstate = int(value[v])
-                            if t == "inputc":
-                                self.__addinputctag(tagname, tagstate)
-                            else:
-                                self.__addtag(tagname, tagstate)
-            #reading data registers
-            # for x in self.config["data"]:
-            #     value = self._gettag_by_name(x)
-            #     self.__addtag(x, value, False)
-
-            self.sendevents()
-            time.sleep(float(self.polling))
+    def reader(self, register, t):
+        for addr in register:
+            if addr in self.full_address_list:
+                tagname = self.full_address_list[addr]
+                tagstate = int(register[addr])
+                if t == "inputc":
+                    self.__addinputctag(tagname, tagstate)
+                else:
+                    self.__addtag(tagname, tagstate)
+                self.logger.error(
+                    "in plchandler %s:%d" %
+                    (self.full_address_list[addr], register[addr]))
 
     def __addtag(self, tag, value, addevent=True):
         '''
@@ -164,29 +191,23 @@ class plchandler(AbstractHandler):
         self._inputctags[tag] = value
         self._tags[tag] = value & 1
 
+    def run(self):
+        AbstractHandler.run(self)
+        framer = ModbusFramer(ClientDecoder())
+        pol_list = {}
+        for t in self.config.keys():
+            if t in ["output", "input", "inputc"]:
+                address_list = {}
+                for x in self.config[t]:
+                    address = self.tagslist[x]["address"]
+                    address_list[address] = x
+                pol_list[t] = self._generate_address_map(address_list)
+        factory = SMHSFactory(framer, pol_list, self.logger, self.reader)
+        SerialModbusClient(
+            factory, "/dev/plc",
+            reactor, baudrate=9600,
+            parity=PARITY_EVEN, bytesize=SEVENBITS,
+            stopbits=STOPBITS_TWO, timeout=3)
+
     def stop(self):
-        '''
-        stop this thread
-        modbus server
-        and call stop on all handlers
-        '''
         AbstractHandler.stop(self)
-        self.stopFlag = True
-        self.mClient.disconnect()
-
-    def _gettag_by_name(self, name):
-        address = self.tagslist[name]["address"]
-        size = self.tagslist[name]["size"]
-        return self.mClient.read_address(address, size)
-
-    def _get_tag_by_address(self, address, size=1):
-        return self.mClient.read_address(address, size)
-
-    def _get_register_by_address(self, address, size=1):
-        return self.mClient.read_input_register(address, size)
-
-    def _get_register_by_address(self, address, count=1):
-        return self.mClient.read_register(address, count)
-
-    def _settag_by_name(self, name, value):
-        self.mClient.write(self.tagslist[name]["address"], value)
