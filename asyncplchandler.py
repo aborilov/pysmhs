@@ -13,7 +13,7 @@ from pydispatch import dispatcher
 
 class SMHSProtocol(ModbusClientProtocol):
 
-    def __init__(self, framer, endpoint, pol_list):
+    def __init__(self, framer, endpoint, pol_list, logger):
         ''' Initializes our custom protocol
 
         :param framer: The decoder to use to process messages
@@ -22,7 +22,8 @@ class SMHSProtocol(ModbusClientProtocol):
         ModbusClientProtocol.__init__(self, framer)
         self.endpoint = endpoint
         self.pol_list = pol_list
-        log.debug("Beggining the processing loop")
+        self.logger = logger
+        self.logger.debug("Beggining the processing loop")
         reactor.callLater(3, self.fetch_holding_registers)
 
     def fetch_holding_registers(self):
@@ -33,24 +34,26 @@ class SMHSProtocol(ModbusClientProtocol):
                 d.addCallBacks(self.start_next_cycle, self.error_handler)
 
     def start_next_cycle(self, response):
-        log.error(response.getRegister(0))
+        self.logger.error(response.getRegister(0))
         reactor.callLater(3, self.fetch_holding_registers)
 
     def error_handler(self, failure):
-        log.error(failure)
+        self.logger.error(failure)
 
 
 class SMHSFactory(ClientFactory):
 
     protocol = SMHSProtocol
 
-    def __init__(self, framer, endpoint, pol_list):
+    def __init__(self, framer, endpoint, pol_list, logger):
         self.framer = framer
         self.endpoint = endpoint
         self.pol_list = pol_list
+        self.logger = logger
 
     def buildProtocol(self, _):
-        proto = self.protocol(self.framer, self.endpoint, self.pol_list)
+        proto = self.protocol(
+            self.framer, self.endpoint, self.pol_list, self.logger)
         proto.factory = self
         return proto
 
@@ -65,8 +68,11 @@ class SerialModbusClient(serialport.SerialPort):
 
 class LoggingLineReader(object):
 
+    def __init__(self, logger):
+        self.logger = logger
+
     def write(self, response):
-        log.info("Read Data: %d" % response)
+        self.logger.info("Read Data: %d" % response)
 
 
 class asyncplchandler(AbstractHandler):
@@ -106,7 +112,7 @@ class asyncplchandler(AbstractHandler):
     def run(self):
         AbstractHandler.run(self)
         framer = ModbusFramer(ClientDecoder())
-        reader = LoggingLineReader()
+        reader = LoggingLineReader(self.logger)
         fullAddressList = {}
         for x in self.tagslist:
             if "address" in self.tagslist[x]:
@@ -120,7 +126,7 @@ class asyncplchandler(AbstractHandler):
                     address = self.tagslist[x]["address"]
                     address_list[address] = x
                 pol_list[t] = self._generate_address_map(address_list)
-        factory = SMHSFactory(framer, reader, pol_list)
+        factory = SMHSFactory(framer, reader, pol_list, self.logger)
         SerialModbusClient(
             factory, "/dev/plc",
             reactor, baudrate=9600,
