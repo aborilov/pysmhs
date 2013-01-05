@@ -30,6 +30,7 @@ class SMHSProtocol(ModbusClientProtocol):
         for t in self.pol_list:
             address_map = self.pol_list[t]
             for registers in address_map:
+		self.logger.error("Read registers: %s" % (registers,))
                 d = self.read_holding_registers(*registers)
                 d.addCallbacks(self.start_next_cycle, self.error_handler)
 
