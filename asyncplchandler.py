@@ -32,15 +32,16 @@ class SMHSProtocol(ModbusClientProtocol):
                 address_map = self.pol_list[t]
                 for registers in address_map:
                     self.logger.error("Read registers: %s" % (registers,))
-                    self.reader(registers)
                     d = self.read_holding_registers(*registers)
                     d.addCallback(self.start_next_cycle, register=registers)
                     d.addErrback(self.error_handler)
 
     def start_next_cycle(self, response, register):
         self.logger.error("readed register %s" % (register,))
+        val = {}
         for i in range(0, register[1] - 1):
-            self.logger.error(response.getRegister(i))
+            val[register[0] + i] = response.getRegister(i)
+        self.reader(val)
         reactor.callLater(3, self.fetch_holding_registers)
 
     def error_handler(self, failure):
@@ -85,6 +86,12 @@ class asyncplchandler(AbstractHandler):
         #fill tagslist with tags from all types
         for tagtype in self.config:
             self.tagslist.update(self.config[tagtype])
+        #fill address list
+        self.fullAddressList = {}
+        for x in self.tagslist:
+            if "address" in self.tagslist[x]:
+                address = self.tagslist[x]["address"]
+                self.fullAddressList[address] = x
 
     def _generate_address_map(self, addressList):
         '''
@@ -107,16 +114,12 @@ class asyncplchandler(AbstractHandler):
         return tuple(addressMap)
 
     def reader(self, register):
-        self.logger.error("in plchandler %s" % (register,))
+        for addr, val in register:
+            self.logger.error("in plchandler %d:%d" % (addr, val))
 
     def run(self):
         AbstractHandler.run(self)
         framer = ModbusFramer(ClientDecoder())
-        fullAddressList = {}
-        for x in self.tagslist:
-            if "address" in self.tagslist[x]:
-                address = self.tagslist[x]["address"]
-                fullAddressList[address] = x
         pol_list = {}
         for t in self.config.keys():
             if t in ["output", "input", "inputc"]:
