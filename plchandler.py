@@ -28,64 +28,71 @@ class SMHSProtocol(ModbusClientProtocol):
         self.rr_count = 0
         self.wr_count = 0
         self.logger.debug("Begining the processing loop")
+        reactor.callLater(3, self.start_new_cycle)
+
+    def start_new_cycle(self):
         d = defer.Deferred()
-        d.addCallback(self.fetch_holding_registers, count=0)
+        d.addCallback(self.write_polling_tag)
         d.callback('start new cycle')
 
-    def fetch_holding_registers(self, response, count):
+    def fetch_holding_registers(self, response):
         self.logger.debug("response = %s" % response)
         address_map = self.pol_list["inputc"]
-        registers = address_map[count]
-        d = self.read_holding_registers(*registers)
-        count += 1
-        if count == len(self.pol_list["inputc"]):
-            d.addCallback(self.fetch_coils, count=0)
-        else:
-            d.addCallback(self.fetch_holding_registers, count=count)
+        dl = []
+        for register in address_map:
+            d = self.read_holding_registers(*register)
+            d.addCallback(self.register_readed, register=register)
+            dl.append(d)
+        deflist = defer.DeferredList(dl)
+        deflist.addCallbacks(self.fetch_coils)
 
-    def fetch_coils(self, response, count):
-        if not count:
-            register = self.pol_list["inputc"][0]
-            val = {}
-            for i in range(0, register[1]):
-                val[register[0] + i] = response.getRegister(i)
-            self.reader(val, "inputc")
+    def register_readed(self, response, register):
+        val = {}
+        for i in range(0, register[1]):
+            val[register[0] + i] = response.getRegister(i)
+        self.reader(val, "inputc")
+
+    def fetch_coils(self, response):
         address_map = self.pol_list["output"]
-        registers = address_map[count]
-        d = self.read_coils(*registers)
-        count += 1
-        if count == len(self.pol_list["output"]):
-            d.addCallback(self.write_tags)
-        else:
-            d.addCallback(self.fetch_coils, count=count)
+        dl = []
+        for register in address_map:
+            d = self.read_coils(*register)
+            d.addCallback(self.coil_readed, register=register)
+            dl.append(d)
+        deflist = defer.DeferredList(dl)
+        deflist.addCallbacks(self.write_tags)
 
-    def write_tags(self, response, item=None):
-        if not item:
-            register = self.pol_list["output"][0]
-            val = {}
-            for i in range(0, register[1]):
-                val[register[0] + i] = response.getBit(i)
-            self.reader(val, "output")
+    def coil_readed(self, response, register):
+        val = {}
+        for i in range(0, register[1]):
+            val[register[0] + i] = response.getBit(i)
+        self.reader(val, "output")
+
+    def write_tags(self, response):
         dl = []
         if len(self.writepool):
             self.logger.debug("writepool len = %d" % len(self.writepool))
-            for x in self.writepool.keys():
-                val = int(self.writepool.pop(x))
-                self.logger.debug(
-                    "writting tag %s to %d" % (x, val))
-                if val:
-                    val = 0xFF00
-                else:
-                    val = 0x0000
-                d = self.write_coil(x, val)
-                dl.append[d]
+            # for x in self.writepool.keys():
+            x, val = self.writepool.popitem()
+            val = int(val)
+            self.logger.debug(
+                "writting tag %s to %d" % (x, val))
+            if val:
+                val = 0xFF00
+            else:
+                val = 0x0000
+            d = self.write_coil(x, val)
+            d.addCallbacks(self.coil_writed)
+            dl.append(d)
         deflist = defer.DeferredList(dl)
-        deflist.addCallbacks(self.fetch_holding_registers)
+        deflist.addCallbacks(self.write_polling_tag)
+
+    def coil_writed(self, response):
+        self.logger.debug("Response %s" % response)
 
     def write_polling_tag(self, response):
-        self.logger.debug("Response - %s" % response)
         d = self.write_coil(2057, 0xFF00)
-        d.addCallback(self.fetch_holding_registers, count=0)
+        d.addCallback(self.fetch_holding_registers)
 
 
 class SMHSFactory(ClientFactory):
