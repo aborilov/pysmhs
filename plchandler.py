@@ -36,7 +36,7 @@ class SMHSProtocol(ModbusClientProtocol):
         d.callback('start new cycle')
 
     def fetch_holding_registers(self, response):
-        self.logger.debug("response = %s" % response)
+        # self.logger.debug("response = %s" % response)
         address_map = self.pol_list["inputc"]
         dl = []
         for register in address_map:
@@ -69,23 +69,28 @@ class SMHSProtocol(ModbusClientProtocol):
         self.reader(val, "output")
 
     def write_tags(self, response):
-        dl = []
+        d = None
         if len(self.writepool):
             self.logger.debug("writepool len = %d" % len(self.writepool))
-            # for x in self.writepool.keys():
-            x, val = self.writepool.popitem()
-            val = int(val)
-            self.logger.debug(
-                "writting tag %s to %d" % (x, val))
-            if val:
-                val = 0xFF00
-            else:
-                val = 0x0000
-            d = self.write_coil(x, val)
-            d.addCallbacks(self.coil_writed)
-            dl.append(d)
-        deflist = defer.DeferredList(dl)
-        deflist.addCallbacks(self.write_polling_tag)
+            for x in self.writepool.keys():
+                val = int(self.writepool.pop(x))
+                self.logger.debug(
+                    "writting tag %s to %d" % (x, val))
+                if val:
+                    val = 0xFF00
+                else:
+                    val = 0x0000
+                if not d:
+                    d = self.write_tag(response, x, val)
+                else:
+                    d.addCallback(self.write_tag, addr=x, value=val)
+        if not d:
+            self.write_polling_tag(response)
+        else:
+            d.addCallback(self.write_polling_tag)
+
+    def write_tag(self, response, addr, value):
+        return self.write_coil(addr, value)
 
     def coil_writed(self, response):
         self.logger.debug("Response %s" % response)
