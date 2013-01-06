@@ -71,12 +71,7 @@
             plchandler_kyhup = 1
             plchandler_kyh = 1
 
-[kuhof]
-    [[conditions]]
-	plchandler_kyh = 0
-    [[actions]]
-	[[[setter]]]
-	    plchandler_kyhup = 0
+
 [vkcTamb3]
     [[conditions]]
         plchandler_vkcTamb3 = 1
