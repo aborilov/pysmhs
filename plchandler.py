@@ -25,10 +25,14 @@ class SMHSProtocol(ModbusClientProtocol):
         self.logger = logger
         self.reader = reader
         self.writepool = writepool
-        self.rr_count = 0
-        self.wr_count = 0
         self.logger.debug("Begining the processing loop")
         reactor.callLater(3, self.start_new_cycle)
+
+    # def connectionLost(self, reason):
+    #     self.logger.debug("Connection to ModBus lost")
+
+    # def connectionMade(self):
+    #     self.logger.debug("Connected to ModBus")
 
     def start_new_cycle(self):
         d = defer.Deferred()
