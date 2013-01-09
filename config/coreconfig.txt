@@ -31,8 +31,8 @@
 [datehandler]
     description = "date handler"
 
-[actionhandler]
-    description = "action handler"
+[newactionhandler]
+    description = "new action handler"
     parent = "corehandler"
         [[params]]
-            configfile = "config/actions.txt"
+            configfile = "config/newactions.txt"
