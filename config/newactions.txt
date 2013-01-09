@@ -18,13 +18,13 @@
             plchandler_tamb = 0
 
 [vkcSpa2]
-    condition = self.gettag('plchandler_vkcSpa') == 1
+    condition = self.gettag('plchandler_vkcSpa2') == 1
     [[actions]]
         [[[switcher]]]
             plchandler_spal = 1
 
 [vkcSpa1]
-    condition = self.gettag('plchandler_vkcSpa') == 1
+    condition = self.gettag('plchandler_vkcSpa1') == 1
     [[actions]]
         [[[switcher]]]
             plchandler_spal2 = 1
