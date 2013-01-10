@@ -1,15 +1,27 @@
-[vanoff]
-	condition = self.gettag('plchandler_vkcVan4') == 1 and self.gettag('plchandler_van2') == 1
+[Van4]
+    condition = self.gettag('plchandler_vkcVan1') == 1
+    [[actions]]
+        [[[switcher]]]
+            plchandler_van4 = 1
+
+[Van2]
+    condition = self.gettag('plchandler_vkcVan2') == 1
+    [[actions]]
+        [[[switcher]]]
+            plchandler_van2 = 1
+
+[VanOn]
+    condition = self.gettag('plchandler_vkcVan4') == 1 and self.gettag('plchandler_van4') == 0 and self.gettag('plchandler_van2') == 0
     [[actions]]
         [[[setter]]]
-            plchandler_van2 = 0
+            plchandler_van4 = 1
 
-[van2off]
-	condition = self.gettag('plchandler_vkcVan4') == 1 and self.gettag('plchandler_van4') == 1 and self.gettag('plchandler_van2') == 1
+[VanOff]
+    condition = self.gettag('plchandler_vkcVan4') == 1 and (self.gettag('plchandler_van4') == 1 or self.gettag('plchandler_van2') == 1)
     [[actions]]
         [[[setter]]]
+            plchandler_van4 = 0
             plchandler_van2 = 0
-
 
 [tamboff]
     condition = self.gettag('plchandler_kor') == 0
@@ -35,23 +47,6 @@
         [[[switcher]]]
             plchandler_zal = 1
 
-[vkcVan4On]
-    condition = self.gettag('plchandler_vkcVan4') == 1 and self.gettag('plchandler_van2') == 0 and self.gettag('plchandler_van4') == 0 
-    [[actions]]
-        [[[setter]]]
-            plchandler_van4 = 1
-
-[vkcVan4On1]
-    condition = self.gettag('plchandler_vkcVan1') == 1 and self.gettag('plchandler_van4') == 0
-    [[actions]]
-        [[[setter]]]
-            plchandler_van4 = 1
-
-[vkcVan4Off]
-    condition = (self.gettag('plchandler_vkcVan1') == 1 or self.gettag('plchandler_vkcVan4') == 1) and self.gettag('plchandler_van4') == 1
-    [[actions]]
-        [[[setter]]]
-            plchandler_van4 = 0
 
 [vkcGard]
     condition = self.gettag('plchandler_vkcGard') == 1
