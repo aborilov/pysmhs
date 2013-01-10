@@ -85,6 +85,8 @@
         [[[0]]]
             actions = switcher
             plchandler_kyhup = 1
+        [[[1]]]
+            actions = switcher
             plchandler_kyh = 1
 
 
