@@ -22,11 +22,12 @@ class newactionhandler(AbstractHandler):
                 self.logger.debug(eval(cond))
                 try:
                     if eval(cond):
-                        for action, params in self.actionlist[cond].items():
+                        for i in sorted(self.actionlist[cond]):
+                            action = self.actionlist[cond][i].pop('action')
+                            params = self.actionlist[cond][i]
                             self.actions.get(action, None)(params)
                 except:
-                    pass
-
+                    self.logger.error("Error while eval condition - %s" % cond)
 
     def loadtags(self):
         for tag in self.config:
