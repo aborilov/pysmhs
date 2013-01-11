@@ -164,6 +164,7 @@ class plchandler(AbstractHandler):
         self.tagslist = {}
         self.writepool = {}
         self._inputctags = {}
+        self._inputtag_threshold = int(serverconfig["counter_threshold"])
         #fill tagslist with tags from all types
         for tagtype in self.config:
             self.tagslist.update(self.config[tagtype])
@@ -236,9 +237,13 @@ class plchandler(AbstractHandler):
             lastval = self._inputctags[tag]
             if lastval != value:
                 if value > lastval:
-                    dif = value - lastval
                     for x in range(lastval + 1, value + 1):
                         self.events.append({"tag": tag, "value": x & 1})
+                else:
+                    dif = self._inputtag_threshold - lastval + value
+                    for x in range(lastval + 1, lastval + dif + 1):
+                        self.events.append({"tag": tag, "value": x & 1})
+
         self._inputctags[tag] = value
         self._tags[tag] = value & 1
 
