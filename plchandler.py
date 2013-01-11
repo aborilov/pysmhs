@@ -43,8 +43,8 @@ class SMHSProtocol(ModbusClientProtocol):
         reg = (4598, 1)
         # d = self.read_holding_registers(*reg)
         d = self.write_register(4598, 250)
-        d.addCallbacks(self.read_holding_registers(*reg))
-        d.addCallbacks(self.threshold_readed)
+        # d.addCallbacks(self.read_holding_registers(*reg))
+        # d.addCallbacks(self.threshold_readed)
         d.addCallbacks(self.write_polling_tag)
 
     def threshold_readed(self, response):
