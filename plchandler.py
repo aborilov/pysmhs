@@ -41,7 +41,9 @@ class SMHSProtocol(ModbusClientProtocol):
 
     def write_counter_threshold(self, response):
         reg = (4598, 1)
-        d = self.read_holding_registers(*reg)
+        # d = self.read_holding_registers(*reg)
+        d = self.write_register(4598, 250)
+        d.addCallbacks(self.read_holding_registers(*reg))
         d.addCallbacks(self.threshold_readed)
         d.addCallbacks(self.write_polling_tag)
 
