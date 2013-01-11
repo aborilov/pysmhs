@@ -1,43 +1,43 @@
 [output]
 	[[zal]]
 		address = 1307
-	
+
 	[[van4]]
 		address = 1303
-	
+
 	[[van2]]
 		address = 1302
-	
+
 	[[spal]]
 		address = 1308
-	
+
 	[[spal2]]
 		address = 1311
-	
+
 	[[krovat]]
 		address = 1304
-		
+
 	[[kyh]]
 		address = 1298
-	
+
 	[[tamb]]
 		address = 1309
-	
+
 	[[ylic]]
 		address = 1310
-	
+
 	[[gard]]
 		address = 1299
-	
+
 	[[kor]]
 		address = 1305
 
 	[[spalkrovatprav]]
-		address = 1300	
+		address = 1300
 
 	[[spalphil]]
 		address = 1306
-	
+
 	[[kyhvityagka]]
 		address = 1296
 
@@ -87,3 +87,5 @@
 [memory]
 	[[pollingTag]]
 		address = 2057
+	[[counter_threshold]]
+		address = 4598

@@ -36,8 +36,17 @@ class SMHSProtocol(ModbusClientProtocol):
 
     def start_new_cycle(self):
         d = defer.Deferred()
-        d.addCallback(self.write_polling_tag)
+        d.addCallback(self.write_counter_threshold)
         d.callback('start new cycle')
+
+    def write_counter_threshold(self, response):
+        reg = (4598, 1)
+        d = self.read_holding_registers(*reg)
+        d.addCallbacks(self.threshold_readed)
+        d.addCallbacks(self.write_polling_tag)
+
+    def threshold_readed(self, response):
+        self.logger.debug('counter threshold = %d' % response.getRegister(0))
 
     def fetch_holding_registers(self, response):
         address_map = self.pol_list["inputc"]
