@@ -6,11 +6,8 @@ pysmhs
 ==================================================
 
 :Website: http://www.pysmhs.org
-
 :Source: https://github.com/aborilov/pysmhs
-
 :Documentation: http://pysmhs.readthedocs.org/en/latest/
-
 :License: MIT License
 
 Features
