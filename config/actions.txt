@@ -20,18 +20,22 @@
     [[2.setter]]
             plchandler_van2 = 0
 
-[tamboff]
-    condition = self.gettag('plchandler_kor') == 0
+[vkcTamb1]
+    condition = self.gettag('plchandler_vkcTamb1') == 1
+    [[1.switcher]]
+        plchandler_kor = 1
+
+[TambKorOff]
+    condition = self.gettag('plchandler_vkcKor') == 1 and (self.gettag('plchandler_tamb') == 1 or self.gettag('plchandler_kor') == 1)
     [[1.setter]]
-        plchandler_tamb = 0
-    [[2.sleep]]
-        timeout = 0.5
-    [[3.setter]]
-        plchandler_tamb = 1
-    [[4.sleep]]
-        timeout = 0.5
-    [[5.setter]]
-        plchandler_tamb = 0
+            plchandler_tamb = 0
+    [[2.setter]]
+            plchandler_kor = 0
+
+[TambKorOn]
+    condition = self.gettag('plchandler_vkcKor') == 1 and self.gettag('plchandler_tamb') == 0 and self.gettag('plchandler_kor') == 0
+    [[1.setter]]
+        plchandler_kor = 1
 
 [vkcSpa2]
     condition = self.gettag('plchandler_vkcSpa2') == 1
@@ -54,23 +58,24 @@
     [[1.switcher]]
         plchandler_gard = 1
 
-[vkcKor]
-    condition = self.gettag('plchandler_vkcKor') == 1
-    [[1.switcher]]
-        plchandler_kor = 1
-
 [vkcVan2]
     condition = self.gettag('plchandler_vkcVan2') == 1
     [[1.switcher]]
         plchandler_van2 = 1
 
-[vkcKyh]
-    condition = self.gettag('plchandler_vkcKyh') == 1
-    [[1.switcher]]
-        plchandler_kyhup = 1
-    [[2.switcher]]
-        plchandler_kyh = 1
+[KyhOff]
+    condition = self.gettag('plchandler_vkcKyh') == 1 and (self.gettag('plchandler_kyh') == 1 or self.gettag('plchandler_kyhup') == 1)
+    [[1.setter]]
+        plchandler_kyhup = 0
+    [[2.setter]]
+        plchandler_kyh = 0
 
+[KyhOn]
+    condition = self.gettag('plchandler_vkcKyh') == 1 and self.gettag('plchandler_kyh') == 0 and self.gettag('plchandler_kyhup') == 0
+    [[1.setter]]
+        plchandler_kyhup = 1
+    [[2.setter]]
+        plchandler_kyh = 1
 
 [vkcTamb3]
     condition = self.gettag('plchandler_vkcTamb3') == 1
