@@ -1,7 +1,8 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 #
-# PySMHS documentation build configuration file, created by
-# sphinx-quickstart on Mon Jan 14 12:20:23 2013.
+# pysmhs documentation build configuration file, created by
+# sphinx-quickstart on Sat Feb 16 19:48:03 2013.
 #
 # This file is execfile()d with the current directory set to its containing dir.
 #
@@ -25,7 +26,7 @@ import sys, os
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo', 'sphinx.ext.pngmath', 'sphinx.ext.viewcode']
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.todo']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -40,15 +41,15 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'PySMHS'
-copyright = u'2013, Pavel Aborilov'
+project = 'pysmhs'
+copyright = '2013, Aborilov Pavel'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
 #
 # The short X.Y version.
-version = '0'
+version = '0.1'
 # The full version, including alpha/beta/rc tags.
 release = '0.1'
 
@@ -164,7 +165,7 @@ html_static_path = ['_static']
 #html_file_suffix = None
 
 # Output file base name for HTML help builder.
-htmlhelp_basename = 'PySMHSdoc'
+htmlhelp_basename = 'pysmhsdoc'
 
 
 # -- Options for LaTeX output --------------------------------------------------
@@ -183,8 +184,8 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'PySMHS.tex', u'PySMHS Documentation',
-   u'Pavel Aborilov', 'manual'),
+  ('index', 'pysmhs.tex', 'pysmhs Documentation',
+   'Aborilov Pavel', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -213,8 +214,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'pysmhs', u'PySMHS Documentation',
-     [u'Pavel Aborilov'], 1)
+    ('index', 'pysmhs', 'pysmhs Documentation',
+     ['Aborilov Pavel'], 1)
 ]
 
 # If true, show URL addresses after external links.
@@ -227,8 +228,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'PySMHS', u'PySMHS Documentation',
-   u'Pavel Aborilov', 'PySMHS', 'One line description of project.',
+  ('index', 'pysmhs', 'pysmhs Documentation',
+   'Aborilov Pavel', 'pysmhs', 'One line description of project.',
    'Miscellaneous'),
 ]
 
