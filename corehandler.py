@@ -2,6 +2,7 @@
 Core handler
 '''
 from abstracthandler import AbstractHandler
+from twisted.internet import reactor
 
 
 class corehandler(AbstractHandler):
@@ -20,7 +21,7 @@ class corehandler(AbstractHandler):
 
     def loadtags(self):
         for tag in self.config:
-            self._settag(tag, 0)
+            self._settag(tag, self.config[tag].get("run", "1"))
 
     def _addhandler(self, classname, parent, params):
         if not classname in self.listeners:
@@ -45,8 +46,6 @@ class corehandler(AbstractHandler):
                     else:
                         parent = self.listeners.get(parentname, None)
                     self._addhandler(classname, parent, params)
-                    if handlers[tag].get("run", "1") == "1":
-                        self.listeners[classname].start()
                 except KeyError, e:
                     print "No such param " + str(e)
 
@@ -59,11 +58,20 @@ class corehandler(AbstractHandler):
         l = tag.split("_")
         if len(l) == 2:
             if l[0] == __name__:
-                self._tags[l[1]] = value
+                if self._tags[l[1]] != value:
+                    self._set_listeners(l[1], value)
+                    self._tags[l[1]] = value
             else:
                 self.listeners[l[0]].settag(l[1], value)
         else:
             self._tags[tag] = value
+
+    def _set_listeners(self, tag, value):
+        if tag in self.listeners:
+            if value:
+                self.listeners[tag].start()
+            else:
+                self.listeners[tag].stop()
 
     def _gettag(self, tag):
         l = tag.split("_")
@@ -88,16 +96,15 @@ class corehandler(AbstractHandler):
         return tagslist
 
     def stop(self):
-        for listener in self.listeners.values():
-            if listener.isAlive():
-                listener.stop()
+        for listener in self.listeners:
+            self._set_listeners(listener, 0)
+        reactor.stop()
 
     def run(self):
         self.logger.debug("RUN")
         self._settag(__name__, 1)
         self._addhandlers(self.config)
-        while any(l.isAlive() for l in self.listeners.values()):
-            for l in self.listeners.values():
-                if l.isAlive():
-                    l.join(1)
-                    break
+        for listener in self.listeners:
+            if self._tags[listener] == '1':
+                self.listeners[listener].start()
+        reactor.run(installSignalHandlers=0)

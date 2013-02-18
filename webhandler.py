@@ -12,32 +12,37 @@ import cgi
 class webhandler(AbstractHandler):
     '''Web server handler'''
 
+    port = None
+
     def __init__(self, parent=None, params={}):
+        self.params = params
         AbstractHandler.__init__(self, parent, params)
         self.logger.info("Init web handler")
         resource = File(params["wwwPath"])
         root = Resource()
         root.putChild("www", resource)
-        root.putChild("get", Simple(parent))
-        site = server.Site(root)
-        reactor.listenTCP(int(params["port"]), site)
+        root.putChild("get", smhs_web(parent))
+        self.site = server.Site(root)
 
     def loadtags(self):
         pass
 
     def run(self):
         AbstractHandler.run(self)
-        reactor.run(installSignalHandlers=0)
+        self.port = reactor.listenTCP(int(self.params["port"]), self.site)
 
     def stop(self):
         AbstractHandler.stop(self)
-        reactor.stop()
+        if self.port:
+            self.port.stopListening()
 
 
-class Simple(resource.Resource):
+class smhs_web(resource.Resource):
     isLeaf = True
-    actionGetJson = "getJson"
+    action_get_json = "getJson"
     actionStopServer = "stopServer"
+    action_list_tags = "listTags"
+    action_set_tag = "setTag"
 
     def __init__(self, parent):
         self.parent = parent
@@ -45,12 +50,29 @@ class Simple(resource.Resource):
 
     def render_GET(self, request):
         if ("action" in request.args):
-            if (request.args["action"][0] == self.actionGetJson):
+            if (request.args["action"][0] == self.action_get_json):
                 html = "{ \"tags\":{"
                 coils = self.parent.tags
                 for x in coils:
                     html += "\"" + x + "\":\"" + str(coils[x]) + "\","
                 html += "} }"
+                return html
+            elif (request.args["action"][0] == self.action_list_tags):
+                tags = self.parent.tags
+                html = ''
+                html += '<table>'
+                for tag in sorted(tags):
+                    html += '<tr>'
+                    html += '<td>%s</td><td>%s</td>' % (tag, tags[tag])
+                    html += '</tr>'
+                return html
+            elif (request.args["action"][0] == self.action_set_tag):
+                l = request.args
+                del l['action']
+                html = ''
+                for tag in l:
+                    self.parent.settag(tag, int(l[tag][0]))
+                    html += "setting %s to %s" % (tag, l[tag][0])
                 return html
             else:
                 if (request.args["action"][0] == self.actionStopServer):

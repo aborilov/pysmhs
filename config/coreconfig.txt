@@ -7,13 +7,13 @@
         logfiles_num = 5
         logfile_size = 1048576
 [plchandler]
-    description = "PLC handler"
+    description = "Async PLC handler"
     [[params]]
         configfile = config/tags_config.txt
         [[[server]]]
-            fakeserver = 0
             pollingTimeout = 0
             packetSize = 50
+            counter_threshold = 250
         [[[port]]]
             name = "/dev/plc"
             data_length = 7
