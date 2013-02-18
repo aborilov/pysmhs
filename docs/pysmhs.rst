@@ -49,42 +49,10 @@ pysmhs Package
     :undoc-members:
     :show-inheritance:
 
-:mod:`modbusclient` Module
---------------------------
-
-.. automodule:: pysmhs.modbusclient
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`modbusclientstub` Module
-------------------------------
-
-.. automodule:: pysmhs.modbusclientstub
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
 :mod:`plchandler` Module
 ------------------------
 
 .. automodule:: pysmhs.plchandler
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`test` Module
-------------------
-
-.. automodule:: pysmhs.test
-    :members:
-    :undoc-members:
-    :show-inheritance:
-
-:mod:`test2` Module
--------------------
-
-.. automodule:: pysmhs.test2
     :members:
     :undoc-members:
     :show-inheritance:
