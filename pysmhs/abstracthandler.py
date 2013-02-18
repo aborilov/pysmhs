@@ -149,7 +149,7 @@ class AbstractHandler(threading.Thread):
         Start handler
         '''
         self.logger.info("Start handler")
-        dispatcher.connect(self.handler, signal=self.params.get(
+        dispatcher.connect(self.__handler, signal=self.params.get(
             "signals", dispatcher.Any))
         threading.Thread.start(self)
 

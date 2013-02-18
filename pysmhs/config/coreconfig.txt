@@ -28,7 +28,7 @@
     parent = "corehandler"
     [[params]]
         port = 80
-        wwwPath = /opt/pysmhs/www
+        wwwPath = /opt/pysmhs/pysmhs/www
 
 [datehandler]
     description = "date handler"
