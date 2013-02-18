@@ -1,15 +1,15 @@
-=====
+======
 pysmhs
-=====
+======
 
-Система управления умным домом
+Smart House Control System
 ==================================================
 
 :Website: http://www.pysmhs.org
 
 :Source: https://github.com/aborilov/pysmhs
 
-:Documentation: http://pysmhs.readthedocs.org/en/latest/
+:Documentation: http://docs.pysmhs.org
 
 :License: MIT License
 
