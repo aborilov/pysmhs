@@ -8,6 +8,7 @@
         logfile_size = 1048576
 [plchandler]
     description = "Async PLC handler"
+    run = 0
     [[params]]
         configfile = config/tags_config.txt
         [[[server]]]
@@ -27,11 +28,13 @@
     description = "WebServer handler"
     parent = "corehandler"
     [[params]]
-        port = 80
+        port = 8080
         wwwPath = /opt/pysmhs/pysmhs/www
 
 [datehandler]
     description = "date handler"
+    [[params]]
+        configfile = config/dateconfig.txt
 
 [actionhandler]
     description = "action handler"

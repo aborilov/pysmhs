@@ -60,10 +60,14 @@ class smhs_web(resource.Resource):
             elif (request.args["action"][0] == self.action_list_tags):
                 tags = self.parent.tags
                 html = ''
-                html += '<table>'
+                html += '<table border="1">'
+                handler = ''
                 for tag in sorted(tags):
+                    if handler != tag.split('_')[0]:
+                        handler = tag.split('_')[0]
+                        html += '<tr><td align="center" colspan="2">%s</td></tr>' % tag.split('_')[0]
                     html += '<tr>'
-                    html += '<td>%s</td><td>%s</td>' % (tag, tags[tag])
+                    html += '<td>%s</td><td>%s</td>' % (tag.split('_')[1], tags[tag])
                     html += '</tr>'
                 return html
             elif (request.args["action"][0] == self.action_set_tag):

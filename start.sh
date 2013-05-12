@@ -1,3 +1,3 @@
 #!/bin/sh
 cd pysmhs
-python __init__.py
+python2 __init__.py

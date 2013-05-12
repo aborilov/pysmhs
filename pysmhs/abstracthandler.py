@@ -141,7 +141,7 @@ class AbstractHandler(threading.Thread):
         Stop handler
         '''
         self.logger.info("Stop handler")
-        dispatcher.disconnect(self.handler, signal=self.params.get(
+        dispatcher.disconnect(self.__handler, signal=self.params.get(
             "listensignals", dispatcher.Any))
 
     def start(self):

@@ -15,7 +15,8 @@ class datehandler(AbstractHandler):
         self._settag("date", datetime.now().strftime("%d.%m.%Y %H:%M:%S"))
 
     def loadtags(self):
-        AbstractHandler.loadtags(self)
+        for tag in self.config:
+            self.settag(tag, '0')
         self.updatedate()
 
     @property
