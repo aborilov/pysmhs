@@ -70,7 +70,7 @@ class smhs_web(resource.Resource):
                 for tag in sorted(tags):
                     if tag.split('_')[0] != handler:
                         handler = tag.split('_')[0]
-                    od.setdefault(handler, {})[tag.split('_')[1]] = tags[tag]
+                    od.setdefault(handler, {})[tag.split('_')[1]] = str(tags[tag])
                 return str(self.listtags_template.render(title=u'Tag list',
                                                          description='here',
                                                          tags=od))

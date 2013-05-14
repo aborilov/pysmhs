@@ -44,13 +44,16 @@
 $(document).ready(function() {
         // alert('hello');
         $('#myswitch').on('switch-change', function (e, data) {
-        var $el = $(data.el), value = data.value;
-        // console.log(e, $el, value);
-        if (value) {
-            alert($el.attr('id') + " on");
-        }else{
-            alert($el.attr('id') + " off");
-        }
+            var $el = $(data.el), value = data.value;
+            // console.log(e, $el, value);
+            data = {};
+            data['action'] = 'setTag';
+            if (value) {
+                data[$el.attr('id')] = '1';
+            }else{
+                data[$el.attr('id')] = '0';
+            }
+                $.get('get', data);
         });
     });
 // $('#normal-toggle-button').toggleButtons();
