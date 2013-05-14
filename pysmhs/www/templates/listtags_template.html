@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+
+  <title>{{ title }}</title>
+  <link href="/www/css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <link href="/www/css/bootstrapSwitch.css" rel="stylesheet" media="screen">
+</head>
+
+<body>
+<script src="/www/js/jquery-latest.js"></script>
+<script src="/www/js/bootstrapSwitch.js"></script>
+<script src="/www/js/bootstrap.min.js"></script>
+<div class="container">
+<table class="table table-hover table-condensed table-striped" id="myswitch">
+    {% for handler in tags %}
+        <thead>
+        <tr><th colspan="2" ><div class="text-center">{{ handler }}</div></th></tr>
+        </thead>
+        <tbody>
+        {% for tag in tags[handler] %}
+            <tr>
+                <td >{{ tag }}</td>
+                <td>
+                    {% if tags[handler][tag] == '1' or tags[handler][tag] == '0' %}
+                        <div class="switch">
+                            <input id="{{ handler }}_{{ tag }}" type="checkbox"
+                        {% if tags[handler][tag] == '1' %}
+                        checked="checked"
+                        {% endif %}></div>
+                    {% else %}
+                    {{ tags[handler][tag] }}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    {% endfor %}
+</table>
+</div>
+
+<script>
+$(document).ready(function() {
+        // alert('hello');
+        $('#myswitch').on('switch-change', function (e, data) {
+        var $el = $(data.el), value = data.value;
+        // console.log(e, $el, value);
+        if (value) {
+            alert($el.attr('id') + " on");
+        }else{
+            alert($el.attr('id') + " off");
+        }
+        });
+    });
+// $('#normal-toggle-button').toggleButtons();
+// alert($('#normal-toggle-button'));
+</script>
+</body>
+</html>
