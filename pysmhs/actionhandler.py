@@ -50,7 +50,7 @@ class actionhandler(AbstractHandler):
 
     def loadtags(self):
         for tag in self.config:
-            self._tags[tag] = 0
+            self._tags[tag] = '0'
 
     def switcher(self, params):
         for tag in params:
@@ -61,10 +61,10 @@ class actionhandler(AbstractHandler):
             self.settag(tag, value)
 
     def _inverttag(self, tag):
-        if self.gettag(tag) == 0:
-            self.settag(tag, 1)
+        if self.gettag(tag) == '0':
+            self.settag(tag, '1')
         else:
-            self.settag(tag, 0)
+            self.settag(tag, '0')
 
     def sleep(self, params):
         self.logger.debug('before timeout')

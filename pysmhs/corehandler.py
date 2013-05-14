@@ -16,8 +16,8 @@ class corehandler(AbstractHandler):
         AbstractHandler.__init__(self, parent, params)
         params = self.config[__name__]["params"]
         self.logger.info('Init core server')
-        if self.config[__name__].get("run", "1") == "1":
-            self.start()
+        # if self.config[__name__].get("run", "1") == "1":
+        #     self.start()
 
     def loadtags(self):
         for tag in self.config:
@@ -25,29 +25,29 @@ class corehandler(AbstractHandler):
 
     def _addhandler(self, classname, parent, params):
         if not classname in self.listeners:
-            try:
-                _temp = __import__(
-                    classname, globals(), locals(), [classname])
-                handler = eval(
-                    "_temp." + classname + "(parent, params)")
-                self.listeners[classname] = handler
-            except ImportError, e:
-                print e
+            # try:
+            _temp = __import__(
+                classname, globals(), locals(), [classname])
+            handler = eval(
+                "_temp." + classname + "(parent, params)")
+            self.listeners[classname] = handler
+            # except ImportError, e:
+            #     print e
 
     def _addhandlers(self, handlers):
         for tag in handlers:
             if tag != __name__:
-                try:
-                    classname = tag
-                    params = handlers[tag].get("params", {})
-                    parentname = handlers[tag].get("parent")
-                    if parentname == __name__:
-                        parent = self
-                    else:
-                        parent = self.listeners.get(parentname, None)
-                    self._addhandler(classname, parent, params)
-                except KeyError, e:
-                    print "No such param " + str(e)
+                # try:
+                classname = tag
+                params = handlers[tag].get("params", {})
+                parentname = handlers[tag].get("parent")
+                if parentname == __name__:
+                    parent = self
+                else:
+                    parent = self.listeners.get(parentname, None)
+                self._addhandler(classname, parent, params)
+                # except KeyError, e:
+                #     print "No such param " + str(e)
 
     def runhandler(self, classname):
         if classname in self.listeners:
@@ -96,13 +96,14 @@ class corehandler(AbstractHandler):
         return tagslist
 
     def stop(self):
+        AbstractHandler.stop(self)
         for listener in self.listeners:
             self._set_listeners(listener, 0)
         reactor.stop()
 
-    def run(self):
+    def start(self):
         self.logger.debug("RUN")
-        self._settag(__name__, 1)
+        self._settag(__name__, '1')
         self._addhandlers(self.config)
         for listener in self.listeners:
             if self._tags[listener] == '1':

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 '''
 Web server handler
 '''
@@ -6,10 +7,13 @@ from twisted.web import server, resource
 from twisted.internet import reactor
 from twisted.web.resource import Resource
 from twisted.web.static import File
+import collections
 import cgi
+from jinja2 import Environment, PackageLoader
 
 
 class webhandler(AbstractHandler):
+
     '''Web server handler'''
 
     port = None
@@ -27,8 +31,8 @@ class webhandler(AbstractHandler):
     def loadtags(self):
         pass
 
-    def run(self):
-        AbstractHandler.run(self)
+    def start(self):
+        AbstractHandler.start(self)
         self.port = reactor.listenTCP(int(self.params["port"]), self.site)
 
     def stop(self):
@@ -45,6 +49,8 @@ class smhs_web(resource.Resource):
     action_set_tag = "setTag"
 
     def __init__(self, parent):
+        env = Environment(loader=PackageLoader('www', 'templates'))
+        self.listtags_template = env.get_template('listtags_template.html')
         self.parent = parent
         resource.Resource.__init__(self)
 
@@ -59,17 +65,15 @@ class smhs_web(resource.Resource):
                 return html
             elif (request.args["action"][0] == self.action_list_tags):
                 tags = self.parent.tags
-                html = ''
-                html += '<table border="1">'
-                handler = ''
+                od = {}
+                handler = ""
                 for tag in sorted(tags):
-                    if handler != tag.split('_')[0]:
+                    if tag.split('_')[0] != handler:
                         handler = tag.split('_')[0]
-                        html += '<tr><td align="center" colspan="2">%s</td></tr>' % tag.split('_')[0]
-                    html += '<tr>'
-                    html += '<td>%s</td><td>%s</td>' % (tag.split('_')[1], tags[tag])
-                    html += '</tr>'
-                return html
+                    od.setdefault(handler, {})[tag.split('_')[1]] = tags[tag]
+                return str(self.listtags_template.render(title=u'Tag list',
+                                                         description='here',
+                                                         tags=od))
             elif (request.args["action"][0] == self.action_set_tag):
                 l = request.args
                 del l['action']

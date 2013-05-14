@@ -11,14 +11,13 @@ import logging.handlers
 from config.configobj import ConfigObj
 
 
-class AbstractHandler(threading.Thread):
+class AbstractHandler(object):
     '''
     Abstractss class for all
     handlers
     '''
 
     def __init__(self, parent=None, params={}):
-        threading.Thread.__init__(self)
         if "configfile" in params:
             self.config = ConfigObj(
                 params["configfile"], indent_type="\t")
@@ -151,7 +150,7 @@ class AbstractHandler(threading.Thread):
         self.logger.info("Start handler")
         dispatcher.connect(self.__handler, signal=self.params.get(
             "signals", dispatcher.Any))
-        threading.Thread.start(self)
+        # threading.Thread.start(self)
 
-    def run(self):
-        threading.Thread.run(self)
+    # def run(self):
+    #     threading.Thread.run(self)
