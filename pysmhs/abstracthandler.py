@@ -87,7 +87,6 @@ class AbstractHandler(object):
                     self.parent.settag(tag, value)
             else:
                 self._settag(tag, value)
-                # self.logger.error("Can't parse handler name from tag " + tag)
         else:
             self._settag(tag, value)
 
@@ -98,6 +97,8 @@ class AbstractHandler(object):
         Override if you need some action
         '''
         self._tags[tag] = value
+        self.events.append({"tag": tag, "value": value})
+        self.sendevents()
 
     def gettag(self, tag):
         '''
@@ -116,7 +117,6 @@ class AbstractHandler(object):
                     return self.parent.gettag(tag)
             else:
                 return self._gettag(tag)
-                # self.logger.error("Can't parse handler name from tag " + tag)
         else:
             return self._gettag(tag)
 

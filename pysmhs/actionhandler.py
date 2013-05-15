@@ -10,7 +10,8 @@ class actionhandler(AbstractHandler):
     def __init__(self, parent=None, params={}):
         AbstractHandler.__init__(self, parent, params)
         self.actions = {'setter': self.setter,
-                        'switcher': self.switcher, 'sleep': self.sleep}
+                        'switcher': self.switcher,
+                        'sleep': self.sleep}
         self.temp_tags = {}
 
     def process(self, signal, events):
@@ -18,27 +19,14 @@ class actionhandler(AbstractHandler):
             self.logger.debug(event)
             self.temp_tags[event['tag']] = event['value']
             for tag, params in self.config.items():
+                params = params.copy()
                 cond = params.pop('condition')
                 if event['tag'] in cond:
                     self.logger.debug("check cond %s" % cond)
                     try:
                         self.logger.debug("eval %s" % eval(cond))
                         if eval(cond):
-                            self.logger.debug(
-                                'have actions %s' % sorted(params))
-                            for i in sorted(params):
-                                self.logger.debug('Now in %s' % i)
-                                l = i.split(".")
-                                if len(l) == 2:
-                                    action = l[1]
-                                    params = params[i]
-                                    self.logger.debug('Call method %s' % i)
-                                    self.actions.get(action, None)(params)
-                                else:
-                                    self.logger.debug(
-                                        'Wrong action name and order - %s' % i)
-                                self.logger.debug(
-                                    'have after actions %s' % sorted(params))
+                            self._settag(tag, '1')
                     except Exception, e:
                         self.logger.error(
                             "Error(%s) while eval(%s)" % (e, cond))
@@ -49,6 +37,29 @@ class actionhandler(AbstractHandler):
         if tag in self.temp_tags:
             return int(self.temp_tags[tag])
         return AbstractHandler.gettag(self, tag)
+
+    def _settag(self, tag, value):
+        AbstractHandler._settag(self, tag, value)
+        if str(value) == '1':
+            self.run_action(tag)
+
+    def run_action(self, tag):
+        params = self.config[tag].copy()
+        self.logger.debug('have actions %s' % sorted(params))
+        params.pop('condition')
+        for i in sorted(params):
+            self.logger.debug('Now in %s' % i)
+            l = i.split(".")
+            if len(l) == 2:
+                action = l[1]
+                params = params[i]
+                self.logger.debug('Call method %s' % i)
+                self.actions.get(action, None)(params)
+            else:
+                self.logger.debug(
+                    'Wrong action name and order - %s' % i)
+        self.logger.debug('have after actions %s' % sorted(params))
+        self._settag(tag, '0')
 
     def loadtags(self):
         for tag in self.config:
