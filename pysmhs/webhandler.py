@@ -66,11 +66,13 @@ class smhs_web(resource.Resource):
             elif (request.args["action"][0] == self.action_list_tags):
                 tags = self.parent.tags
                 od = {}
-                handler = ""
+                last_handler = ""
                 for tag in sorted(tags):
-                    if tag.split('_')[0] != handler:
-                        handler = tag.split('_')[0]
-                    od.setdefault(handler, {})[tag.split('_')[1]] = str(tags[tag])
+                    current_handler = tag.split('_')[0]
+                    if current_handler != last_handler:
+                        last_handler = current_handler
+                    tag_name = tag.split('_')[1]
+                    od.setdefault(last_handler, {})[tag_name] = str(tags[tag])
                 return str(self.listtags_template.render(title=u'Tag list',
                                                          description='here',
                                                          tags=od))

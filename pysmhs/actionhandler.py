@@ -19,17 +19,18 @@ class actionhandler(AbstractHandler):
             self.logger.debug(event)
             self.temp_tags[event['tag']] = event['value']
             for tag, params in self.config.items():
-                params = params.copy()
-                cond = params.pop('condition')
-                if event['tag'] in cond:
-                    self.logger.debug("check cond %s" % cond)
-                    try:
-                        self.logger.debug("eval %s" % eval(cond))
-                        if eval(cond):
-                            self._settag(tag, '1')
-                    except Exception, e:
-                        self.logger.error(
-                            "Error(%s) while eval(%s)" % (e, cond))
+                if 'condition' in params:
+                    params = params.copy()
+                    cond = params.pop('condition')
+                    if event['tag'] in cond:
+                        self.logger.debug("check cond %s" % cond)
+                        try:
+                            self.logger.debug("eval %s" % eval(cond))
+                            if eval(cond):
+                                self._settag(tag, '1')
+                        except Exception, e:
+                            self.logger.error(
+                                "Error(%s) while eval(%s)" % (e, cond))
         self.temp_tags = {}
         self.logger.debug('End of process')
 
@@ -46,7 +47,8 @@ class actionhandler(AbstractHandler):
     def run_action(self, tag):
         params = self.config[tag].copy()
         self.logger.debug('have actions %s' % sorted(params))
-        params.pop('condition')
+        if 'condition' in params:
+            params.pop('condition')
         for i in sorted(params):
             self.logger.debug('Now in %s' % i)
             l = i.split(".")

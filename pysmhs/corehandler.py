@@ -60,7 +60,7 @@ class corehandler(AbstractHandler):
             if l[0] == __name__:
                 if self._tags[l[1]] != value:
                     self._set_listeners(l[1], value)
-                    self._tags[l[1]] = value
+                    AbstractHandler._settag(self, l[1], value)
             else:
                 self.listeners[l[0]].settag(l[1], value)
         else:
