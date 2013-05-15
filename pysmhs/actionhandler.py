@@ -9,37 +9,39 @@ class actionhandler(AbstractHandler):
 
     def __init__(self, parent=None, params={}):
         AbstractHandler.__init__(self, parent, params)
-        self.actions = {'setter': self.setter, 'switcher': self.switcher, 'sleep': self.sleep}
-        self.actionlist = {}
+        self.actions = {'setter': self.setter,
+                        'switcher': self.switcher, 'sleep': self.sleep}
         self.temp_tags = {}
-        for name, params in self.config.items():
-            cond = params.pop('condition')
-            self.actionlist[cond] = params
 
     def process(self, signal, events):
         for event in events:
             self.logger.debug(event)
             self.temp_tags[event['tag']] = event['value']
-            for cond in self.actionlist.keys():
+            for tag, params in self.config.items():
+                cond = params.pop('condition')
                 if event['tag'] in cond:
                     self.logger.debug("check cond %s" % cond)
                     try:
                         self.logger.debug("eval %s" % eval(cond))
                         if eval(cond):
-                            self.logger.debug('have actions %s' % sorted(self.actionlist[cond]))
-                            for i in sorted(self.actionlist[cond]):
+                            self.logger.debug(
+                                'have actions %s' % sorted(params))
+                            for i in sorted(params):
                                 self.logger.debug('Now in %s' % i)
                                 l = i.split(".")
                                 if len(l) == 2:
                                     action = l[1]
-                                    params = self.actionlist[cond][i]
+                                    params = params[i]
                                     self.logger.debug('Call method %s' % i)
                                     self.actions.get(action, None)(params)
                                 else:
-                                    self.logger.debug('Wrong action name and order - %s' % i)
-                                self.logger.debug('have after actions %s' % sorted(self.actionlist[cond]))
+                                    self.logger.debug(
+                                        'Wrong action name and order - %s' % i)
+                                self.logger.debug(
+                                    'have after actions %s' % sorted(params))
                     except Exception, e:
-                        self.logger.error("Error(%s) while eval(%s)" % (e, cond))
+                        self.logger.error(
+                            "Error(%s) while eval(%s)" % (e, cond))
         self.temp_tags = {}
         self.logger.debug('End of process')
 

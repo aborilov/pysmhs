@@ -77,6 +77,7 @@ class AbstractHandler(object):
         if parent call his method
         else call private method
         '''
+        self.logger.info("settag " + tag)
         if self.parent:
             l = tag.split("_")
             if len(l) == 2:
@@ -85,7 +86,8 @@ class AbstractHandler(object):
                 else:
                     self.parent.settag(tag, value)
             else:
-                self.logger.error("Can't parse handler name from tag " + tag)
+                self._settag(tag, value)
+                # self.logger.error("Can't parse handler name from tag " + tag)
         else:
             self._settag(tag, value)
 
@@ -113,7 +115,8 @@ class AbstractHandler(object):
                 else:
                     return self.parent.gettag(tag)
             else:
-                self.logger.error("Can't parse handler name from tag " + tag)
+                return self._gettag(tag)
+                # self.logger.error("Can't parse handler name from tag " + tag)
         else:
             return self._gettag(tag)
 
