@@ -102,6 +102,7 @@ class corehandler(AbstractHandler):
         reactor.stop()
 
     def start(self):
+        # self.stopped = False
         self.logger.debug("RUN")
         self._settag(__name__, '1')
         self._addhandlers(self.config)

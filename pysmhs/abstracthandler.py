@@ -23,6 +23,7 @@ class AbstractHandler(object):
                 params["configfile"], indent_type="\t")
         self.signal = self.__class__.__name__
         self.params = params
+        self.stopped = True
         self.parent = parent
         self._tags = {}
         self.events = []
@@ -127,6 +128,8 @@ class AbstractHandler(object):
 
     @property
     def tags(self):
+        if self.stopped:
+            return {}
         return self._tags
 
     def loadtags(self):
@@ -139,6 +142,7 @@ class AbstractHandler(object):
         '''
         Stop handler
         '''
+        self.stopped = True
         self.logger.info("Stop handler")
         dispatcher.disconnect(self.__handler, signal=self.params.get(
             "listensignals", dispatcher.Any))
@@ -147,6 +151,7 @@ class AbstractHandler(object):
         '''
         Start handler
         '''
+        self.stopped = False
         self.logger.info("Start handler")
         dispatcher.connect(self.__handler, signal=self.params.get(
             "signals", dispatcher.Any))

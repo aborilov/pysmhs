@@ -21,5 +21,7 @@ class datehandler(AbstractHandler):
 
     @property
     def tags(self):
+        if self.stopped:
+            return {}
         self.updatedate()
         return self._tags
