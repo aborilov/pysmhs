@@ -54,9 +54,9 @@ class actionhandler(AbstractHandler):
             l = i.split(".")
             if len(l) == 2:
                 action = l[1]
-                params = params[i]
+                param = params[i]
                 self.logger.debug('Call method %s' % i)
-                self.actions.get(action, None)(params)
+                self.actions.get(action, None)(param)
             else:
                 self.logger.debug(
                     'Wrong action name and order - %s' % i)
@@ -76,7 +76,7 @@ class actionhandler(AbstractHandler):
             self.settag(tag, value)
 
     def _inverttag(self, tag):
-        if self.gettag(tag) == '0':
+        if str(self.gettag(tag)) == '0':
             self.settag(tag, '1')
         else:
             self.settag(tag, '0')

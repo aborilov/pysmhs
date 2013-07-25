@@ -94,6 +94,7 @@ class SMHSProtocol(ModbusClientProtocol):
         val = {}
         for i in range(0, register[1]):
             val[register[0] + i] = response.getBit(i)
+            #print str(val[register[0] + i]) + ":" +  str(response.getBit(i))
         self.reader(val, "output")
 
     def write_tags(self, response):
@@ -247,8 +248,8 @@ class plchandler(AbstractHandler):
         self._inputctags[tag] = value
         self._tags[tag] = value & 1
 
-    def run(self):
-        AbstractHandler.run(self)
+    def start(self):
+        AbstractHandler.start(self)
         framer = ModbusFramer(ClientDecoder())
         pol_list = {}
         for t in self.config.keys():
