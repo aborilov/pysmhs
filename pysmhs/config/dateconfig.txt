@@ -1,4 +1,5 @@
-[date]
 [evening]
-    start = 'start'
-    end = 'end'
+    start = '2013-10-02 15:21'
+    end = '2013-10-02 15:22'
+    until = '2014-10-02 13:00'
+    freq = DAILY
