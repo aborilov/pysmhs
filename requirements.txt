@@ -1,7 +1,8 @@
-pydispatch==2.0.3
+PyDispatcher==2.0.3
 Twisted==12.3.0
 pymodbus==1.1.0
 pyserial==2.6
 wsgiref==0.1.2
 zope.interface==4.0.3
-python-dateutil=2.1
+python-dateutil==2.1
+six==1.4.1
