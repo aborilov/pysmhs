@@ -45,7 +45,7 @@ class SMHSProtocol(ModbusClientProtocol):
         d = self.write_register(4598, 250)
         # d.addCallbacks(self.read_holding_registers(*reg))
         # d.addCallbacks(self.threshold_readed)
-        d.addCallbacks(self.write_polling_tag)
+        d.addCallback(self.write_polling_tag)
 
     def threshold_readed(self, response):
         self.logger.debug('counter threshold = %d' % response.getRegister(0))
@@ -62,7 +62,7 @@ class SMHSProtocol(ModbusClientProtocol):
         if not d:
             self.fetch_coils(response)
         else:
-            d.addCallbacks(self.fetch_coils)
+            d.addCallback(self.fetch_coils)
 
     def fetch_holding_register(self, response, register):
         return self.read_holding_registers(*register)
@@ -88,7 +88,7 @@ class SMHSProtocol(ModbusClientProtocol):
         if not d:
             self.write_tags(response)
         else:
-            d.addCallbacks(self.write_tags)
+            d.addCallback(self.write_tags)
 
     def coil_readed(self, response, register):
         val = {}
@@ -116,7 +116,7 @@ class SMHSProtocol(ModbusClientProtocol):
         if not d:
             self.write_polling_tag(response)
         else:
-            d.addCallbacks(self.write_polling_tag)
+            d.addCallback(self.write_polling_tag)
 
     def write_tag(self, response, addr, value):
         return self.write_coil(addr, value)
