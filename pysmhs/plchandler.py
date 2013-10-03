@@ -7,9 +7,7 @@ from serial import PARITY_NONE, PARITY_EVEN, PARITY_ODD
 from serial import STOPBITS_ONE, STOPBITS_TWO
 from serial import FIVEBITS, SIXBITS, SEVENBITS, EIGHTBITS
 from pymodbus.transaction import ModbusAsciiFramer as ModbusFramer
-
 from abstracthandler import AbstractHandler
-from pydispatch import dispatcher
 
 
 class SMHSProtocol(ModbusClientProtocol):
@@ -40,7 +38,7 @@ class SMHSProtocol(ModbusClientProtocol):
         d.callback('start new cycle')
 
     def write_counter_threshold(self, response):
-        reg = (4598, 1)
+        # reg = (4598, 1)
         # d = self.read_holding_registers(*reg)
         d = self.write_register(4598, 250)
         # d.addCallbacks(self.read_holding_registers(*reg))
@@ -220,13 +218,13 @@ class plchandler(AbstractHandler):
         add it to events list
         '''
         if tag in self._tags:
-            if self._tags[tag] != value:
-                self._tags[tag] = value
+            if self._tags[tag] != str(value):
+                self._tags[tag] = str(value)
                 if addevent:
                     # self.events[tag] = value
-                    self.events.append({"tag": tag, "value": value})
+                    self.events.append({"tag": tag, "value": str(value)})
         else:
-            self._tags[tag] = value
+            self._tags[tag] = str(value)
 
     def __addinputctag(self, tag, value):
         '''
@@ -239,14 +237,14 @@ class plchandler(AbstractHandler):
             if lastval != value:
                 if value > lastval:
                     for x in range(lastval + 1, value + 1):
-                        self.events.append({"tag": tag, "value": x & 1})
+                        self.events.append({"tag": tag, "value": str(x & 1)})
                 else:
                     dif = self._inputtag_threshold - lastval + value
                     for x in range(lastval + 1, lastval + dif + 1):
-                        self.events.append({"tag": tag, "value": x & 1})
+                        self.events.append({"tag": tag, "value": str(x & 1)})
 
         self._inputctags[tag] = value
-        self._tags[tag] = value & 1
+        self._tags[tag] = str(value & 1)
 
     def start(self):
         AbstractHandler.start(self)
