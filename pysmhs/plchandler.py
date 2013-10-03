@@ -218,13 +218,13 @@ class plchandler(AbstractHandler):
         add it to events list
         '''
         if tag in self._tags:
-            if self._tags[tag] != str(value):
-                self._tags[tag] = str(value)
+            if self._tags[tag] != value:
+                self._tags[tag] = value
                 if addevent:
                     # self.events[tag] = value
-                    self.events.append({"tag": tag, "value": str(value)})
+                    self.events.append({"tag": tag, "value": value})
         else:
-            self._tags[tag] = str(value)
+            self._tags[tag] = value
 
     def __addinputctag(self, tag, value):
         '''
@@ -237,14 +237,14 @@ class plchandler(AbstractHandler):
             if lastval != value:
                 if value > lastval:
                     for x in range(lastval + 1, value + 1):
-                        self.events.append({"tag": tag, "value": str(x & 1)})
+                        self.events.append({"tag": tag, "value": x & 1})
                 else:
                     dif = self._inputtag_threshold - lastval + value
                     for x in range(lastval + 1, lastval + dif + 1):
-                        self.events.append({"tag": tag, "value": str(x & 1)})
+                        self.events.append({"tag": tag, "value": x & 1})
 
         self._inputctags[tag] = value
-        self._tags[tag] = str(value & 1)
+        self._tags[tag] = value & 1
 
     def start(self):
         AbstractHandler.start(self)
