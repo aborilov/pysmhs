@@ -11,8 +11,8 @@ from dateutil.rrule import *
 class datehandler(AbstractHandler):
 
     def updatedate(self):
-        now = datetime.now().strftime("%d.%m.%Y %H:%M:%S")
-        self._tags['date'] = now
+        now = datetime.now()
+        self._tags['date'] = now.strftime("%d.%m.%Y %H:%M:%S")
         self.checktags(now)
 
     def loadtags(self):
@@ -31,6 +31,8 @@ class datehandler(AbstractHandler):
             tagrrule["endrr"] = endrr
 
     def checktag(self, tag, dt):
+        dt = dt.replace(second=0, microsecond=0)
+        print("check" + str(dt))
         if dt in self.rrules[tag]["startrr"]:
             self._settag(tag, '1')
         elif dt in self.rrules[tag]["endrr"]:
