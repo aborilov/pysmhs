@@ -12,8 +12,6 @@ class TestDatehandler(unittest.TestCase):
     def testDate(self):
         print("")
         print(self.d.tags)
-        # print(self.d.gettag('date'))
-        # self.d.checktags()
 
 
 if __name__ == '__main__':
