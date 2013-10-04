@@ -15,16 +15,26 @@ class datehandler(AbstractHandler):
     midnight = time(00, 00, 00)
 
     def updatedate(self):
-        now = datetime.now()
+        now = datetime.now().replace(microsecond=0)
         self._tags['date'] = now.strftime("%d.%m.%Y %H:%M:%S")
         self.checktags(now)
-        if now.time().replace(microsecond=0) == self.midnight:
+        if now.time() == self.midnight:
             self._tags['sunset'] = self.getsunset().strftime("%H:%M:%S")
-            self._tags['sunrise'] = self.getsunrise().strftime("%H:%M:%S")    
+            self._tags['sunrise'] = self.getsunrise().strftime("%H:%M:%S")
+        if now.time().strftime("%H:%M:%S") == self._tags['sunset']:
+            self._settag('issunset', '1')
+        else:
+            self._settag('issunset', '0')
+        if now.time().strftime("%H:%M:%S") == self._tags['sunrise']:
+            self._settag('issunrise', '1')
+        else:
+            self._settag('issunrise', '0')
 
     def loadtags(self):
         self._tags['sunset'] = self.getsunset().strftime("%H:%M:%S")
         self._tags['sunrise'] = self.getsunrise().strftime("%H:%M:%S")
+        self._tags['issunset'] = '0'
+        self._tags['issunrise'] = '0'
         self.rrules = {}
         for tag, params in self.config.items():
             startdate = parse(params["start"])
@@ -34,7 +44,7 @@ class datehandler(AbstractHandler):
             startrr = rrule(
                 freq, dtstart=startdate, until=untildate, cache=True)
             endrr = rrule(freq, dtstart=enddate, until=untildate, cache=True)
-            self.settag(tag, '0')
+            self._tags[tag] = '0'
             tagrrule = self.rrules.setdefault(tag, {})
             tagrrule["startrr"] = startrr
             tagrrule["endrr"] = endrr
@@ -42,9 +52,11 @@ class datehandler(AbstractHandler):
     def earthtool(self, param):
         now = datetime.now()
         xml = urllib2.urlopen(
-            "http://www.earthtools.org/sun/54.32/36.16/" + str(now.day) + "/" + str(now.month) + "/+4/0").read()
+            "http://www.earthtools.org/sun/54.32/36.16/" +
+            str(now.day) + "/" +
+            str(now.month) + "/+4/0").read()
         xmldoc = minidom.parseString(xml)
-        itemlist = xmldoc.getElementsByTagName(param) 
+        itemlist = xmldoc.getElementsByTagName(param)
         return parse(itemlist[0].childNodes[0].nodeValue).time()
 
     def getsunset(self):
@@ -52,8 +64,7 @@ class datehandler(AbstractHandler):
         try:
             sunset = self.earthtool('sunset')
         except Exception as inst:
-            self.logger.error("Cant get sunset")
-            print("error" + str(inst))
+            self.logger.error("Cant get sunset", inst)
         return sunset
 
     def getsunrise(self):
@@ -61,8 +72,7 @@ class datehandler(AbstractHandler):
         try:
             sunrise = self.earthtool('sunrise')
         except Exception as inst:
-            self.logger.error("Cant get sunrise")
-            print("error" + str(inst))
+            self.logger.error("Cant get sunrise", inst)
         return sunrise
 
     def checktag(self, tag, dt):
