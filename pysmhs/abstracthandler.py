@@ -6,7 +6,6 @@ Created on Jul 17, 2012
 from pydispatch import dispatcher
 import threading
 import logging
-import threading
 import logging.handlers
 from config.configobj import ConfigObj
 
@@ -159,7 +158,5 @@ class AbstractHandler(object):
         self.logger.info("Start handler")
         dispatcher.connect(self.__handler, signal=self.params.get(
             "signals", dispatcher.Any))
-        # threading.Thread.start(self)
 
-    # def run(self):
-    #     threading.Thread.run(self)
+

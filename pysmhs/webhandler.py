@@ -7,9 +7,12 @@ from twisted.web import server, resource
 from twisted.internet import reactor
 from twisted.web.resource import Resource
 from twisted.web.static import File
-import collections
 import cgi
+import threading
 from jinja2 import Environment, PackageLoader
+from collections import OrderedDict
+from itertools import islice
+from uuid import uuid4
 
 
 class webhandler(AbstractHandler):
@@ -17,8 +20,11 @@ class webhandler(AbstractHandler):
     '''Web server handler'''
 
     port = None
+    lock = threading.Lock()
 
     def __init__(self, parent=None, params={}):
+        self.cachemax = 255
+        self.eventcache = OrderedDict()
         self.params = params
         AbstractHandler.__init__(self, parent, params)
         self.logger.info("Init web handler")
@@ -26,10 +32,22 @@ class webhandler(AbstractHandler):
         root = Resource()
         root.putChild("www", resource)
         root.putChild("get", smhs_web(parent))
+        root.putChild("mon", monitor(self.eventcache))
         self.site = server.Site(root)
 
     def loadtags(self):
         pass
+
+    def process(self, signal, events):
+        with self.lock:
+            for event in events:
+                if len(self.eventcache) == self.cachemax:
+                    self.eventcache.popitem(last=False)
+                self.addevent(event)
+
+    def addevent(self, event):
+        token = uuid4().bytes.encode("base64")
+        self.eventcache[token] = event
 
     def start(self):
         AbstractHandler.start(self)
@@ -96,3 +114,13 @@ class smhs_web(resource.Resource):
                 self.parent.settag(x, 1)
             else:
                 self.parent.settag(x, 0)
+
+class monitor(resource.Resource):
+    isLeaf = True
+
+    def __init__(self, eventcache):
+        self.eventcache = eventcache
+        resource.Resource.__init__(self)
+
+    def render_GET(self, request):
+        return str(self.eventcache)
