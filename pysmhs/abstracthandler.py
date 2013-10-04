@@ -96,9 +96,10 @@ class AbstractHandler(object):
         set tag to value in tags
         Override if you need some action
         '''
-        self._tags[tag] = value
-        self.events.append({"tag": tag, "value": value})
-        self.sendevents()
+        if self._tags[tag] != value:
+            self._tags[tag] = value
+            self.events.append({"tag": tag, "value": value})
+            self.sendevents()
 
     def gettag(self, tag):
         '''
