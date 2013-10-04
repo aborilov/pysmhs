@@ -56,6 +56,7 @@ class corehandler(AbstractHandler):
     def _settag(self, tag, value):
         self.logger.debug("Setting tag %s to %s" % (tag, value))
         l = tag.split("_")
+        # try:
         if len(l) == 2:
             if l[0] == __name__:
                 if self._tags[l[1]] != value:
@@ -65,6 +66,9 @@ class corehandler(AbstractHandler):
                 self.listeners[l[0]].settag(l[1], value)
         else:
             self._tags[tag] = value
+        # except:
+        #     self.logger.error(
+        #         "Can't settag", exc_info=1)
 
     def _set_listeners(self, tag, value):
         if tag in self.listeners:

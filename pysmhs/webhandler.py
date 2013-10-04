@@ -119,8 +119,11 @@ class monitor(resource.Resource):
     isLeaf = True
 
     def __init__(self, eventcache):
+        env = Environment(loader=PackageLoader('www', 'templates'))
         self.eventcache = eventcache
+        self.monitor_template = env.get_template('monitor_template.html')
         resource.Resource.__init__(self)
 
     def render_GET(self, request):
-        return str(self.eventcache)
+        return str(self.monitor_template.render(
+            title=u'Monitor', description='here', events=self.eventcache))

@@ -8,9 +8,11 @@ import threading
 import logging
 import logging.handlers
 from config.configobj import ConfigObj
+from datetime import datetime
 
 
 class AbstractHandler(object):
+
     '''
     Abstractss class for all
     handlers
@@ -64,6 +66,7 @@ class AbstractHandler(object):
         '''
         if self.events:
             for event in self.events:
+                event["date"] = datetime.now()
                 event["tag"] =\
                     "%s_%s" % (self.__class__.__name__, event["tag"])
                 event["value"] = str(event["value"])
@@ -83,7 +86,13 @@ class AbstractHandler(object):
                 if l == self.__class__.__name__:
                     self._settag(l[1], value)
                 else:
-                    self.parent.settag(tag, value)
+                    try:
+                        self.parent.settag(tag, value)
+                    except:
+                        self.logger.error(
+                            "Can't set tag %s with value %s" % (
+                                tag, value),
+                            exc_info=1)
             else:
                 self._settag(tag, value)
         else:
@@ -158,5 +167,3 @@ class AbstractHandler(object):
         self.logger.info("Start handler")
         dispatcher.connect(self.__handler, signal=self.params.get(
             "signals", dispatcher.Any))
-
-

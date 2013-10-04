@@ -63,16 +63,16 @@ class datehandler(AbstractHandler):
         sunset = time(hour=20, minute=00, second=0, microsecond=0)
         try:
             sunset = self.earthtool('sunset')
-        except Exception as inst:
-            self.logger.error("Cant get sunset", inst)
+        except:
+            self.logger.error("Cant get sunset", exc_info=1)
         return sunset
 
     def getsunrise(self):
         sunrise = time(hour=8, minute=00, second=0, microsecond=0)
         try:
             sunrise = self.earthtool('sunrise')
-        except Exception as inst:
-            self.logger.error("Cant get sunrise", inst)
+        except:
+            self.logger.error("Cant get sunrise", exc_info=1)
         return sunrise
 
     def checktag(self, tag, dt):
