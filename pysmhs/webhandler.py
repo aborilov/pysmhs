@@ -32,7 +32,7 @@ class webhandler(AbstractHandler):
         root = Resource()
         root.putChild("www", resource)
         root.putChild("get", smhs_web(parent))
-        root.putChild("mon", monitor(self.eventcache))
+        #root.putChild("mon", monitor(self.eventcache))
         self.site = server.Site(root)
 
     def loadtags(self):

@@ -88,7 +88,7 @@
         plchandler_ylic = 1
 
 [ylicAtEveningOn]
-    condition = self.gettag('datehandler_evening') == 1
+    condition = self.gettag('datehandler_issunset') == 1
     [[1.setter]]
         plchandler_ylic = 1
 
