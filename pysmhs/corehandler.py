@@ -4,6 +4,10 @@ Core handler
 from abstracthandler import AbstractHandler
 from twisted.internet import reactor
 
+import logging
+
+logger = logging.getLogger()
+
 
 class corehandler(AbstractHandler):
     '''
@@ -15,7 +19,7 @@ class corehandler(AbstractHandler):
         self.listeners = {}
         AbstractHandler.__init__(self, parent, params)
         params = self.config[__name__]["params"]
-        self.logger.info('Init core server')
+        logger.info('Init core server')
         # if self.config[__name__].get("run", "1") == "1":
         #     self.start()
 
@@ -54,7 +58,7 @@ class corehandler(AbstractHandler):
             self.listeners[classname].start()
 
     def _settag(self, tag, value):
-        self.logger.debug("Setting tag %s to %s" % (tag, value))
+        logger.debug("Setting tag %s to %s" % (tag, value))
         l = tag.split("_")
         # try:
         if len(l) == 2:
@@ -67,7 +71,7 @@ class corehandler(AbstractHandler):
         else:
             self._tags[tag] = value
         # except:
-        #     self.logger.error(
+        #     logger.error(
         #         "Can't settag", exc_info=1)
 
     def _set_listeners(self, tag, value):
@@ -107,7 +111,7 @@ class corehandler(AbstractHandler):
 
     def start(self):
         # self.stopped = False
-        self.logger.debug("RUN")
+        logger.debug("RUN")
         self._settag(__name__, '1')
         self._addhandlers(self.config)
         for listener in self.listeners:

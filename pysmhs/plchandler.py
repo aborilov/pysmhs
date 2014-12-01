@@ -9,10 +9,14 @@ from serial import FIVEBITS, SIXBITS, SEVENBITS, EIGHTBITS
 from pymodbus.transaction import ModbusAsciiFramer as ModbusFramer
 from abstracthandler import AbstractHandler
 
+import logging
+
+logger = logging.getLogger()
+
 
 class SMHSProtocol(ModbusClientProtocol):
 
-    def __init__(self, framer, pol_list, logger, reader, writepool):
+    def __init__(self, framer, pol_list, reader, writepool):
         ''' Initializes our custom protocol
 
         :param framer: The decoder to use to process messages
@@ -20,17 +24,16 @@ class SMHSProtocol(ModbusClientProtocol):
         '''
         ModbusClientProtocol.__init__(self, framer)
         self.pol_list = pol_list
-        self.logger = logger
         self.reader = reader
         self.writepool = writepool
-        self.logger.debug("Begining the processing loop")
+        logger.debug("Begining the processing loop")
         reactor.callLater(3, self.start_new_cycle)
 
     # def connectionLost(self, reason):
-    #     self.logger.debug("Connection to ModBus lost")
+    #     logger.debug("Connection to ModBus lost")
 
     # def connectionMade(self):
-    #     self.logger.debug("Connected to ModBus")
+    #     logger.debug("Connected to ModBus")
 
     def start_new_cycle(self):
         d = defer.Deferred()
@@ -46,7 +49,7 @@ class SMHSProtocol(ModbusClientProtocol):
         d.addCallback(self.write_polling_tag)
 
     def threshold_readed(self, response):
-        self.logger.debug('counter threshold = %d' % response.getRegister(0))
+        logger.debug('counter threshold = %d' % response.getRegister(0))
 
     def fetch_holding_registers(self, response):
         address_map = self.pol_list["inputc"]
@@ -98,10 +101,10 @@ class SMHSProtocol(ModbusClientProtocol):
     def write_tags(self, response):
         d = None
         if len(self.writepool):
-            self.logger.debug("writepool len = %d" % len(self.writepool))
+            logger.debug("writepool len = %d" % len(self.writepool))
             for x in self.writepool.keys():
                 val = int(self.writepool.pop(x))
-                self.logger.debug(
+                logger.debug(
                     "writting tag %s to %d" % (x, val))
                 if val:
                     val = 0xFF00
@@ -128,17 +131,16 @@ class SMHSFactory(ClientFactory):
 
     protocol = SMHSProtocol
 
-    def __init__(self, framer, pol_list, logger, reader, writepool):
+    def __init__(self, framer, pol_list, reader, writepool):
         self.framer = framer
         self.pol_list = pol_list
-        self.logger = logger
         self.reader = reader
         self.writepool = writepool
 
     def buildProtocol(self, _):
         proto = self.protocol(
             self.framer,
-            self.pol_list, self.logger, self.reader, self.writepool)
+            self.pol_list, self.reader, self.writepool)
         proto.factory = self
         return proto
 
@@ -155,7 +157,7 @@ class plchandler(AbstractHandler):
 
     def __init__(self, parent=None, params={}):
         AbstractHandler.__init__(self, parent, params)
-        self.logger.info("Init async_plchandler")
+        logger.info("Init async_plchandler")
         serverconfig = params["server"]
         self.serial_port = params["port"]
         self.pollint = serverconfig["pollingTimeout"]
@@ -173,10 +175,10 @@ class plchandler(AbstractHandler):
             if "address" in self.tagslist[x]:
                 address = self.tagslist[x]["address"]
                 self.full_address_list[int(address)] = x
-        self.logger.debug("Full address list - %s" % self.full_address_list)
+        logger.debug("Full address list - %s" % self.full_address_list)
 
     def _settag(self, name, value):
-        self.logger.debug("set tag %s to %s" % (name, value))
+        logger.debug("set tag %s to %s" % (name, value))
         self.writepool[int(self.tagslist[name]["address"])] = value
 
     def _generate_address_map(self, addressList):
@@ -258,9 +260,9 @@ class plchandler(AbstractHandler):
                     address_list[address] = x
                 pol_list[t] = self._generate_address_map(address_list)
         factory = SMHSFactory(
-            framer, pol_list, self.logger, self.reader, self.writepool)
+            framer, pol_list, self.reader, self.writepool)
         SerialModbusClient(
-            factory, "/dev/plc",
+            factory, "/dev/ttyS0",
             reactor, baudrate=9600,
             parity=PARITY_EVEN, bytesize=SEVENBITS,
             stopbits=STOPBITS_TWO, timeout=0)

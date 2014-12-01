@@ -1,57 +1,39 @@
-'''
-Created on Jul 17, 2012
-
-@author: pavel
-'''
 from pydispatch import dispatcher
-import threading
-import logging
-import logging.handlers
 from config.configobj import ConfigObj
 from datetime import datetime
 
+import logging
+import logging.handlers
+
+logfiles_num = 5
+logfile_size = 1048576
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+handler = logging.handlers.RotatingFileHandler(
+    'smhs.log', maxBytes=logfile_size, backupCount=logfiles_num)
+form = logging.Formatter(
+    '%(asctime)s %(name)-12s %(levelname)s:%(message)s')
+handler.setFormatter(form)
+logger.addHandler(handler)
 
 class AbstractHandler(object):
 
     '''
-    Abstractss class for all
-    handlers
+    Abstractss class for all handlers
     '''
 
     def __init__(self, parent=None, params={}):
         if "configfile" in params:
-            self.config = ConfigObj(
-                params["configfile"], indent_type="\t")
+            self.config = ConfigObj(params["configfile"], indent_type="\t")
         self.signal = self.__class__.__name__
         self.params = params
         self.stopped = True
         self.parent = parent
         self._tags = {}
         self.events = []
-        loglevel = params.get('loglevel', 'debug').upper()
-        filename = params.get('logfile', 'smhs.log')
-        logfiles_num = int(params.get('logfiles_num', 5))
-        logfile_size = int(params.get('logfile_size', 1048576))
-        self.logger = logging.getLogger(self.__class__.__name__)
-        self.logger.setLevel(getattr(logging, loglevel))
-        handler = logging.handlers.RotatingFileHandler(
-            filename, maxBytes=logfile_size, backupCount=logfiles_num)
-        form = logging.Formatter(
-            '%(asctime)s %(name)-12s %(levelname)s:%(message)s')
-        handler.setFormatter(form)
-        self.logger.addHandler(handler)
-        self.logger.debug("Have params - " + str(self.params))
-        self.logger.debug("Have parent - " + str(self.parent))
+        logger.debug("Have params - " + str(self.params))
+        logger.debug("Have parent - " + str(self.parent))
         self.loadtags()
-
-    def __handler(self, signal, events):
-        '''
-        method accept events from dispacher
-        @param signal:
-        @param events:
-        '''
-        t1 = threading.Thread(target=self.process, args=(signal, events))
-        t1.start()
 
     def process(self, signal, events):
         '''
@@ -79,7 +61,7 @@ class AbstractHandler(object):
         if parent call his method
         else call private method
         '''
-        self.logger.info("settag " + tag)
+        logger.info("settag " + tag)
         if self.parent:
             l = tag.split("_")
             if len(l) == 2:
@@ -89,7 +71,7 @@ class AbstractHandler(object):
                     try:
                         self.parent.settag(tag, value)
                     except:
-                        self.logger.error(
+                        logger.error(
                             "Can't set tag %s with value %s" % (
                                 tag, value),
                             exc_info=1)
@@ -116,7 +98,7 @@ class AbstractHandler(object):
         else call private method
 
         '''
-        self.logger.info("gettag " + tag)
+        logger.info("gettag " + tag)
         if self.parent:
             l = tag.split("_")
             if len(l) == 2:
@@ -135,7 +117,7 @@ class AbstractHandler(object):
         get tag from tags
         Override if you need some action
         '''
-        self.logger.debug("RETURN %s" % self._tags[tag])
+        logger.debug("RETURN %s" % self._tags[tag])
         return self._tags[tag]
 
     @property
@@ -155,8 +137,8 @@ class AbstractHandler(object):
         Stop handler
         '''
         self.stopped = True
-        self.logger.info("Stop handler")
-        dispatcher.disconnect(self.__handler, signal=self.params.get(
+        logger.info("Stop handler")
+        dispatcher.disconnect(self.process, signal=self.params.get(
             "listensignals", dispatcher.Any))
 
     def start(self):
@@ -164,6 +146,6 @@ class AbstractHandler(object):
         Start handler
         '''
         self.stopped = False
-        self.logger.info("Start handler")
-        dispatcher.connect(self.__handler, signal=self.params.get(
+        logger.info("Start handler")
+        dispatcher.connect(self.process, signal=self.params.get(
             "signals", dispatcher.Any))

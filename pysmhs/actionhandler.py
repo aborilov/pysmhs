@@ -3,6 +3,9 @@ Action Handler
 '''
 from abstracthandler import AbstractHandler
 import time
+import logging
+
+logger = logging.getLogger()
 
 
 class actionhandler(AbstractHandler):
@@ -16,23 +19,23 @@ class actionhandler(AbstractHandler):
 
     def process(self, signal, events):
         for event in events:
-            self.logger.debug(event)
+            logger.debug(event)
             self.temp_tags[event['tag']] = event['value']
             for tag, params in self.config.items():
                 if 'condition' in params:
                     params = params.copy()
                     cond = params.pop('condition')
                     if event['tag'] in cond:
-                        self.logger.debug("check cond %s" % cond)
+                        logger.debug("check cond %s" % cond)
                         try:
-                            self.logger.debug("eval %s" % eval(cond))
+                            logger.debug("eval %s" % eval(cond))
                             if eval(cond):
                                 self._settag(tag, '1')
                         except Exception, e:
-                            self.logger.error(
+                            logger.error(
                                 "Error(%s) while eval(%s)" % (e, cond))
         self.temp_tags = {}
-        self.logger.debug('End of process')
+        logger.debug('End of process')
 
     def gettag(self, tag):
         if tag in self.temp_tags:
@@ -46,21 +49,21 @@ class actionhandler(AbstractHandler):
 
     def run_action(self, tag):
         params = self.config[tag].copy()
-        self.logger.debug('have actions %s' % sorted(params))
+        logger.debug('have actions %s' % sorted(params))
         if 'condition' in params:
             params.pop('condition')
         for i in sorted(params):
-            self.logger.debug('Now in %s' % i)
+            logger.debug('Now in %s' % i)
             l = i.split(".")
             if len(l) == 2:
                 action = l[1]
                 param = params[i]
-                self.logger.debug('Call method %s' % i)
+                logger.debug('Call method %s' % i)
                 self.actions.get(action, None)(param)
             else:
-                self.logger.debug(
+                logger.debug(
                     'Wrong action name and order - %s' % i)
-        self.logger.debug('have after actions %s' % sorted(params))
+        logger.debug('have after actions %s' % sorted(params))
         self._settag(tag, '0')
 
     def loadtags(self):
@@ -82,6 +85,6 @@ class actionhandler(AbstractHandler):
             self.settag(tag, '0')
 
     def sleep(self, params):
-        self.logger.debug('before timeout')
+        logger.debug('before timeout')
         time.sleep(float(params.get('timeout', 1)))
-        self.logger.debug('after timeout')
+        logger.debug('after timeout')

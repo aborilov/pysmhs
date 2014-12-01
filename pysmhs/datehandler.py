@@ -64,7 +64,7 @@ class datehandler(AbstractHandler):
         try:
             sunset = self.earthtool('sunset')
         except:
-            self.logger.error("Cant get sunset", exc_info=1)
+            logger.error("Cant get sunset", exc_info=1)
         return sunset
 
     def getsunrise(self):
@@ -72,7 +72,7 @@ class datehandler(AbstractHandler):
         try:
             sunrise = self.earthtool('sunrise')
         except:
-            self.logger.error("Cant get sunrise", exc_info=1)
+            logger.error("Cant get sunrise", exc_info=1)
         return sunrise
 
     def checktag(self, tag, dt):

@@ -8,11 +8,13 @@ from twisted.internet import reactor
 from twisted.web.resource import Resource
 from twisted.web.static import File
 import cgi
-import threading
 from jinja2 import Environment, PackageLoader
 from collections import OrderedDict
-from itertools import islice
 from uuid import uuid4
+
+import logging
+
+logger = logging.getLogger()
 
 
 class webhandler(AbstractHandler):
@@ -20,14 +22,13 @@ class webhandler(AbstractHandler):
     '''Web server handler'''
 
     port = None
-    lock = threading.Lock()
 
     def __init__(self, parent=None, params={}):
         self.cachemax = 255
         self.eventcache = OrderedDict()
         self.params = params
         AbstractHandler.__init__(self, parent, params)
-        self.logger.info("Init web handler")
+        logger.info("Init web handler")
         resource = File(params["wwwPath"])
         root = Resource()
         root.putChild("www", resource)
@@ -39,11 +40,10 @@ class webhandler(AbstractHandler):
         pass
 
     def process(self, signal, events):
-        with self.lock:
-            for event in events:
-                if len(self.eventcache) == self.cachemax:
-                    self.eventcache.popitem(last=False)
-                self.addevent(event)
+        for event in events:
+            if len(self.eventcache) == self.cachemax:
+                self.eventcache.popitem(last=False)
+            self.addevent(event)
 
     def addevent(self, event):
         token = uuid4().bytes.encode("base64")

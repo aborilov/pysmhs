@@ -1,11 +1,4 @@
-'''
-Created on Jan 24, 2012
-
-@author: pavel
-'''
-
 from pydispatch import dispatcher
-import threading
 
 
 class EventHandler(object):
@@ -16,19 +9,10 @@ class EventHandler(object):
     '''
 
     def __init__(self, params, polling):
-        dispatcher.connect(self.handler, signal=params.setdefault(
+        dispatcher.connect(self.proccess, signal=params.setdefault(
             "signals", dispatcher.Any))
         self.params = params
         self.polling = polling
-
-    def handler(self, signal, events):
-        '''
-        method accept events from dispacher
-        @param signal:
-        @param events:
-        '''
-        t1 = threading.Thread(target=self.proccess, args=(signal, events))
-        t1.start()
 
     def proccess(self, signal, events):
         '''
@@ -42,6 +26,5 @@ class EventHandler(object):
         '''
         Method need to be implemented
         In this method handler have to close all resource
-        and stop all threads
         '''
         print "stop EventHandler " + str(self)
