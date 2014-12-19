@@ -7,7 +7,10 @@ from twisted.internet.task import LoopingCall
 from dateutil.parser import parse
 from dateutil.rrule import *
 import urllib2
+import logging
 from xml.dom import minidom
+
+logger = logging.getLogger()
 
 
 class datehandler(AbstractHandler):
@@ -15,6 +18,7 @@ class datehandler(AbstractHandler):
     midnight = time(00, 00, 00)
 
     def updatedate(self):
+        logger.debug("UPDATE")
         now = datetime.now().replace(microsecond=0)
         self._tags['date'] = now.strftime("%d.%m.%Y %H:%M:%S")
         self.checktags(now)

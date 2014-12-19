@@ -1,6 +1,3 @@
-from pydispatch import dispatcher
-
-
 class EventHandler(object):
     '''
         Abstract class for all EventHandler
@@ -9,8 +6,6 @@ class EventHandler(object):
     '''
 
     def __init__(self, params, polling):
-        dispatcher.connect(self.proccess, signal=params.setdefault(
-            "signals", dispatcher.Any))
         self.params = params
         self.polling = polling
 

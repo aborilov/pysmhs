@@ -105,8 +105,8 @@ class corehandler(AbstractHandler):
 
     def stop(self):
         AbstractHandler.stop(self)
-        for listener in self.listeners:
-            self._set_listeners(listener, 0)
+        #for listener in self.listeners:
+            #self._set_listeners(listener, 0)
         reactor.stop()
 
     def start(self):

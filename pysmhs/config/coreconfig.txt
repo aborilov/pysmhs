@@ -8,7 +8,7 @@
         logfile_size = 1048576
 [plchandler]
     description = "Async PLC handler"
-    run = 1
+    run = 0
     [[params]]
         configfile = config/tags_config.txt
         [[[server]]]
@@ -16,7 +16,7 @@
             packetSize = 50
             counter_threshold = 250
         [[[port]]]
-            name = "/dev/plc"
+            name = "/dev/ttyS0"
             data_length = 7
             speed = 9600
             parity = "E"
@@ -27,8 +27,9 @@
 [webhandler]
     description = "WebServer handler"
     parent = "corehandler"
+    run = 0
     [[params]]
-        port = 80
+        port = 8080
         wwwPath = /opt/pysmhs/pysmhs/www
 
 [datehandler]
@@ -39,5 +40,6 @@
 [actionhandler]
     description = "action handler"
     parent = "corehandler"
+    run = 0
         [[params]]
             configfile = "config/actions.txt"

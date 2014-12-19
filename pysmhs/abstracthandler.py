@@ -1,6 +1,9 @@
-from pydispatch import dispatcher
+import louie
+from louie import dispatcher, TwistedDispatchPlugin
 from config.configobj import ConfigObj
 from datetime import datetime
+
+louie.install_plugin(TwistedDispatchPlugin)
 
 import logging
 import logging.handlers
@@ -42,18 +45,12 @@ class AbstractHandler(object):
         '''
         pass
 
-    def sendevents(self):
+    def sendevents(self, tag, value):
         '''
-        send all events
+        send event
         '''
-        if self.events:
-            for event in self.events:
-                event["date"] = datetime.now()
-                event["tag"] =\
-                    "%s_%s" % (self.__class__.__name__, event["tag"])
-                event["value"] = str(event["value"])
-            dispatcher.send(signal=self.signal, events=self.events)
-            self.events = []
+        tag = "%s_%s" % (self.__class__.__name__, event["tag"])
+        dispatcher.send(signal=self.signal, event={tag:value})
 
     def settag(self, tag, value):
         '''
@@ -88,8 +85,7 @@ class AbstractHandler(object):
         '''
         if self._tags[tag] != value:
             self._tags[tag] = value
-            self.events.append({"tag": tag, "value": value})
-            self.sendevents()
+            self.sendevents(tag, value)
 
     def gettag(self, tag):
         '''
