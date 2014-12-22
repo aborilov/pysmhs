@@ -1,18 +1,23 @@
+import logging
+
 from twisted.internet import serialport, reactor
 from twisted.internet import defer
 from twisted.internet.protocol import ClientFactory
+
 from pymodbus.factory import ClientDecoder
 from pymodbus.client.async import ModbusClientProtocol
+from pymodbus.transaction import ModbusAsciiFramer as ModbusFramer
+
 from serial import PARITY_NONE, PARITY_EVEN, PARITY_ODD
 from serial import STOPBITS_ONE, STOPBITS_TWO
 from serial import FIVEBITS, SIXBITS, SEVENBITS, EIGHTBITS
-from pymodbus.transaction import ModbusAsciiFramer as ModbusFramer
-from abstracthandler import AbstractHandler
 
-import logging
+from abstracthandler import AbstractHandler
 
 logger = logging.getLogger()
 
+pymodbus_logger = logging.getLogger('pymodbus')
+pymodbus_logger.setLevel(logging.ERROR)
 
 class SMHSProtocol(ModbusClientProtocol):
 
@@ -27,104 +32,109 @@ class SMHSProtocol(ModbusClientProtocol):
         self.reader = reader
         self.writepool = writepool
         logger.debug("Begining the processing loop")
-        reactor.callLater(3, self.start_new_cycle)
+        # reactor.callLater(3, self.start_new_cycle)
 
     # def connectionLost(self, reason):
     #     logger.debug("Connection to ModBus lost")
 
-    # def connectionMade(self):
-    #     logger.debug("Connected to ModBus")
+    def connectionMade(self):
+        logger.debug("Connected to ModBus")
+        super(SMHSProtocol, self).connectionMade()
+        self.read_reg()
 
-    def start_new_cycle(self):
-        d = defer.Deferred()
-        d.addCallback(self.write_counter_threshold)
-        d.callback('start new cycle')
+    @defer.inlineCallbacks
+    def read_reg(self):
+        while (1):
+            try:
+                yield self.fetch_holding_registers()
+            except Exception as e:
+                logger.exception('')
 
-    def write_counter_threshold(self, response):
-        # reg = (4598, 1)
-        # d = self.read_holding_registers(*reg)
-        d = self.write_register(4598, 250)
-        # d.addCallbacks(self.read_holding_registers(*reg))
-        # d.addCallbacks(self.threshold_readed)
-        d.addCallback(self.write_polling_tag)
+    # def start_new_cycle(self):
+        # d = defer.Deferred()
+        # d.addCallback(self.write_counter_threshold)
+        # d.callback('start new cycle')
 
-    def threshold_readed(self, response):
-        logger.debug('counter threshold = %d' % response.getRegister(0))
+    # def write_counter_threshold(self, response):
+        # # reg = (4598, 1)
+        # # d = self.read_holding_registers(*reg)
+        # d = self.write_register(4598, 250)
+        # # d.addCallbacks(self.read_holding_registers(*reg))
+        # # d.addCallbacks(self.threshold_readed)
+        # d.addCallback(self.write_polling_tag)
 
-    def fetch_holding_registers(self, response):
+    # def threshold_readed(self, response):
+        # logger.debug('counter threshold = %d' % response.getRegister(0))
+
+    @defer.inlineCallbacks
+    def fetch_holding_registers(self):
         address_map = self.pol_list["inputc"]
-        d = None
         for register in address_map:
-            if not d:
-                d = self.fetch_holding_register(response, register=register)
-            else:
-                d.addCallback(self.fetch_holding_register, register=register)
-            d.addCallback(self.register_readed, register=register)
-        if not d:
-            self.fetch_coils(response)
-        else:
-            d.addCallback(self.fetch_coils)
+            response = yield self.read_holding_registers(*register)
+            val = {}
+            for i in range(0, register[1]):
+                val[register[0] + i] = response.getRegister(i)
+            self.reader(val, "inputc")
 
-    def fetch_holding_register(self, response, register):
-        return self.read_holding_registers(*register)
-
-    def register_readed(self, response, register):
-        val = {}
-        for i in range(0, register[1]):
-            val[register[0] + i] = response.getRegister(i)
-        self.reader(val, "inputc")
-
-    def fetch_coil(self, response, register):
-        return self.read_coils(*register)
-
-    def fetch_coils(self, response):
         address_map = self.pol_list["output"]
-        d = None
         for register in address_map:
-            if not d:
-                d = self.fetch_coil(response, register)
-            else:
-                d.addCallback(self.fetch_coil, register=register)
-            d.addCallback(self.coil_readed, register=register)
-        if not d:
-            self.write_tags(response)
-        else:
-            d.addCallback(self.write_tags)
+            response = yield self.read_coils(*register)
+            val = {}
+            for i in range(0, register[1]):
+                val[register[0] + i] = response.getBit(i)
+            self.reader(val, "output")
 
-    def coil_readed(self, response, register):
-        val = {}
-        for i in range(0, register[1]):
-            val[register[0] + i] = response.getBit(i)
-            #print str(val[register[0] + i]) + ":" +  str(response.getBit(i))
-        self.reader(val, "output")
+    # def fetch_coil(self, response, register):
+        # return self.read_coils(*register)
 
-    def write_tags(self, response):
-        d = None
-        if len(self.writepool):
-            logger.debug("writepool len = %d" % len(self.writepool))
-            for x in self.writepool.keys():
-                val = int(self.writepool.pop(x))
-                logger.debug(
-                    "writting tag %s to %d" % (x, val))
-                if val:
-                    val = 0xFF00
-                else:
-                    val = 0x0000
-                if not d:
-                    d = self.write_tag(response, x, val)
-                else:
-                    d.addCallback(self.write_tag, addr=x, value=val)
-        if not d:
-            self.write_polling_tag(response)
-        else:
-            d.addCallback(self.write_polling_tag)
+    # def fetch_coils(self, response):
+        # address_map = self.pol_list["output"]
+        # d = None
+        # for register in address_map:
+            # if not d:
+                # d = self.fetch_coil(response, register)
+            # else:
+                # d.addCallback(self.fetch_coil, register=register)
+            # d.addCallback(self.coil_readed, register=register)
+        # if not d:
+            # self.write_tags(response)
+        # else:
+            # d.addCallback(self.write_tags)
 
-    def write_tag(self, response, addr, value):
-        return self.write_coil(addr, value)
+    # def coil_readed(self, response, register):
+        # val = {}
+        # for i in range(0, register[1]):
+            # val[register[0] + i] = response.getBit(i)
+            # #print str(val[register[0] + i]) + ":" +  str(response.getBit(i))
+        # self.reader(val, "output")
 
-    def write_polling_tag(self, response):
-        d = self.write_coil(2057, 0xFF00)
-        d.addCallback(self.fetch_holding_registers)
+    # def write_tags(self, response):
+        # d = None
+        # if len(self.writepool):
+            # logger.debug("writepool len = %d" % len(self.writepool))
+            # for x in self.writepool.keys():
+                # val = int(self.writepool.pop(x))
+                # logger.debug(
+                    # "writting tag %s to %d" % (x, val))
+                # if val:
+                    # val = 0xFF00
+                # else:
+                    # val = 0x0000
+                # if not d:
+                    # d = self.write_tag(response, x, val)
+                # else:
+                    # d.addCallback(self.write_tag, addr=x, value=val)
+        # if not d:
+            # self.write_polling_tag(response)
+        # else:
+            # d.addCallback(self.write_polling_tag)
+
+    # def write_tag(self, response, addr, value):
+        # return self.write_coil(addr, value)
+
+    # def write_polling_tag(self, response):
+        # d = self.write_coil(2057, 0xFF00)
+        # d.addCallback(self.fetch_holding_registers)
 
 
 class SMHSFactory(ClientFactory):
@@ -210,7 +220,6 @@ class plchandler(AbstractHandler):
                     self.__addinputctag(tagname, tagstate)
                 else:
                     self.__addtag(tagname, tagstate)
-        self.sendevents()
 
     def __addtag(self, tag, value, addevent=True):
         '''
@@ -223,8 +232,7 @@ class plchandler(AbstractHandler):
             if self._tags[tag] != value:
                 self._tags[tag] = value
                 if addevent:
-                    # self.events[tag] = value
-                    self.events.append({"tag": tag, "value": value})
+                    self.sendevents(tag, value)
         else:
             self._tags[tag] = value
 
@@ -239,11 +247,11 @@ class plchandler(AbstractHandler):
             if lastval != value:
                 if value > lastval:
                     for x in range(lastval + 1, value + 1):
-                        self.events.append({"tag": tag, "value": x & 1})
+                        self.sendevents(tag, x & 1)
                 else:
                     dif = self._inputtag_threshold - lastval + value
                     for x in range(lastval + 1, lastval + dif + 1):
-                        self.events.append({"tag": tag, "value": x & 1})
+                        self.sendevents(tag, x & 1)
 
         self._inputctags[tag] = value
         self._tags[tag] = value & 1
@@ -262,7 +270,7 @@ class plchandler(AbstractHandler):
         factory = SMHSFactory(
             framer, pol_list, self.reader, self.writepool)
         SerialModbusClient(
-            factory, "/dev/ttyS0",
+            factory, "/dev/plc",
             reactor, baudrate=9600,
             parity=PARITY_EVEN, bytesize=SEVENBITS,
             stopbits=STOPBITS_TWO, timeout=0)

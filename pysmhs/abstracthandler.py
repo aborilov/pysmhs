@@ -49,35 +49,12 @@ class AbstractHandler(object):
         '''
         send event
         '''
-        tag = "%s_%s" % (self.__class__.__name__, event["tag"])
+        logger.debug(
+            'Send tag: {} with value {} from {}'.format(
+                tag, value, self.signal))
         dispatcher.send(signal=self.signal, event={tag:value})
 
     def settag(self, tag, value):
-        '''
-        set tag to value
-        if parent call his method
-        else call private method
-        '''
-        logger.info("settag " + tag)
-        if self.parent:
-            l = tag.split("_")
-            if len(l) == 2:
-                if l == self.__class__.__name__:
-                    self._settag(l[1], value)
-                else:
-                    try:
-                        self.parent.settag(tag, value)
-                    except:
-                        logger.error(
-                            "Can't set tag %s with value %s" % (
-                                tag, value),
-                            exc_info=1)
-            else:
-                self._settag(tag, value)
-        else:
-            self._settag(tag, value)
-
-    def _settag(self, tag, value):
         '''
         Private method for settag
         set tag to value in tags
@@ -88,26 +65,6 @@ class AbstractHandler(object):
             self.sendevents(tag, value)
 
     def gettag(self, tag):
-        '''
-        get tag value
-        if parent call his method
-        else call private method
-
-        '''
-        logger.info("gettag " + tag)
-        if self.parent:
-            l = tag.split("_")
-            if len(l) == 2:
-                if l[0] == __name__:
-                    return self._gettag(l[1])
-                else:
-                    return self.parent.gettag(tag)
-            else:
-                return self._gettag(tag)
-        else:
-            return self._gettag(tag)
-
-    def _gettag(self, tag):
         '''
         Private method for gettag
         get tag from tags
@@ -144,4 +101,4 @@ class AbstractHandler(object):
         self.stopped = False
         logger.info("Start handler")
         dispatcher.connect(self.process, signal=self.params.get(
-            "signals", dispatcher.Any))
+            "listensignals", dispatcher.Any))
