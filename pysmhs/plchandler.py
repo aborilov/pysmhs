@@ -32,10 +32,6 @@ class SMHSProtocol(ModbusClientProtocol):
         self.reader = reader
         self.writepool = writepool
         logger.debug("Begining the processing loop")
-        # reactor.callLater(3, self.start_new_cycle)
-
-    # def connectionLost(self, reason):
-    #     logger.debug("Connection to ModBus lost")
 
     def connectionMade(self):
         logger.debug("Connected to ModBus")
@@ -44,27 +40,16 @@ class SMHSProtocol(ModbusClientProtocol):
 
     @defer.inlineCallbacks
     def read_reg(self):
+        #Write counter threshold
+        reg = (4598, 1)
+        yield self.read_holding_registers(*reg)
+        #Write polling tag
+        # yield self.write_coil(2057, 0xFF00)
         while (1):
             try:
                 yield self.fetch_holding_registers()
             except Exception as e:
                 logger.exception('')
-
-    # def start_new_cycle(self):
-        # d = defer.Deferred()
-        # d.addCallback(self.write_counter_threshold)
-        # d.callback('start new cycle')
-
-    # def write_counter_threshold(self, response):
-        # # reg = (4598, 1)
-        # # d = self.read_holding_registers(*reg)
-        # d = self.write_register(4598, 250)
-        # # d.addCallbacks(self.read_holding_registers(*reg))
-        # # d.addCallbacks(self.threshold_readed)
-        # d.addCallback(self.write_polling_tag)
-
-    # def threshold_readed(self, response):
-        # logger.debug('counter threshold = %d' % response.getRegister(0))
 
     @defer.inlineCallbacks
     def fetch_holding_registers(self):
@@ -83,30 +68,6 @@ class SMHSProtocol(ModbusClientProtocol):
             for i in range(0, register[1]):
                 val[register[0] + i] = response.getBit(i)
             self.reader(val, "output")
-
-    # def fetch_coil(self, response, register):
-        # return self.read_coils(*register)
-
-    # def fetch_coils(self, response):
-        # address_map = self.pol_list["output"]
-        # d = None
-        # for register in address_map:
-            # if not d:
-                # d = self.fetch_coil(response, register)
-            # else:
-                # d.addCallback(self.fetch_coil, register=register)
-            # d.addCallback(self.coil_readed, register=register)
-        # if not d:
-            # self.write_tags(response)
-        # else:
-            # d.addCallback(self.write_tags)
-
-    # def coil_readed(self, response, register):
-        # val = {}
-        # for i in range(0, register[1]):
-            # val[register[0] + i] = response.getBit(i)
-            # #print str(val[register[0] + i]) + ":" +  str(response.getBit(i))
-        # self.reader(val, "output")
 
     # def write_tags(self, response):
         # d = None
@@ -131,10 +92,6 @@ class SMHSProtocol(ModbusClientProtocol):
 
     # def write_tag(self, response, addr, value):
         # return self.write_coil(addr, value)
-
-    # def write_polling_tag(self, response):
-        # d = self.write_coil(2057, 0xFF00)
-        # d.addCallback(self.fetch_holding_registers)
 
 
 class SMHSFactory(ClientFactory):
