@@ -88,4 +88,4 @@
 	[[pollingTag]]
 		address = 2057
 	[[counter_threshold]]
-		address = 4598
+		address = 4496

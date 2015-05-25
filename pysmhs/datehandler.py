@@ -14,6 +14,10 @@ class datehandler(AbstractHandler):
 
     midnight = time(00, 00, 00)
 
+    def __init__(self, parent=None, params={}):
+        super(datehandler, self).__init__(parent, params)
+        self.lc = None
+
     def updatedate(self):
         now = datetime.now().replace(microsecond=0)
         self._tags['date'] = now.strftime("%d.%m.%Y %H:%M:%S")

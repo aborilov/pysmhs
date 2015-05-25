@@ -16,7 +16,7 @@
             packetSize = 50
             counter_threshold = 250
         [[[port]]]
-            name = "/dev/plc"
+            name = "/dev/ttyUSB0"
             data_length = 7
             speed = 9600
             parity = "E"
@@ -29,15 +29,17 @@
     parent = "corehandler"
     [[params]]
         port = 80
-        wwwPath = /opt/pysmhs/pysmhs/www
+        wwwPath = /home/pi/workspaces/pysmhs/pysmhs/www
 
 [datehandler]
     description = "date handler"
+    run = 0
     [[params]]
         configfile = config/dateconfig.txt
 
 [actionhandler]
     description = "action handler"
+    run = 0
     parent = "corehandler"
         [[params]]
             configfile = "config/actions.txt"
