@@ -42,12 +42,14 @@ class SMHSProtocol(ModbusClientProtocol):
     def read_reg(self):
         #Write counter threshold
         reg = (4598, 1)
-        yield self.read_holding_registers(*reg)
+        result = yield self.read_holding_registers(*reg)
+        logger.debug('readed {}'.format(result))
         #Write polling tag
         # yield self.write_coil(2057, 0xFF00)
         while (1):
             try:
                 yield self.fetch_holding_registers()
+                logger.debug('readed'.format(result))
             except Exception as e:
                 logger.exception('')
 
@@ -227,7 +229,7 @@ class plchandler(AbstractHandler):
         factory = SMHSFactory(
             framer, pol_list, self.reader, self.writepool)
         SerialModbusClient(
-            factory, "/dev/plc",
+            factory, "/dev/ttyUSB0",
             reactor, baudrate=9600,
             parity=PARITY_EVEN, bytesize=SEVENBITS,
             stopbits=STOPBITS_TWO, timeout=0)
