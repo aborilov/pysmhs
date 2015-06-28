@@ -1,7 +1,7 @@
 import logging
 
 from twisted.internet import serialport, reactor
-from twisted.internet import defer
+from twisted.internet import defer, task
 from twisted.internet.protocol import ClientFactory
 
 from pymodbus.factory import ClientDecoder
@@ -31,17 +31,23 @@ class SMHSProtocol(ModbusClientProtocol):
         self.pol_list = pol_list
         self.reader = reader
         self.writepool = writepool
-        logger.debug("Begining the processing loop")
+        self.loop = task.LoopingCall(self.fetch_holding_registers)
 
     def connectionMade(self):
         logger.debug("Connected to ModBus")
         super(SMHSProtocol, self).connectionMade()
-        self.read_reg()
+        self.loop.start(0)
+
+    # def connectionLost(self, reason):
+        # self.loop.stop()
+        # super(SMHSProtocol, self).connectionLost(reason)
+        # logger.debug('lost')
 
     @defer.inlineCallbacks
     def read_reg(self):
         #Write counter threshold
         reg = (4598, 1)
+        logger.debug('start read')
         result = yield self.read_holding_registers(*reg)
         logger.debug('readed {}'.format(result))
         #Write polling tag
@@ -55,6 +61,7 @@ class SMHSProtocol(ModbusClientProtocol):
 
     @defer.inlineCallbacks
     def fetch_holding_registers(self):
+        logger.debug('read registers from {}'.format(self.pol_list))
         address_map = self.pol_list["inputc"]
         for register in address_map:
             response = yield self.read_holding_registers(*register)
@@ -226,6 +233,7 @@ class plchandler(AbstractHandler):
                     address = self.tagslist[x]["address"]
                     address_list[address] = x
                 pol_list[t] = self._generate_address_map(address_list)
+        logger.debug(pol_list)
         factory = SMHSFactory(
             framer, pol_list, self.reader, self.writepool)
         SerialModbusClient(
