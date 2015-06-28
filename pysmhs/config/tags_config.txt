@@ -20,8 +20,8 @@
 	[[kyh]]
 		address = 1298
 
-	[[tamb]]
-		address = 1309
+	[[M30]]
+		address = 1283
 
 	[[ylic]]
 		address = 1310

@@ -100,6 +100,7 @@ class smhs_web(resource.Resource):
                 html = ''
                 for tag in l:
                     self.parent.settag(tag, int(l[tag][0]))
+                    self.logger.debug("web: set tag {}:{}".format(tag, l[tag][0]))
                     html += "setting %s to %s" % (tag, l[tag][0])
                 return html
             else:

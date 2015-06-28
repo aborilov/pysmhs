@@ -41,7 +41,7 @@ class SMHSProtocol(ModbusClientProtocol):
         # reg = (4598, 1)
         # d = self.read_holding_registers(*reg)
         self.logger.debug("write counter")
-        d = self.write_register(4598, 250)
+        d = self.write_register(4496, 250)
         # d.addCallbacks(self.read_holding_registers(*reg))
         # d.addCallbacks(self.threshold_readed)
         d.addCallback(self.write_polling_tag)
@@ -122,7 +122,6 @@ class SMHSProtocol(ModbusClientProtocol):
 
     def write_polling_tag(self, response):
         d = self.write_coil(2057, 0xFF00)
-        self.logger.debug('write polling tag')
         d.addCallback(self.fetch_holding_registers)
 
 
