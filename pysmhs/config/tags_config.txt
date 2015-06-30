@@ -1,4 +1,6 @@
 [output]
+    [[ylic]]
+        address = 2047
     [[M0]]
         address = 2048
     [[M1]]

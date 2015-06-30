@@ -19,6 +19,8 @@ form = logging.Formatter(
 handler.setFormatter(form)
 logger.addHandler(handler)
 
+logger = logging.getLogger('abstracthandler')
+
 class AbstractHandler(object):
 
     '''

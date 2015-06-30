@@ -14,7 +14,7 @@ from uuid import uuid4
 
 import logging
 
-logger = logging.getLogger()
+logger = logging.getLogger('webhandler')
 
 
 class webhandler(AbstractHandler):
@@ -101,6 +101,7 @@ class smhs_web(resource.Resource):
                 for tag in l:
                     self.parent.settag(tag, int(l[tag][0]))
                     html += "setting %s to %s" % (tag, l[tag][0])
+                    logger.debug(html)
                 return html
             else:
                 if (request.args["action"][0] == self.actionStopServer):

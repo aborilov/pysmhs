@@ -6,7 +6,7 @@ from twisted.internet import reactor
 
 import logging
 
-logger = logging.getLogger()
+logger = logging.getLogger('corehandler')
 
 
 class corehandler(AbstractHandler):
@@ -56,6 +56,9 @@ class corehandler(AbstractHandler):
     def runhandler(self, classname):
         if classname in self.listeners:
             self.listeners[classname].start()
+
+    def settag(self, tag, value):
+        self._settag(tag, value)
 
     def _settag(self, tag, value):
         logger.debug("Setting tag %s to %s" % (tag, value))

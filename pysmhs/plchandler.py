@@ -14,7 +14,7 @@ from serial import FIVEBITS, SIXBITS, SEVENBITS, EIGHTBITS
 
 from abstracthandler import AbstractHandler
 
-logger = logging.getLogger()
+logger = logging.getLogger('plchandler')
 
 pymodbus_logger = logging.getLogger('pymodbus')
 pymodbus_logger.setLevel(logging.ERROR)
@@ -62,21 +62,23 @@ class SMHSProtocol(ModbusClientProtocol):
     @defer.inlineCallbacks
     def fetch_holding_registers(self):
         logger.debug('read registers from {}'.format(self.pol_list))
-        address_map = self.pol_list["inputc"]
-        for register in address_map:
-            response = yield self.read_holding_registers(*register)
-            val = {}
-            for i in range(0, register[1]):
-                val[register[0] + i] = response.getRegister(i)
-            self.reader(val, "inputc")
+        address_map = self.pol_list.get("inputc", None)
+        if address_map:
+            for register in address_map:
+                response = yield self.read_holding_registers(*register)
+                val = {}
+                for i in range(0, register[1]):
+                    val[register[0] + i] = response.getRegister(i)
+                self.reader(val, "inputc")
 
-        address_map = self.pol_list["output"]
-        for register in address_map:
-            response = yield self.read_coils(*register)
-            val = {}
-            for i in range(0, register[1]):
-                val[register[0] + i] = response.getBit(i)
-            self.reader(val, "output")
+        address_map = self.pol_list.get("output", None)
+        if address_map:
+            for register in address_map:
+                response = yield self.read_coils(*register)
+                val = {}
+                for i in range(0, register[1]):
+                    val[register[0] + i] = response.getBit(i)
+                self.reader(val, "output")
 
     # def write_tags(self, response):
         # d = None
@@ -147,10 +149,14 @@ class plchandler(AbstractHandler):
             self.tagslist.update(self.config[tagtype])
         #fill address list
         self.full_address_list = {}
+        logger.debug(self.tagslist)
         for x in self.tagslist:
             if "address" in self.tagslist[x]:
                 address = self.tagslist[x]["address"]
                 self.full_address_list[int(address)] = x
+        for tag in self.tagslist.keys():
+            self._tags[tag] = 0
+        logger.debug(self._tags)
         logger.debug("Full address list - %s" % self.full_address_list)
 
     def _settag(self, name, value):
@@ -237,7 +243,7 @@ class plchandler(AbstractHandler):
         factory = SMHSFactory(
             framer, pol_list, self.reader, self.writepool)
         SerialModbusClient(
-            factory, "/dev/ttyUSB0",
+            factory, self.serial_port['name'],
             reactor, baudrate=9600,
             parity=PARITY_EVEN, bytesize=SEVENBITS,
             stopbits=STOPBITS_TWO, timeout=0)

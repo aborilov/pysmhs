@@ -16,7 +16,7 @@
             packetSize = 50
             counter_threshold = 250
         [[[port]]]
-            name = "/dev/plc"
+            name = "/dev/ttyS0"
             data_length = 7
             speed = 9600
             parity = "E"
@@ -27,10 +27,10 @@
 [webhandler]
     description = "WebServer handler"
     parent = "corehandler"
-    run = 0
+    run = 1
     [[params]]
         port = 8080
-        wwwPath = /opt/pysmhs/pysmhs/www
+        wwwPath = /home/pavel/.virtualenvs/pysmhs/pysmhs/pysmhs/www
 
 [datehandler]
     run = 0
