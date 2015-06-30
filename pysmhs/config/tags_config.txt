@@ -1,91 +1,85 @@
 [output]
-	[[zal]]
-		address = 1307
-
-	[[van4]]
-		address = 1303
-
-	[[van2]]
-		address = 1302
-
-	[[spal]]
-		address = 1308
-
-	[[spal2]]
-		address = 1311
-
-	[[krovat]]
-		address = 1304
-
-	[[kyh]]
-		address = 1298
-
-	[[tamb]]
-		address = 1309
-
-	[[ylic]]
-		address = 1310
-
-	[[gard]]
-		address = 1299
-
-	[[kor]]
-		address = 1305
-
-	[[spalkrovatprav]]
-		address = 1300
-
-	[[spalphil]]
-		address = 1306
-
-	[[kyhvityagka]]
-		address = 1296
-
-	[[vanrozetka]]
-		address = 1312
-
-	[[kyhup]]
-		address = 1313
-
-[inputc]
-	[[vkcSpa2]]
-		address = 3593
-
-	[[vkcSpa1]]
-		address = 3592
-
-	[[vkcZal]]
-		address = 3594
-
-	[[vkcVan4]]
-		address = 3595
-
-	[[vkcGard]]
-		address = 3596
-
-	[[vkcKor]]
-		address = 3597
-
-	[[vkcVan1]]
-		address = 3599
-
-	[[vkcVan2]]
-		address = 3600
-
-	[[vkcKyh]]
-		address = 3598
-
-	[[vkcTamb3]]
-		address = 3603
-
-	[[vkcTamb2]]
-		address = 3602
-
-	[[vkcTamb1]]
-		address = 3601
+    [[M0]]
+        address = 2048
+    [[M1]]
+        address = 2049
+    [[M2]]
+        address = 2050
+    [[M3]]
+        address = 2051
+    [[M4]]
+        address = 2052
+    [[M5]]
+        address = 2053
+    [[M9]]
+        address = 2057
+    [[M10]]
+        address = 2058
+    [[M11]]
+        address = 2059
+    [[M12]]
+        address = 2060
+    [[M13]]
+        address = 2061
+    [[M14]]
+        address = 2062
+    [[M15]]
+        address = 2063
+    [[M16]]
+        address = 2064
+    [[M17]]
+        address = 2065
+    [[M18]]
+        address = 2066
+    [[M19]]
+        address = 2067
+    [[M20]]
+        address = 2068
+    [[M21]]
+        address = 2069
+    [[M22]]
+        address = 2070
+    [[M23]]
+        address = 2071
+    [[M24]]
+        address = 2072
+    [[M25]]
+        address = 2073
+    [[M26]]
+        address = 2074
+    [[M27]]
+        address = 2075
+    [[M28]]
+        address = 2076
+    [[M29]]
+        address = 2077
+    [[M30]]
+        address = 2078
+    [[M31]]
+        address = 2079
+    [[M32]]
+        address = 2080
+    [[M33]]
+        address = 2081
+    [[M34]]
+        address = 2082
+    [[M35]]
+        address = 2083
+    [[M36]]
+        address = 2084
+    [[M37]]
+        address = 2085
+    [[M38]]
+        address = 2086
+    [[M39]]
+        address = 2087
+    [[M42]]
+        address = 2090
+    [[M44]]
+        address = 2092
 
 [memory]
-	[[pollingTag]]
-		address = 2057
-	[[counter_threshold]]
-		address = 4598
+    [[pollingTag]]
+        address = 2057
+    [[counter_threshold]]
+        address = 4598
