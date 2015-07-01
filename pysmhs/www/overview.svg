@@ -5992,9 +5992,9 @@
     <g
        transform="matrix(0.73054223,0,0,0.17115605,-232.61176,31.842817)"
        id="layer1-43"
-       inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M42&quot;]}">
+       inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M42&quot;]}">
       <g
-         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M42&quot;]}"
+         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M42&quot;]}"
          id="g2521">
         <rect
            style="fill:url(#radialGradient2519);fill-opacity:1;fill-rule:nonzero;stroke:#000000;stroke-width:3;stroke-miterlimit:4;stroke-opacity:1;stroke-dasharray:none"
@@ -6058,10 +6058,10 @@
          style="opacity:0.67716812;fill:url(#linearGradient3312);fill-opacity:1;stroke:none"
          inkscape:connector-curvature="0" />
       <g
-         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M112&quot;]}"
+         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M112&quot;]}"
          id="g3277">
         <g
-           inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M112&quot;]},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if(top.getTag('M1')==1) {\n\tif (top.getTag('M112') == 1) {\n\t\ttop.setTag('M112',0);\n\t} else {\n\t\ttop.setTag('M112',1);\n\t}\n}&quot;}]}"
+           inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M112&quot;]},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if(top.getTag('plchandler_M1')==1) {\n\tif (top.getTag('plchandler_M112') == 1) {\n\t\ttop.setTag('plchandler_M112',0);\n\t} else {\n\t\ttop.setTag('plchandler_M112',1);\n\t}\n}&quot;}]}"
            id="g2631"
            transform="translate(334.33651,154.31326)">
           <path
@@ -6160,7 +6160,7 @@
        id="layer1-49"
        inkscape:label="Layer 1">
       <g
-         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M17&quot;]},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;setTag('M17', 1)&quot;}]}"
+         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M17&quot;]},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;setTag('plchandler_M17', 1)&quot;}]}"
          id="g3350-4"
          transform="matrix(0.5831603,0,0,0.5831603,141.54926,66.20275)">
         <path
@@ -6359,7 +6359,7 @@
        id="layer1-3"
        inkscape:label="">
       <g
-         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M32&quot;]}"
+         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M32&quot;]}"
          id="g2498">
         <path
            d="m 470,412.36218 c 0,93.88841 -76.11159,170 -170,170 -93.88841,0 -170,-76.11159 -170,-170 0,-93.8884 76.11159,-170 170,-170 93.88841,0 170,76.1116 170,170 z"
@@ -6433,7 +6433,7 @@
        id="layer1-3-7"
        inkscape:label="">
       <g
-         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M33&quot;]}"
+         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M33&quot;]}"
          id="g2498-8">
         <path
            d="m 470,412.36218 c 0,93.88841 -76.11159,170 -170,170 -93.88841,0 -170,-76.11159 -170,-170 0,-93.8884 76.11159,-170 170,-170 93.88841,0 170,76.1116 170,170 z"
@@ -6517,7 +6517,7 @@
        id="layer1-8-1"
        inkscape:label="">
       <g
-         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%action=M0&quot;,&quot;%back=M0&quot;]},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if (top.getTag('M31') == 1) {\ntop.setTag('M31',0);\n} else {\ntop.setTag('M31',1);\n}&quot;}]}"
+         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%action=plchandler_M0&quot;,&quot;%back=plchandler_M0&quot;]},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if (top.getTag('plchandler_M31') == 1) {\ntop.setTag('plchandler_M31',0);\n} else {\ntop.setTag('plchandler_M31',1);\n}&quot;}]}"
          id="g3341-9"
          transform="translate(-36.090183,1594.5353)">
         <path
@@ -7212,7 +7212,7 @@
        id="layer1-2"
        inkscape:label="">
       <g
-         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M16&quot;]}"
+         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M16&quot;]}"
          id="g2503">
         <path
            id="path3317"
@@ -7336,7 +7336,7 @@
     <g
        transform="translate(-53.968362,288.10806)"
        id="layer1-551"
-       inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M10&quot;]},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if (top.getTag('M1')==1) {\n\tif (top.getTag('M10') == 1) {\n\t\ttop.setTag('M10',0);\n\t} else {\n\t\ttop.setTag('M10',1);\n\t}\n}&quot;}]}">
+       inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M10&quot;]},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if (top.getTag('plchandler_M1')==1) {\n\tif (top.getTag('plchandler_M10') == 1) {\n\t\ttop.setTag('plchandler_M10',0);\n\t} else {\n\t\ttop.setTag('plchandler_M10',1);\n\t}\n}&quot;}]}">
       <use
          height="115.83651"
          width="50"
@@ -8030,7 +8030,7 @@
     <g
        transform="translate(188.49605,288.10852)"
        id="layer1-551-4"
-       inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M11&quot;]},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if(top.getTag('M1')==1) {\n\tif (top.getTag('M11') == 1) {\n\t\ttop.setTag('M11',0);\n\t} else {\n\t\ttop.setTag('M11',1);\n\t}\n}&quot;}]}">
+       inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M11&quot;]},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if(top.getTag('plchandler_M1')==1) {\n\tif (top.getTag('plchandler_M11') == 1) {\n\t\ttop.setTag('plchandler_M11',0);\n\t} else {\n\t\ttop.setTag('plchandler_M11',1);\n\t}\n}&quot;}]}">
       <use
          height="115.83651"
          width="50"
@@ -8150,7 +8150,7 @@
        id="layer1-2-4"
        inkscape:label="">
       <g
-         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M16&quot;]}"
+         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M16&quot;]}"
          id="g2503-8">
         <path
            id="path3317-8"
@@ -8274,7 +8274,7 @@
     <g
        id="g2664"
        transform="matrix(0,0.12195122,-0.12195122,0,423.31388,319.53644)"
-       inkscape:label="{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if(top.getTag('M1')==1) {\n\tif (top.getTag('M16') == 1) {\n\t\ttop.setTag('M16',0);\n\t} else {\n\t\ttop.setTag('M16',1);\n\t}\n}&quot;}]}">
+       inkscape:label="{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if(top.getTag('plchandler_M1')==1) {\n\tif (top.getTag('plchandler_M16') == 1) {\n\t\ttop.setTag('plchandler_M16',0);\n\t} else {\n\t\ttop.setTag('plchandler_M16',1);\n\t}\n}&quot;}]}">
       <path
          inkscape:connector-curvature="0"
          sodipodi:nodetypes="ccccc"
@@ -8708,7 +8708,7 @@
        id="layer1-8-1-1"
        inkscape:label="">
       <g
-         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%action=M1&quot;,&quot;%back=M1&quot;]},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if (top.getTag('M1') == 1) {\ntop.setTag('M1',0);\n} else {\ntop.setTag('M1',1);\n}&quot;}]}"
+         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%action=plchandler_M1&quot;,&quot;%back=plchandler_M1&quot;]},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if (top.getTag('plchandler_M1') == 1) {\ntop.setTag('plchandler_M1',0);\n} else {\ntop.setTag('plchandler_M1',1);\n}&quot;}]}"
          id="g3341-9-1"
          transform="translate(-36.090183,1594.5353)">
         <path
@@ -8790,7 +8790,7 @@
        id="layer1-82"
        inkscape:label="Layer 1">
       <g
-         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M12&quot;]},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if(top.getTag('M1')==1) {\n\tif (top.getTag('M12') == 1) {\n\t\ttop.setTag('M12',0);\n\t} else {\n\t\ttop.setTag('M12',1);\n\t}\n}&quot;}]}"
+         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M12&quot;]},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if(top.getTag('plchandler_M1')==1) {\n\tif (top.getTag('plchandler_M12') == 1) {\n\t\ttop.setTag('plchandler_M12',0);\n\t} else {\n\t\ttop.setTag('plchandler_M12',1);\n\t}\n}&quot;}]}"
          id="g3855">
         <use
            height="102.68121"
@@ -8894,7 +8894,7 @@
        id="layer1-3-7-6-4"
        inkscape:label="">
       <g
-         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M39&quot;]}"
+         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M39&quot;]}"
          id="g2498-8-1-2"
          transform="translate(2626.1715,24.601123)">
         <path
@@ -8934,7 +8934,7 @@
        inkscape:label="Layer 1">
       <g
          id="g2542"
-         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M20&quot;]},{&quot;attr&quot;:&quot;rotate&quot;,&quot;max&quot;:3,&quot;min&quot;:0,&quot;tag&quot;:&quot;M20&quot;},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if(top.getTag('M1')==1) {\n\tif (top.getTag('M15') == 1) {\n\t\ttop.setTag('M15',0);\n\t} else {\n\t\ttop.setTag('M15',1);\n\t}\n}&quot;}]}"
+         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M20&quot;]},{&quot;attr&quot;:&quot;rotate&quot;,&quot;max&quot;:3,&quot;min&quot;:0,&quot;tag&quot;:&quot;plchandler_M20&quot;},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if(top.getTag('plchandler_M1')==1) {\n\tif (top.getTag('plchandler_M15') == 1) {\n\t\ttop.setTag('plchandler_M15',0);\n\t} else {\n\t\ttop.setTag('plchandler_M15',1);\n\t}\n}&quot;}]}"
          transform="matrix(0,1,-1,0,431.32763,-91.269214)">
         <rect
            style="opacity:0.75961537;fill:#4d4d4d;fill-opacity:1;stroke:none"
@@ -9024,7 +9024,7 @@
        inkscape:label="Layer 1">
       <g
          id="g2542-6"
-         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M23&quot;]},{&quot;attr&quot;:&quot;rotate&quot;,&quot;max&quot;:3,&quot;min&quot;:0,&quot;tag&quot;:&quot;M23&quot;},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if(top.getTag('M1')==1) {\n\tif (top.getTag('M15') == 1) {\n\t\ttop.setTag('M15',0);\n\t} else {\n\t\ttop.setTag('M15',1);\n\t}\n}&quot;}]}"
+         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M23&quot;]},{&quot;attr&quot;:&quot;rotate&quot;,&quot;max&quot;:3,&quot;min&quot;:0,&quot;tag&quot;:&quot;plchandler_M23&quot;},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if(top.getTag('plchandler_M1')==1) {\n\tif (top.getTag('plchandler_M15') == 1) {\n\t\ttop.setTag('plchandler_M15',0);\n\t} else {\n\t\ttop.setTag('plchandler_M15',1);\n\t}\n}&quot;}]}"
          transform="matrix(0,1,-1,0,431.32763,-91.269214)">
         <rect
            style="opacity:0.75961537;fill:#4d4d4d;fill-opacity:1;stroke:none"
@@ -9114,7 +9114,7 @@
        inkscape:label="Layer 1">
       <g
          id="g2542-1"
-         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M22&quot;]},{&quot;attr&quot;:&quot;rotate&quot;,&quot;max&quot;:3,&quot;min&quot;:0,&quot;tag&quot;:&quot;M22&quot;},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if(top.getTag('M1')==1) {\n\tif (top.getTag('M15') == 1) {\n\t\ttop.setTag('M15',0);\n\t} else {\n\t\ttop.setTag('M15',1);\n\t}\n}&quot;}]}"
+         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M22&quot;]},{&quot;attr&quot;:&quot;rotate&quot;,&quot;max&quot;:3,&quot;min&quot;:0,&quot;tag&quot;:&quot;M22&quot;},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if(top.getTag('plchandler_M1')==1) {\n\tif (top.getTag('plchandler_M15') == 1) {\n\t\ttop.setTag('plchandler_M15',0);\n\t} else {\n\t\ttop.setTag('plchandler_M15',1);\n\t}\n}&quot;}]}"
          transform="matrix(0,1,-1,0,431.32763,-91.269214)">
         <rect
            style="opacity:0.75961537;fill:#4d4d4d;fill-opacity:1;stroke:none"
@@ -9204,7 +9204,7 @@
        inkscape:label="Layer 1">
       <g
          id="g2542-4"
-         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M21&quot;]},{&quot;attr&quot;:&quot;rotate&quot;,&quot;max&quot;:3,&quot;min&quot;:0,&quot;tag&quot;:&quot;M21&quot;},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if(top.getTag('M1')==1) {\n\tif (top.getTag('M15') == 1) {\n\t\ttop.setTag('M15',0);\n\t} else {\n\t\ttop.setTag('M15',1);\n\t}\n}&quot;}]}"
+         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M21&quot;]},{&quot;attr&quot;:&quot;rotate&quot;,&quot;max&quot;:3,&quot;min&quot;:0,&quot;tag&quot;:&quot;M21&quot;},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if(top.getTag('plchandler_M1')==1) {\n\tif (top.getTag('plchandler_M15') == 1) {\n\t\ttop.setTag('plchandler_M15',0);\n\t} else {\n\t\ttop.setTag('plchandler_M15',1);\n\t}\n}&quot;}]}"
          transform="matrix(0,1,-1,0,432.22607,-91.269204)">
         <rect
            style="opacity:0.75961537;fill:#4d4d4d;fill-opacity:1;stroke:none"
@@ -9356,7 +9356,7 @@
        id="layer1-8-1-9"
        inkscape:label="">
       <g
-         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%action=M2&quot;,&quot;%back=M2&quot;]},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if (top.getTag('M2') == 1) {\ntop.setTag('M2',0);\n} else {\ntop.setTag('M2',1);\n}&quot;}]}"
+         inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%action=plchandler_M2&quot;,&quot;%back=plchandler_M2&quot;]},{&quot;attr&quot;:&quot;script&quot;,&quot;list&quot;:[{&quot;evt&quot;:&quot;mouseup&quot;,&quot;param&quot;:&quot;if (top.getTag('plchandler_M2') == 1) {\ntop.setTag('plchandler_M2',0);\n} else {\ntop.setTag('plchandler_M2',1);\n}&quot;}]}"
          id="g3341-9-4"
          transform="translate(-36.090183,1594.5353)">
         <path
@@ -9445,7 +9445,7 @@
        y="276"
        inkscape:label="{&quot;attr&quot;:&quot;bar&quot;,&quot;max&quot;:100,&quot;min&quot;:0,&quot;tag&quot;:&quot;T0&quot;}" />
     <g
-       inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M34&quot;]}"
+       inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M34&quot;]}"
        id="g2498-8-1-2-1"
        transform="matrix(0.02202953,0,0,0.02202953,198.30701,392.91585)">
       <path
@@ -9479,7 +9479,7 @@
          inkscape:connector-curvature="0" />
     </g>
     <g
-       inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=M38&quot;]}"
+       inkscape:label="{&quot;attr&quot;:&quot;clone&quot;,&quot;map&quot;:[&quot;%s=plchandler_M38&quot;]}"
        id="g2498-8-1-2-18"
        transform="matrix(0.02202953,0,0,0.02202953,312.64612,393.91585)">
       <path
