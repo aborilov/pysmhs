@@ -26,13 +26,13 @@ class datehandler(AbstractHandler):
             self._tags['sunset'] = self.getsunset().strftime("%H:%M:%S")
             self._tags['sunrise'] = self.getsunrise().strftime("%H:%M:%S")
         if now.time().strftime("%H:%M:%S") == self._tags['sunset']:
-            self._settag('issunset', '1')
+            self.settag('issunset', '1')
         else:
-            self._settag('issunset', '0')
+            self.settag('issunset', '0')
         if now.time().strftime("%H:%M:%S") == self._tags['sunrise']:
-            self._settag('issunrise', '1')
+            self.settag('issunrise', '1')
         else:
-            self._settag('issunrise', '0')
+            self.settag('issunrise', '0')
 
     def loadtags(self):
         self._tags['sunset'] = self.getsunset().strftime("%H:%M:%S")
@@ -82,9 +82,9 @@ class datehandler(AbstractHandler):
     def checktag(self, tag, dt):
         dt = dt.replace(second=0, microsecond=0)
         if dt in self.rrules[tag]["startrr"]:
-            self._settag(tag, '1')
+            self.settag(tag, '1')
         elif dt in self.rrules[tag]["endrr"]:
-            self._settag(tag, '0')
+            self.settag(tag, '0')
 
     def checktags(self, dt):
         for tag in self.rrules:

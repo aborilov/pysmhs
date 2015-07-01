@@ -25,7 +25,7 @@ class corehandler(AbstractHandler):
 
     def loadtags(self):
         for tag in self.config:
-            self._settag(tag, self.config[tag].get("run", "1"))
+            self.settag(tag, self.config[tag].get("run", "1"))
 
     def _addhandler(self, classname, parent, params):
         if not classname in self.listeners:
@@ -57,10 +57,10 @@ class corehandler(AbstractHandler):
         if classname in self.listeners:
             self.listeners[classname].start()
 
-    def settag(self, tag, value):
-        self._settag(tag, value)
+    # def settag(self, tag, value):
+        # self._settag(tag, value)
 
-    def _settag(self, tag, value):
+    def settag(self, tag, value):
         logger.debug("Setting tag %s to %s" % (tag, value))
         l = tag.split("_")
         # try:
@@ -68,7 +68,7 @@ class corehandler(AbstractHandler):
             if l[0] == __name__:
                 if self._tags[l[1]] != value:
                     self._set_listeners(l[1], value)
-                    AbstractHandler._settag(self, l[1], value)
+                    AbstractHandler.settag(self, l[1], value)
             else:
                 self.listeners[l[0]].settag(l[1], value)
         else:
@@ -115,7 +115,7 @@ class corehandler(AbstractHandler):
     def start(self):
         # self.stopped = False
         logger.debug("RUN")
-        self._settag(__name__, '1')
+        self.settag(__name__, '1')
         self._addhandlers(self.config)
         for listener in self.listeners:
             if self._tags[listener] == '1':

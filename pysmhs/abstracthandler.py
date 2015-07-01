@@ -63,6 +63,7 @@ class AbstractHandler(object):
         Override if you need some action
         '''
         if self._tags[tag] != value:
+            logger.debug('change tag {} to value {}'.format(tag, value))
             self._tags[tag] = value
             self.sendevents(tag, value)
 
