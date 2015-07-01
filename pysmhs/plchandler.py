@@ -104,13 +104,22 @@ class SMHSProtocol(ModbusClientProtocol):
         # else:
             # d.addCallback(self.write_polling_tag)
 
+    @defer.inlineCallbacks
     def write_tag(self, addr, value):
         logger.debug('write tag {} with value {} to plc'.format(addr, value))
         if value:
             val = 0xFF00
         else:
             val = 0x0000
-        return self.write_coil(addr, val)
+        try:
+            result = yield self.write_coil(addr, val)
+            if not result.value:
+                raise ValueError("result not true")
+        except Exception:
+            logger.exception(
+                "while write to coil {} value {}".format(addr, val))
+        defer.returnValue(result)
+
 
 
 class SMHSFactory(ClientFactory):
