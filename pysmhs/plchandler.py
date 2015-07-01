@@ -159,14 +159,14 @@ class plchandler(AbstractHandler):
             self.tagslist.update(self.config[tagtype])
         #fill address list
         self.full_address_list = {}
-        logger.debug(self.tagslist)
+        # logger.debug(self.tagslist)
         for x in self.tagslist:
             if "address" in self.tagslist[x]:
                 address = self.tagslist[x]["address"]
                 self.full_address_list[int(address)] = x
-        for tag in self.tagslist.keys():
-            self._tags[tag] = 0
-        logger.debug(self._tags)
+        # for tag in self.tagslist.keys():
+            # self._tags[tag] = 0
+        # logger.debug(self._tags)
         logger.debug("Full address list - %s" % self.full_address_list)
 
     def settag(self, name, value):
@@ -215,6 +215,7 @@ class plchandler(AbstractHandler):
         if tag in self._tags:
             super(plchandler, self).settag(tag, value)
         else:
+            logger.debug('add tag {} with value {}'.format(tag, value))
             self._tags[tag] = value
 
     def __addinputctag(self, tag, value):
