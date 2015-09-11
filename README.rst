@@ -2,6 +2,11 @@
 pysmhs
 ======
 
+.. image:: https://badges.gitter.im/Join%20Chat.svg
+   :alt: Join the chat at https://gitter.im/aborilov/pysmhs
+   :target: https://gitter.im/aborilov/pysmhs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
+
+
 Smart House Control System
 ==================================================
 
@@ -38,6 +43,3 @@ Please report any suggestions, feature requests, bug reports, or annoyances to
 the Github `issue tracker`_.
 
 
-.. image:: https://badges.gitter.im/Join%20Chat.svg
-   :alt: Join the chat at https://gitter.im/aborilov/pysmhs
-   :target: https://gitter.im/aborilov/pysmhs?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge
