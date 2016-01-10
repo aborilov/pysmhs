@@ -1,7 +1,7 @@
 [corehandler]
     description = "Core handler"
     [[params]]
-        configfile = "config/coreconfig.txt"
+        configfile = coreconfig.txt
         loglevel = "error"
         logfile = "smhs.log"
         logfiles_num = 5
@@ -10,7 +10,7 @@
     description = "Async PLC handler"
     run = 0
     [[params]]
-        configfile = /usr/etc/pysmhs/tags_config.txt
+        configfile = tags_config.txt
         [[[server]]]
             pollingTimeout = 0
             packetSize = 50
@@ -36,11 +36,11 @@
     run = 1
     description = "date handler"
     [[params]]
-        configfile = /usr/etc/pysmhs/dateconfig.txt
+        configfile = dateconfig.txt
 
 [actionhandler]
     description = "action handler"
     parent = "corehandler"
     run = 0
         [[params]]
-            configfile = "/usr/etc/pysmhs/actions.txt"
+            configfile = actions.txt

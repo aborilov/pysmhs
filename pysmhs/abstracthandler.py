@@ -5,6 +5,8 @@ from datetime import datetime
 
 louie.install_plugin(TwistedDispatchPlugin)
 
+import sys
+from os import path
 import logging
 import logging.handlers
 
@@ -29,7 +31,9 @@ class AbstractHandler(object):
 
     def __init__(self, parent=None, params={}):
         if "configfile" in params:
-            self.config = ConfigObj(params["configfile"], indent_type="\t")
+            config_path = path.join(
+                sys.prefix, 'etc/pysmhs', params['configfile'])
+            self.config = ConfigObj(config_path, indent_type="\t")
         self.signal = self.__class__.__name__
         self.params = params
         self.stopped = True

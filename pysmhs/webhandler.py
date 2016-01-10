@@ -13,6 +13,7 @@ from collections import OrderedDict
 from uuid import uuid4
 
 import logging
+from pkg_resources import resource_filename
 
 logger = logging.getLogger('webhandler')
 
@@ -30,7 +31,7 @@ class webhandler(AbstractHandler):
         AbstractHandler.__init__(self, parent, params)
         logger.info("Init web handler")
         #  resource = File(params["wwwPath"])
-        root = File(params['wwwPath'])
+        root = File(resource_filename('pysmhs', 'www'))
         #  root.putChild("www", resource)
         root.putChild("get", smhs_web(parent))
         #root.putChild("mon", monitor(self.eventcache))
