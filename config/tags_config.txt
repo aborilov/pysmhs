@@ -1,0 +1,85 @@
+[output]
+    [[M0]]
+        address = 2048
+    [[M1]]
+        address = 2049
+    [[M2]]
+        address = 2050
+    [[M3]]
+        address = 2051
+    [[M4]]
+        address = 2052
+    [[M5]]
+        address = 2053
+    [[M9]]
+        address = 2057
+    [[M10]]
+        address = 2058
+    [[M11]]
+        address = 2059
+    [[M12]]
+        address = 2060
+    [[M13]]
+        address = 2061
+    [[M14]]
+        address = 2062
+    [[M15]]
+        address = 2063
+    [[M16]]
+        address = 2064
+    [[M17]]
+        address = 2065
+    [[M18]]
+        address = 2066
+    [[M19]]
+        address = 2067
+    [[M20]]
+        address = 2068
+    [[M21]]
+        address = 2069
+    [[M22]]
+        address = 2070
+    [[M23]]
+        address = 2071
+    [[M24]]
+        address = 2072
+    [[M25]]
+        address = 2073
+    [[M26]]
+        address = 2074
+    [[M27]]
+        address = 2075
+    [[M28]]
+        address = 2076
+    [[M29]]
+        address = 2077
+    [[M30]]
+        address = 2078
+    [[M31]]
+        address = 2079
+    [[M32]]
+        address = 2080
+    [[M33]]
+        address = 2081
+    [[M34]]
+        address = 2082
+    [[M35]]
+        address = 2083
+    [[M36]]
+        address = 2084
+    [[M37]]
+        address = 2085
+    [[M38]]
+        address = 2086
+    [[M39]]
+        address = 2087
+    [[M42]]
+        address = 2090
+    [[M44]]
+        address = 2092
+
+[memory]
+    [[pollingTag]]
+        address = 2057
+    [[counter_threshold]]
+        address = 4598

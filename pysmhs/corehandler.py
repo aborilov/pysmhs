@@ -18,7 +18,7 @@ class corehandler(AbstractHandler):
         assert "configfile" in params, "no param configfile"
         self.listeners = {}
         AbstractHandler.__init__(self, parent, params)
-        params = self.config[__name__]["params"]
+        params = self.config[type(self).__name__]["params"]
         logger.info('Init core server')
         # if self.config[__name__].get("run", "1") == "1":
         #     self.start()
@@ -40,12 +40,12 @@ class corehandler(AbstractHandler):
 
     def _addhandlers(self, handlers):
         for tag in handlers:
-            if tag != __name__:
+            if tag != type(self).__name__:
                 # try:
                 classname = tag
                 params = handlers[tag].get("params", {})
                 parentname = handlers[tag].get("parent")
-                if parentname == __name__:
+                if parentname == type(self).__name__:
                     parent = self
                 else:
                     parent = self.listeners.get(parentname, None)
@@ -65,7 +65,7 @@ class corehandler(AbstractHandler):
         l = tag.split("_")
         # try:
         if len(l) == 2:
-            if l[0] == __name__:
+            if l[0] == type(self).__name__:
                 if self._tags[l[1]] != value:
                     self._set_listeners(l[1], value)
                     AbstractHandler.settag(self, l[1], value)
@@ -87,7 +87,7 @@ class corehandler(AbstractHandler):
     def _gettag(self, tag):
         l = tag.split("_")
         if len(l) == 2:
-            if l[0] == __name__:
+            if l[0] == type(self).__name__:
                 return self._tags[l[1]]
             else:
                 return self.listeners[l[0]].gettag(l[1])
@@ -103,7 +103,7 @@ class corehandler(AbstractHandler):
                     "%s_%s" %
                     (listener.__class__.__name__, tag)] = listener.tags[tag]
         for tag in self._tags:
-            tagslist["%s_%s" % (__name__, tag)] = self._tags[tag]
+            tagslist["%s_%s" % (type(self).__name__, tag)] = self._tags[tag]
         return tagslist
 
     def stop(self):
@@ -115,7 +115,7 @@ class corehandler(AbstractHandler):
     def start(self):
         # self.stopped = False
         logger.debug("RUN")
-        self.settag(__name__, '1')
+        self.settag(type(self).__name__, '1')
         self._addhandlers(self.config)
         for listener in self.listeners:
             if self._tags[listener] == '1':

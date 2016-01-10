@@ -1,0 +1,98 @@
+[Van4]
+    condition = self.gettag('plchandler_vkcVan1') == 1
+    [[1.switcher]]
+        plchandler_van4 = 1
+
+[Van2]
+    condition = self.gettag('plchandler_vkcVan2') == 1
+    [[1.switcher]]
+        plchandler_van2 = 1
+
+[VanOn]
+    condition = self.gettag('plchandler_vkcVan4') == 1 and self.gettag('plchandler_van4') == 0 and self.gettag('plchandler_van2') == 0
+    [[1.setter]]
+        plchandler_van4 = 1
+
+[VanOff]
+    condition = self.gettag('plchandler_vkcVan4') == 1 and (self.gettag('plchandler_van4') == 1 or self.gettag('plchandler_van2') == 1)
+    [[1.setter]]
+            plchandler_van4 = 0
+    [[2.setter]]
+            plchandler_van2 = 0
+
+[vkcTamb1]
+    condition = self.gettag('plchandler_vkcTamb1') == 1
+    [[1.switcher]]
+        plchandler_kor = 1
+
+[TambKorOff]
+    condition = self.gettag('plchandler_vkcKor') == 1 and (self.gettag('plchandler_tamb') == 1 or self.gettag('plchandler_kor') == 1)
+    [[1.setter]]
+            plchandler_tamb = 0
+    [[2.setter]]
+            plchandler_kor = 0
+
+[TambKorOn]
+    condition = self.gettag('plchandler_vkcKor') == 1 and self.gettag('plchandler_tamb') == 0 and self.gettag('plchandler_kor') == 0
+    [[1.setter]]
+        plchandler_kor = 1
+
+[vkcSpa2]
+    condition = self.gettag('plchandler_vkcSpa2') == 1
+    [[1.switcher]]
+        plchandler_spal = 1
+
+[vkcSpa1]
+    condition = self.gettag('plchandler_vkcSpa1') == 1
+    [[1.switcher]]
+        plchandler_spal2 = 1
+
+[vkcZal]
+    condition = self.gettag('plchandler_vkcZal') == 1
+    [[1.switcher]]
+        plchandler_zal = 1
+
+
+[vkcGard]
+    condition = self.gettag('plchandler_vkcGard') == 1
+    [[1.switcher]]
+        plchandler_gard = 1
+
+[vkcVan2]
+    condition = self.gettag('plchandler_vkcVan2') == 1
+    [[1.switcher]]
+        plchandler_van2 = 1
+
+[KyhOff]
+    condition = self.gettag('plchandler_vkcKyh') == 1 and (self.gettag('plchandler_kyh') == 1 or self.gettag('plchandler_kyhup') == 1)
+    [[1.setter]]
+        plchandler_kyhup = 0
+    [[2.setter]]
+        plchandler_kyh = 0
+
+[KyhOn]
+    condition = self.gettag('plchandler_vkcKyh') == 1 and self.gettag('plchandler_kyh') == 0 and self.gettag('plchandler_kyhup') == 0
+    [[1.setter]]
+        plchandler_kyhup = 1
+    [[2.setter]]
+        plchandler_kyh = 1
+
+[vkcTamb3]
+    condition = self.gettag('plchandler_vkcTamb3') == 1
+    [[1.switcher]]
+        plchandler_tamb = 1
+
+[vkcTamb2]
+    condition = self.gettag('plchandler_vkcTamb2') == 1
+    [[1.switcher]]
+        plchandler_ylic = 1
+
+[ylicAtEveningOn]
+    condition = self.gettag('datehandler_issunset') == 1
+    [[1.setter]]
+        plchandler_ylic = 1
+
+[ylicAtEveningOff]
+    condition = self.gettag('datehandler_evening') == 0
+    [[1.setter]]
+        plchandler_ylic = 0

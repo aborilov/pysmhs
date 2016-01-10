@@ -1,0 +1,16 @@
+# freq: YEARLY, MONTHLY, WEEKLY, DAILY, HOURLY, MINUTELY, or SECONDLY
+# start: start of event
+# end: end of event
+# until: the limit of the recurrence
+#
+#
+#
+#
+#
+
+[evening]
+    start = '2013-10-02 20:03'
+    end = '2013-10-02 01:00'
+    until = '2014-10-02 13:00'
+    freq = DAILY
+    

@@ -29,9 +29,9 @@ class webhandler(AbstractHandler):
         self.params = params
         AbstractHandler.__init__(self, parent, params)
         logger.info("Init web handler")
-        resource = File(params["wwwPath"])
-        root = Resource()
-        root.putChild("www", resource)
+        #  resource = File(params["wwwPath"])
+        root = File(params['wwwPath'])
+        #  root.putChild("www", resource)
         root.putChild("get", smhs_web(parent))
         #root.putChild("mon", monitor(self.eventcache))
         self.site = server.Site(root)
@@ -67,7 +67,7 @@ class smhs_web(resource.Resource):
     action_set_tag = "setTag"
 
     def __init__(self, parent):
-        env = Environment(loader=PackageLoader('www', 'templates'))
+        env = Environment(loader=PackageLoader('pysmhs', 'www/templates'))
         self.listtags_template = env.get_template('listtags_template.html')
         self.parent = parent
         resource.Resource.__init__(self)

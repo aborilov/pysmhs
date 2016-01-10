@@ -10,7 +10,7 @@
     description = "Async PLC handler"
     run = 0
     [[params]]
-        configfile = config/tags_config.txt
+        configfile = /usr/etc/pysmhs/tags_config.txt
         [[[server]]]
             pollingTimeout = 0
             packetSize = 50
@@ -30,17 +30,17 @@
     run = 1
     [[params]]
         port = 8080
-        wwwPath = www
+        wwwPath = pysmhs/www
 
 [datehandler]
     run = 1
     description = "date handler"
     [[params]]
-        configfile = config/dateconfig.txt
+        configfile = /usr/etc/pysmhs/dateconfig.txt
 
 [actionhandler]
     description = "action handler"
     parent = "corehandler"
     run = 0
         [[params]]
-            configfile = "config/actions.txt"
+            configfile = "/usr/etc/pysmhs/actions.txt"
