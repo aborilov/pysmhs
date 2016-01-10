@@ -3,7 +3,7 @@ import sys
 
 setup(
     name="pysmhs",
-    version="1.0.1",
+    version="1.0.4",
     packages=find_packages(exclude=["test"]),
     data_files=[
         ('etc/pysmhs',
@@ -11,7 +11,10 @@ setup(
           'config/dateconfig.txt', 'config/tags_config.txt'])],
     include_package_data=True,
     author="Aborilov Pavel",
-    description="PySMHS",
+    description="Smart House Control System",
+    author_email = 'aborilov@gmail.com',
+    url = 'http://www.pysmhs.org/',
+    download_url = 'https://github.com/aborilov/pysmhs/archive/develop.zip',
     install_requires=[
         "Jinja2",
         "Twisted",
