@@ -6,6 +6,11 @@
         logfile = "smhs.log"
         logfiles_num = 5
         logfile_size = 1048576
+[dummyhandler]
+    description = "Dummy handler"
+    run = 1
+    [[params]]
+        configfile = dummy_config.txt
 [plchandler]
     description = "Async PLC handler"
     run = 0

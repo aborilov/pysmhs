@@ -90,7 +90,7 @@ class AbstractHandler(object):
         '''
         Load tags from config
         '''
-        pass
+        self._tags = dict(self.config)
 
     def stop(self):
         '''

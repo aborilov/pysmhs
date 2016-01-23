@@ -8,6 +8,7 @@ from twisted.internet import reactor
 from twisted.web.resource import Resource
 from twisted.web.static import File
 import cgi
+import json
 from jinja2 import Environment, PackageLoader
 from collections import OrderedDict
 from uuid import uuid4
@@ -34,6 +35,7 @@ class webhandler(AbstractHandler):
         root = File(resource_filename('pysmhs', 'www'))
         #  root.putChild("www", resource)
         root.putChild("get", smhs_web(parent))
+        root.putChild("api", ApiResource(parent))
         #root.putChild("mon", monitor(self.eventcache))
         self.site = server.Site(root)
 
@@ -58,6 +60,91 @@ class webhandler(AbstractHandler):
         AbstractHandler.stop(self)
         if self.port:
             self.port.stopListening()
+
+
+class ApiResource(resource.Resource):
+
+    isLeaf = False
+
+    def __init__(self, parent):
+        resource.Resource.__init__(self)
+        self.corehandler = parent
+
+    def getChild(self, handler, request):
+        if handler == '':
+            return self
+        if handler in self.corehandler.listeners:
+            return HandlerResource(self.corehandler.listeners[handler])
+
+    def render_GET(self, request):
+        return json.dumps(self.corehandler.listeners.keys())
+
+class HandlerResource(resource.Resource):
+
+    isLeaf = False
+
+    def __init__(self, handler):
+        resource.Resource.__init__(self)
+        self.handler = handler
+
+    def getChild(self, resource, request):
+        if resource == '':
+            return self
+        if resource == 'tags':
+            return AllTagsResource(self.handler)
+        if resource == 'config':
+            return ConfigResource(self.handler)
+        return self
+
+    def render_GET(self, request):
+        return json.dumps(['tags', 'config'])
+
+class ConfigResource(resource.Resource):
+
+    isLeaf = True
+
+    def __init__(self, handler):
+        self.handler = handler
+        resource.Resource.__init__(self)
+
+    def render_GET(self, request):
+        return json.dumps(self.handler.params)
+
+
+class AllTagsResource(resource.Resource):
+
+    isLeaf = False
+
+    def __init__(self, handler):
+        resource.Resource.__init__(self)
+        self.handler = handler
+
+    def getChild(self, tag, request):
+        if tag == '':
+            return self
+        return TagResource(self.handler, tag)
+
+    def render_GET(self, request):
+        return json.dumps(self.handler.tags)
+
+
+class TagResource(resource.Resource):
+
+    isLeaf = True
+
+    def __init__(self, handler, tag):
+        resource.Resource.__init__(self)
+        self.handler = handler
+        self.tag = tag
+
+    def render_GET(self, request):
+        return json.dumps(self.handler.gettag(self.tag))
+
+    def render_POST(self, request):
+        value = request.args.get('value', None)
+        if value:
+            self.handler.settag(self.tag, value[0])
+        return json.dumps(self.handler.gettag(self.tag))
 
 
 class smhs_web(resource.Resource):
