@@ -1,20 +1,20 @@
 [corehandler]
-    description = "Core handler"
     [[params]]
+        description = "Core handler"
         configfile = coreconfig.txt
         loglevel = "error"
         logfile = "smhs.log"
         logfiles_num = 5
         logfile_size = 1048576
 [dummyhandler]
-    description = "Dummy handler"
-    run = 1
-    [[params]]
-        configfile = dummy_config.txt
-[plchandler]
-    description = "Async PLC handler"
     run = 0
     [[params]]
+        description = "Dummy handler"
+        configfile = dummy_config.txt
+[plchandler]
+    run = 0
+    [[params]]
+        description = "Async PLC handler"
         configfile = tags_config.txt
         [[[server]]]
             pollingTimeout = 0
@@ -30,22 +30,22 @@
             timeout = 0.03
 
 [webhandler]
-    description = "WebServer handler"
     parent = "corehandler"
     run = 1
     [[params]]
+        description = "WebServer handler"
         port = 8080
         wwwPath = pysmhs/www
 
 [datehandler]
-    run = 1
-    description = "date handler"
+    run = 0
     [[params]]
+        description = "date handler"
         configfile = dateconfig.txt
 
 [actionhandler]
-    description = "action handler"
     parent = "corehandler"
     run = 0
         [[params]]
+            description = "action handler"
             configfile = actions.txt

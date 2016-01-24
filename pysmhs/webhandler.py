@@ -35,7 +35,7 @@ class webhandler(AbstractHandler):
         root = File(resource_filename('pysmhs', 'www'))
         #  root.putChild("www", resource)
         root.putChild("get", smhs_web(parent))
-        root.putChild("api", ApiResource(parent))
+        root.putChild("api", ApiResource(parent, self.eventcache))
         #root.putChild("mon", monitor(self.eventcache))
         self.site = server.Site(root)
 
@@ -53,11 +53,11 @@ class webhandler(AbstractHandler):
         self.eventcache[token] = event
 
     def start(self):
-        AbstractHandler.start(self)
+        super(webhandler, self).start()
         self.port = reactor.listenTCP(int(self.params["port"]), self.site)
 
     def stop(self):
-        AbstractHandler.stop(self)
+        super(webhandler, self).stop()
         if self.port:
             self.port.stopListening()
 
@@ -66,15 +66,46 @@ class ApiResource(resource.Resource):
 
     isLeaf = False
 
-    def __init__(self, parent):
+    def __init__(self, parent, events):
         resource.Resource.__init__(self)
         self.corehandler = parent
+        self.events = events
+
+    def getChild(self, handler, request):
+        if handler == 'handlers':
+            return HandlersResource(self.corehandler)
+        if handler == 'events':
+            return EventsResource(self.events)
+        return self
+
+    def render_GET(self, request):
+        return "API version 0.1"
+
+
+class EventsResource(resource.Resource):
+
+    isLeaf = True
+
+    def __init__(self, events):
+        resource.Resource.__init__(self)
+        self.events = events
+
+    def render_GET(self, request):
+        return json.dumps(self.events)
+
+
+class HandlersResource(resource.Resource):
+
+    isLeaf = False
+
+    def __init__(self, corehandler):
+        resource.Resource.__init__(self)
+        self.corehandler = corehandler
 
     def getChild(self, handler, request):
         if handler == '':
             return self
-        if handler in self.corehandler.listeners:
-            return HandlerResource(self.corehandler.listeners[handler])
+        return HandlerResource(self.corehandler.listeners[handler])
 
     def render_GET(self, request):
         return json.dumps(self.corehandler.listeners.keys())

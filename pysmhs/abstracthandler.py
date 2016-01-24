@@ -3,7 +3,7 @@ from louie import dispatcher, TwistedDispatchPlugin
 from config.configobj import ConfigObj
 from datetime import datetime
 
-louie.install_plugin(TwistedDispatchPlugin)
+louie.install_plugin(TwistedDispatchPlugin())
 
 import sys
 from os import path
@@ -58,7 +58,7 @@ class AbstractHandler(object):
         logger.debug(
             'Send tag: {} with value {} from {}'.format(
                 tag, value, self.signal))
-        dispatcher.send(signal=self.signal, event={tag:value})
+        dispatcher.send(signal=self.signal, events={tag:value})
 
     def settag(self, tag, value):
         '''
@@ -108,4 +108,4 @@ class AbstractHandler(object):
         self.stopped = False
         logger.info("Start handler")
         dispatcher.connect(self.process, signal=self.params.get(
-            "listensignals", dispatcher.Any))
+            "listensignals", dispatcher.All))
