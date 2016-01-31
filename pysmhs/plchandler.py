@@ -238,11 +238,11 @@ class plchandler(AbstractHandler):
             if lastval != value:
                 if value > lastval:
                     for x in range(lastval + 1, value + 1):
-                        self.sendevents(tag, x & 1)
+                        self.sendevent(tag, x & 1)
                 else:
                     dif = self._inputtag_threshold - lastval + value
                     for x in range(lastval + 1, lastval + dif + 1):
-                        self.sendevents(tag, x & 1)
+                        self.sendevent(tag, x & 1)
 
         self._inputctags[tag] = value
         self._tags[tag] = value & 1

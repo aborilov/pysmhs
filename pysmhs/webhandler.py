@@ -4,7 +4,7 @@ Web server handler
 '''
 from abstracthandler import AbstractHandler
 from twisted.web import server, resource
-from twisted.internet import reactor
+from twisted.internet import reactor, defer
 from twisted.web.resource import Resource
 from twisted.web.static import File
 import cgi
@@ -29,28 +29,32 @@ class webhandler(AbstractHandler):
         self.cachemax = 255
         self.eventcache = OrderedDict()
         self.params = params
+        self.waiter = []
         super(webhandler, self).__init__(parent, params)
         logger.info("Init web handler")
         #  resource = File(params["wwwPath"])
         root = File(resource_filename('pysmhs', 'www'))
         #  root.putChild("www", resource)
         root.putChild("get", smhs_web(parent))
-        root.putChild("api", ApiResource(parent, self.eventcache))
+        root.putChild("api", ApiResource(parent, self.waiter, self.eventcache))
         #root.putChild("mon", monitor(self.eventcache))
         self.site = server.Site(root)
 
     def loadtags(self):
         pass
 
-    def process(self, signal, events):
-        for event in events:
-            if len(self.eventcache) == self.cachemax:
-                self.eventcache.popitem(last=False)
-            self.addevent(event)
+    def process(self, signal, event):
+        if len(self.eventcache) == self.cachemax:
+            self.eventcache.popitem(last=False)
+        self.addevent(event)
 
     def addevent(self, event):
-        token = uuid4().bytes.encode("base64")
+        token = uuid4().hex
         self.eventcache[token] = event
+        while self.waiter:
+            request = self.waiter.pop()
+            request.write(json.dumps({token: event}))
+            request.finish()
 
     def start(self):
         super(webhandler, self).start()
@@ -66,16 +70,17 @@ class ApiResource(resource.Resource):
 
     isLeaf = False
 
-    def __init__(self, parent, events):
+    def __init__(self, parent, waiter, events):
         resource.Resource.__init__(self)
         self.corehandler = parent
         self.events = events
+        self.waiter = waiter
 
     def getChild(self, handler, request):
         if handler == 'handlers':
             return HandlersResource(self.corehandler)
         if handler == 'events':
-            return EventsResource(self.events)
+            return EventsResource(self.waiter, self.events)
         return self
 
     def render_GET(self, request):
@@ -86,11 +91,41 @@ class EventsResource(resource.Resource):
 
     isLeaf = True
 
-    def __init__(self, events):
+    def __init__(self, waiter, events):
         resource.Resource.__init__(self)
         self.events = events
+        self.waiter = waiter
+
+    def _responseFailed(self, err, request):
+        self.waiter.remove(request)
 
     def render_GET(self, request):
+        request.setHeader("Content-Type", "application/json; charset=utf-8")
+        if 'index' in request.args:
+            index = request.args['index'][0]
+            keys = self.events.keys()
+            if index in keys:
+                i = keys.index(index)
+                k = keys[i + 1:]
+                events = [{key: self.events[key]} for key in k]
+                logger.debug("have events: {}".format(events))
+                if events:
+                    return json.dumps(events)
+                elif 'wait' in request.args:
+                    self.waiter.append(request)
+                    request.notifyFinish().addErrback(
+                        self._responseFailed, request)
+                    return server.NOT_DONE_YET
+        elif 'wait' in request.args:
+            self.waiter.append(request)
+            request.notifyFinish().addErrback(self._responseFailed, request)
+            return server.NOT_DONE_YET
+        return self.last_event()
+
+    def last_event(self):
+        if self.events:
+            key = next(reversed(self.events))
+            return json.dumps({key: self.events[key]})
         return json.dumps(self.events)
 
 
@@ -105,10 +140,11 @@ class HandlersResource(resource.Resource):
     def getChild(self, handler, request):
         if handler == '':
             return self
-        return HandlerResource(self.corehandler.listeners[handler])
+        return HandlerResource(self.corehandler.handlers[handler])
 
     def render_GET(self, request):
-        return json.dumps(self.corehandler.listeners.keys())
+        request.setHeader("Content-Type", "application/json; charset=utf-8")
+        return json.dumps(self.corehandler.handlers.keys())
 
 class HandlerResource(resource.Resource):
 
@@ -128,6 +164,7 @@ class HandlerResource(resource.Resource):
         return self
 
     def render_GET(self, request):
+        request.setHeader("Content-Type", "application/json; charset=utf-8")
         return json.dumps(['tags', 'config'])
 
 class ConfigResource(resource.Resource):
@@ -139,6 +176,7 @@ class ConfigResource(resource.Resource):
         resource.Resource.__init__(self)
 
     def render_GET(self, request):
+        request.setHeader("Content-Type", "application/json; charset=utf-8")
         return json.dumps(self.handler.params)
 
 
@@ -156,6 +194,7 @@ class AllTagsResource(resource.Resource):
         return TagResource(self.handler, tag)
 
     def render_GET(self, request):
+        request.setHeader("Content-Type", "application/json; charset=utf-8")
         return json.dumps(self.handler.tags)
 
 
@@ -169,6 +208,7 @@ class TagResource(resource.Resource):
         self.tag = tag
 
     def render_GET(self, request):
+        request.setHeader("Content-Type", "application/json; charset=utf-8")
         return json.dumps(self.handler.gettag(self.tag))
 
     def render_POST(self, request):

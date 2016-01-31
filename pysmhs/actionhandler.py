@@ -17,7 +17,7 @@ class actionhandler(AbstractHandler):
                         'sleep': self.sleep}
         self.temp_tags = {}
 
-    def process(self, signal, events):
+    def process(self, signal, event):
         for event in events:
             logger.debug(event)
             self.temp_tags[event['tag']] = event['value']

@@ -44,21 +44,21 @@ class AbstractHandler(object):
         logger.debug("Have parent - " + str(self.parent))
         self.loadtags()
 
-    def process(self, signal, events):
+    def process(self, signal, event):
         '''
         Method need to be implemented
         accept events, with list of changed tags
         '''
         pass
 
-    def sendevents(self, tag, value):
+    def sendevent(self, tag, value):
         '''
         send event
         '''
         logger.debug(
             'Send tag: {} with value {} from {}'.format(
                 tag, value, self.signal))
-        dispatcher.send(signal=self.signal, events={tag:value})
+        dispatcher.send(signal=self.signal, event={tag:value})
 
     def settag(self, tag, value):
         '''
@@ -69,7 +69,7 @@ class AbstractHandler(object):
         if self._tags[tag] != value:
             logger.debug('change tag {} to value {}'.format(tag, value))
             self._tags[tag] = value
-            self.sendevents(tag, value)
+            self.sendevent(tag, value)
 
     def gettag(self, tag):
         '''
@@ -77,7 +77,6 @@ class AbstractHandler(object):
         get tag from tags
         Override if you need some action
         '''
-        logger.debug("RETURN %s" % self._tags[tag])
         return self._tags[tag]
 
     @property
