@@ -16,7 +16,7 @@ class corehandler(AbstractHandler):
 
     def __init__(self, parent=None, params={}):
         assert "configfile" in params, "no param configfile"
-        self.listeners = {}
+        self.handlers = {}
         AbstractHandler.__init__(self, parent, params)
         params = self.config[type(self).__name__]["params"]
         logger.info('Init core server')
@@ -28,13 +28,13 @@ class corehandler(AbstractHandler):
             self.settag(tag, self.config[tag].get("run", "1"))
 
     def _addhandler(self, classname, parent, params):
-        if not classname in self.listeners:
+        if not classname in self.handlers:
             # try:
             _temp = __import__(
                 classname, globals(), locals(), [classname])
             handler = eval(
                 "_temp." + classname + "(parent, params)")
-            self.listeners[classname] = handler
+            self.handlers[classname] = handler
             # except ImportError, e:
             #     print e
 
@@ -48,14 +48,14 @@ class corehandler(AbstractHandler):
                 if parentname == type(self).__name__:
                     parent = self
                 else:
-                    parent = self.listeners.get(parentname, None)
+                    parent = self.handlers.get(parentname, None)
                 self._addhandler(classname, parent, params)
                 # except KeyError, e:
                 #     print "No such param " + str(e)
 
     def runhandler(self, classname):
-        if classname in self.listeners:
-            self.listeners[classname].start()
+        if classname in self.handlers:
+            self.handlers[classname].start()
 
     # def settag(self, tag, value):
         # self._settag(tag, value)
@@ -70,7 +70,7 @@ class corehandler(AbstractHandler):
                     self._set_listeners(l[1], value)
                     AbstractHandler.settag(self, l[1], value)
             else:
-                self.listeners[l[0]].settag(l[1], value)
+                self.handlers[l[0]].settag(l[1], value)
         else:
             self._tags[tag] = value
         # except:
@@ -78,11 +78,11 @@ class corehandler(AbstractHandler):
         #         "Can't settag", exc_info=1)
 
     def _set_listeners(self, tag, value):
-        if tag in self.listeners:
+        if tag in self.handlers:
             if value:
-                self.listeners[tag].start()
+                self.handlers[tag].start()
             else:
-                self.listeners[tag].stop()
+                self.handlers[tag].stop()
 
     def _gettag(self, tag):
         l = tag.split("_")
@@ -90,14 +90,14 @@ class corehandler(AbstractHandler):
             if l[0] == type(self).__name__:
                 return self._tags[l[1]]
             else:
-                return self.listeners[l[0]].gettag(l[1])
+                return self.handlers[l[0]].gettag(l[1])
         else:
             return self._tags[tag]
 
     @property
     def tags(self):
         tagslist = {}
-        for listener in self.listeners.values():
+        for listener in self.handlers.values():
             for tag in listener.tags:
                 tagslist[
                     "%s_%s" %
@@ -108,7 +108,7 @@ class corehandler(AbstractHandler):
 
     def stop(self):
         AbstractHandler.stop(self)
-        #for listener in self.listeners:
+        #for listener in self.handlers:
             #self._set_listeners(listener, 0)
         reactor.stop()
 
@@ -117,7 +117,7 @@ class corehandler(AbstractHandler):
         logger.debug("RUN")
         self.settag(type(self).__name__, '1')
         self._addhandlers(self.config)
-        for listener in self.listeners:
+        for listener in self.handlers:
             if self._tags[listener] == '1':
-                self.listeners[listener].start()
+                self.handlers[listener].start()
         reactor.run(installSignalHandlers=0)

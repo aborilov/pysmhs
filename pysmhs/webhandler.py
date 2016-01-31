@@ -29,7 +29,7 @@ class webhandler(AbstractHandler):
         self.cachemax = 255
         self.eventcache = OrderedDict()
         self.params = params
-        AbstractHandler.__init__(self, parent, params)
+        super(webhandler, self).__init__(parent, params)
         logger.info("Init web handler")
         #  resource = File(params["wwwPath"])
         root = File(resource_filename('pysmhs', 'www'))
