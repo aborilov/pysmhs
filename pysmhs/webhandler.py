@@ -143,6 +143,7 @@ class HandlersResource(resource.Resource):
         return HandlerResource(self.corehandler.handlers[handler])
 
     def render_GET(self, request):
+        request.setHeader("Access-Control-Allow-Origin", "*")
         request.setHeader("Content-Type", "application/json; charset=utf-8")
         return json.dumps(self.corehandler.handlers.keys())
 
@@ -165,6 +166,7 @@ class HandlerResource(resource.Resource):
 
     def render_GET(self, request):
         request.setHeader("Content-Type", "application/json; charset=utf-8")
+        request.setHeader("Access-Control-Allow-Origin", "*")
         return json.dumps(['tags', 'config'])
 
 class ConfigResource(resource.Resource):
@@ -177,6 +179,7 @@ class ConfigResource(resource.Resource):
 
     def render_GET(self, request):
         request.setHeader("Content-Type", "application/json; charset=utf-8")
+        request.setHeader("Access-Control-Allow-Origin", "*")
         return json.dumps(self.handler.params)
 
 
@@ -195,6 +198,7 @@ class AllTagsResource(resource.Resource):
 
     def render_GET(self, request):
         request.setHeader("Content-Type", "application/json; charset=utf-8")
+        request.setHeader("Access-Control-Allow-Origin", "*")
         return json.dumps(self.handler.tags)
 
 
@@ -209,6 +213,7 @@ class TagResource(resource.Resource):
 
     def render_GET(self, request):
         request.setHeader("Content-Type", "application/json; charset=utf-8")
+        request.setHeader("Access-Control-Allow-Origin", "*")
         return json.dumps(self.handler.gettag(self.tag))
 
     def render_POST(self, request):
