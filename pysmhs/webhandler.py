@@ -140,7 +140,8 @@ class HandlersResource(resource.Resource):
     def getChild(self, handler, request):
         if handler == '':
             return self
-        return HandlerResource(self.corehandler.handlers[handler])
+        return HandlerResource(
+            self.corehandler.handlers.get(handler, self.corehandler))
 
     def render_GET(self, request):
         request.setHeader("Content-Type", "application/json; charset=utf-8")

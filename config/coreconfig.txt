@@ -7,7 +7,7 @@
         logfiles_num = 5
         logfile_size = 1048576
 [dummyhandler]
-    run = 0
+    run = 1
     [[params]]
         description = "Dummy handler"
         configfile = dummy_config.txt
@@ -38,7 +38,7 @@
         wwwPath = pysmhs/www
 
 [datehandler]
-    run = 0
+    run = 1
     [[params]]
         description = "date handler"
         configfile = dateconfig.txt
