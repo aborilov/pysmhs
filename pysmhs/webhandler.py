@@ -218,9 +218,18 @@ class TagResource(resource.Resource):
         return json.dumps(self.handler.gettag(self.tag))
 
     def render_POST(self, request):
-        value = request.args.get('value', None)
+        request.setHeader("Content-Type", "application/json; charset=utf-8")
+        request.setHeader("Access-Control-Allow-Origin", "*")
+        data = {}
+        try:
+            content = request.content.read()
+            data = json.loads(content)
+        except:
+            logger.debug("not json data: {}".format(content))
+        data.update({key: request.args[key][0] for key in request.args})
+        value = data.get('value', None)
         if value:
-            self.handler.settag(self.tag, value[0])
+            self.handler.settag(self.tag, value)
         return json.dumps(self.handler.gettag(self.tag))
 
 
