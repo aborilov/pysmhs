@@ -7,6 +7,7 @@ from twisted.internet.protocol import ClientFactory
 from pymodbus.factory import ClientDecoder
 from pymodbus.client.async import ModbusClientProtocol
 from pymodbus.transaction import ModbusAsciiFramer as ModbusFramer
+from pymodbus.pdu import ExceptionResponse
 
 from serial import PARITY_NONE, PARITY_EVEN, PARITY_ODD
 from serial import STOPBITS_ONE, STOPBITS_TWO
@@ -21,7 +22,7 @@ pymodbus_logger.setLevel(logging.ERROR)
 
 class SMHSProtocol(ModbusClientProtocol):
 
-    def __init__(self, framer, pol_list, reader, writepool):
+    def __init__(self, framer, pol_list, reader):
         ''' Initializes our custom protocol
 
         :param framer: The decoder to use to process messages
@@ -30,8 +31,8 @@ class SMHSProtocol(ModbusClientProtocol):
         ModbusClientProtocol.__init__(self, framer)
         self.pol_list = pol_list
         self.reader = reader
-        self.writepool = writepool
         self.loop = task.LoopingCall(self.fetch_holding_registers)
+        self.lock = defer.DeferredLock()
 
     def connectionMade(self):
         logger.debug("Connected to ModBus")
@@ -61,12 +62,15 @@ class SMHSProtocol(ModbusClientProtocol):
 
     @defer.inlineCallbacks
     def fetch_holding_registers(self):
-        # logger.debug('read registers from {}'.format(self.pol_list))
         try:
             address_map = self.pol_list.get("inputc", None)
             if address_map:
                 for register in address_map:
                     response = yield self.read_holding_registers(*register)
+                    if isinstance(response, ExceptionResponse):
+                        logger.debug(
+                            "error while read: {}".format(register))
+                        continue
                     val = {}
                     for i in range(0, register[1]):
                         val[register[0] + i] = response.getRegister(i)
@@ -76,6 +80,10 @@ class SMHSProtocol(ModbusClientProtocol):
             if address_map:
                 for register in address_map:
                     response = yield self.read_coils(*register)
+                    if isinstance(response, ExceptionResponse):
+                        logger.debug(
+                            "error while read: {}".format(register))
+                        continue
                     val = {}
                     for i in range(0, register[1]):
                         val[register[0] + i] = response.getBit(i)
@@ -83,42 +91,16 @@ class SMHSProtocol(ModbusClientProtocol):
         except Exception:
             logger.exception("can't fetch registers")
 
-    # def write_tags(self, response):
-        # d = None
-        # if len(self.writepool):
-            # logger.debug("writepool len = %d" % len(self.writepool))
-            # for x in self.writepool.keys():
-                # val = int(self.writepool.pop(x))
-                # logger.debug(
-                    # "writting tag %s to %d" % (x, val))
-                # if val:
-                    # val = 0xFF00
-                # else:
-                    # val = 0x0000
-                # if not d:
-                    # d = self.write_tag(response, x, val)
-                # else:
-                    # d.addCallback(self.write_tag, addr=x, value=val)
-        # if not d:
-            # self.write_polling_tag(response)
-        # else:
-            # d.addCallback(self.write_polling_tag)
-
     @defer.inlineCallbacks
     def write_tag(self, addr, value):
         logger.debug('write tag {} with value {} to plc'.format(addr, value))
-        if value:
-            val = 0xFF00
-        else:
-            val = 0x0000
         try:
-            result = yield self.write_coil(addr, val)
-            if not result.value:
-                raise ValueError("result not true")
+            result = yield self.write_coil(addr, bool(int(value)))
+            logger.debug("write result: {}".format(result))
+            defer.returnValue(result)
         except Exception:
             logger.exception(
-                "while write to coil {} value {}".format(addr, val))
-        defer.returnValue(result)
+                "while write to coil {} value {}".format(addr, value))
 
 
 
@@ -126,17 +108,16 @@ class SMHSFactory(ClientFactory):
 
     protocol = SMHSProtocol
 
-    def __init__(self, framer, pol_list, reader, writepool):
+    def __init__(self, framer, pol_list, reader):
         self.framer = framer
         self.pol_list = pol_list
         self.reader = reader
-        self.writepool = writepool
         self.proto = None
 
     def buildProtocol(self, _):
         proto = self.protocol(
             self.framer,
-            self.pol_list, self.reader, self.writepool)
+            self.pol_list, self.reader)
         self.proto = proto
         proto.factory = self
         return proto
@@ -160,7 +141,6 @@ class plchandler(AbstractHandler):
         self.pollint = serverconfig["pollingTimeout"]
         self.packetSize = int(serverconfig["packetSize"])
         self.tagslist = {}
-        self.writepool = {}
         self._inputctags = {}
         self._inputtag_threshold = int(serverconfig["counter_threshold"])
         #fill tagslist with tags from all types
@@ -178,9 +158,11 @@ class plchandler(AbstractHandler):
         # logger.debug(self._tags)
         logger.debug("Full address list - %s" % self.full_address_list)
 
+    def loadtags(self):
+        pass
+
     def settag(self, name, value):
         logger.debug("set tag %s to %s" % (name, value))
-        # self.writepool[int(self.tagslist[name]["address"])] = value
         address = int(self.tagslist[name]['address'])
         self.factory.proto.write_tag(address, value)
 
@@ -260,7 +242,7 @@ class plchandler(AbstractHandler):
                 pol_list[t] = self._generate_address_map(address_list)
         logger.debug(pol_list)
         factory = SMHSFactory(
-            framer, pol_list, self.reader, self.writepool)
+            framer, pol_list, self.reader)
         self.factory = factory
         SerialModbusClient(
             factory, self.serial_port['name'],
