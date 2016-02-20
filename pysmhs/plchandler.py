@@ -76,9 +76,8 @@ class SMHSProtocol(ModbusClientProtocol):
                         val[register[0] + i] = response.getRegister(i)
                     self.reader(val, "inputc")
 
-            address_map = self.pol_list.get("output", None)
-            if address_map:
-                for register in address_map:
+            for t in ('input', 'output'):
+                for register in self.pol_list.get(t, ()):
                     response = yield self.read_coils(*register)
                     if isinstance(response, ExceptionResponse):
                         logger.debug(
@@ -87,7 +86,7 @@ class SMHSProtocol(ModbusClientProtocol):
                     val = {}
                     for i in range(0, register[1]):
                         val[register[0] + i] = response.getBit(i)
-                    self.reader(val, "output")
+                    self.reader(val, t)
         except Exception:
             logger.exception("can't fetch registers")
 
@@ -173,18 +172,18 @@ class plchandler(AbstractHandler):
         and value = number of bits need to read
         '''
         keylist = addressList.keys()
-        maxAddress = int(max(keylist))
-        minAddress = int(min(keylist))
-        s = maxAddress - minAddress + 1
-        c, d = divmod(s, self.packetSize)
-        l = maxAddress - d + 1
-        addressMap = []
-        for x in range(0, c):
-            curAddress = minAddress + self.packetSize * x
-            addressMap.append((curAddress, self.packetSize,))
-        if (d > 0):
-            addressMap.append((l, d,))
-        return tuple(addressMap)
+        l = []
+        keylist.sort()
+        keylist.reverse()
+        while keylist:
+            cur = int(keylist.pop())
+            cur_list = l[-1] if l else []
+            if cur_list and cur - int(cur_list[-1]) == 1:
+                cur_list.append(cur)
+            else:
+                l.append([cur])
+        rv = [(i[0], i[-1]-i[0]+1)for i in l]
+        return tuple(rv)
 
     def reader(self, register, t):
         for addr in register:
