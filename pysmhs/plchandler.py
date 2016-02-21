@@ -1,4 +1,5 @@
 import logging
+from functools import wraps
 
 from twisted.internet import serialport, reactor
 from twisted.internet import defer, task
@@ -19,6 +20,13 @@ logger = logging.getLogger('plchandler')
 
 pymodbus_logger = logging.getLogger('pymodbus')
 pymodbus_logger.setLevel(logging.ERROR)
+lock = defer.DeferredLock()
+
+def with_lock(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        return lock.run(func, *args, **kwargs)
+    return wrapper
 
 class SMHSProtocol(ModbusClientProtocol):
 
@@ -32,7 +40,6 @@ class SMHSProtocol(ModbusClientProtocol):
         self.pol_list = pol_list
         self.reader = reader
         self.loop = task.LoopingCall(self.fetch_holding_registers)
-        self.lock = defer.DeferredLock()
 
     def connectionMade(self):
         logger.debug("Connected to ModBus")
@@ -60,6 +67,7 @@ class SMHSProtocol(ModbusClientProtocol):
             # except Exception as e:
                 # logger.exception('')
 
+    @with_lock
     @defer.inlineCallbacks
     def fetch_holding_registers(self):
         try:
@@ -90,6 +98,7 @@ class SMHSProtocol(ModbusClientProtocol):
         except Exception:
             logger.exception("can't fetch registers")
 
+    @with_lock
     @defer.inlineCallbacks
     def write_tag(self, addr, value):
         logger.debug('write tag {} with value {} to plc'.format(addr, value))
