@@ -101,6 +101,7 @@ class EventsResource(resource.Resource):
 
     def render_GET(self, request):
         request.setHeader("Content-Type", "application/json; charset=utf-8")
+        request.setHeader("Access-Control-Allow-Origin", "*")
         if 'index' in request.args:
             index = request.args['index'][0]
             keys = self.events.keys()
