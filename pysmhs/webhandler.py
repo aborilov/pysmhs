@@ -44,9 +44,14 @@ class webhandler(AbstractHandler):
         pass
 
     def process(self, signal, event):
+        webevent = {}
+        for key, value in event.items():
+            webevent['tag'] = key
+            webevent['value'] = value
+            webevent['handler'] = signal
         if len(self.eventcache) == self.cachemax:
             self.eventcache.popitem(last=False)
-        self.addevent(event)
+        self.addevent(webevent)
 
     def addevent(self, event):
         token = uuid4().hex
