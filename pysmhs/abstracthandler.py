@@ -97,17 +97,21 @@ class AbstractHandler(object):
         '''
         self.stopped = True
         logger.info("Stop handler")
-        try:
-            dispatcher.disconnect(self.process, signal=self.params.get(
-                "listensignals", dispatcher.Any))
-        except:
-            logger.exception("Error while try to disconnect listener")
+        signals = self.params.get('listensignals', (dispatcher.All,))
+        for signal in signals:
+            try:
+                dispatcher.disconnect(self.process, signal=signal)
+            except:
+                logger.exception("Error while try to disconnect listener")
 
     def start(self):
         '''
         Start handler
         '''
         self.stopped = False
-        logger.info("Start handler")
-        dispatcher.connect(self.process, signal=self.params.get(
-            "listensignals", dispatcher.All))
+        logger.info("Start handler: {}".format(self.__class__.__name__))
+        signals = self.params.get('listensignals', (dispatcher.All,))
+        for signal in signals:
+            logger.debug('{} start listen for {}'.format(
+                self.__class__.__name__, signal))
+            dispatcher.connect(self.process, signal=signal)

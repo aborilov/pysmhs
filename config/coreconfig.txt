@@ -11,6 +11,11 @@
     [[params]]
         description = "Dummy handler"
         configfile = dummy_config.txt
+[kioskhandler]
+    run = 1
+    [[params]]
+        description = "Kiosk handler"
+        configfile = kiosk_config.txt
 [plchandler]
     run = 0
     [[params]]
