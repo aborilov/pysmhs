@@ -6,7 +6,7 @@ from twisted.internet import reactor, defer, task
 #from unittest import TestCase
 from twisted.trial import unittest
 
-from kiosk.fsm.changer_fsm import ChangerFSM
+from pysmhs.fsm.changer_fsm import ChangerFSM
 
 
 try:
@@ -410,8 +410,8 @@ class TestChangerFsm(unittest.TestCase):
 
         self.changer_fsm.start_dispense(amount=10)
         
-        yield self.check_outputs_defer(
-                       fsm_amount_dispensed_expected=[({'amount': 0,},)])
+        yield self.check_outputs_defer(sleep_sec=0.1,
+                       changer_dispense_amount_expected=[((10,),)])
 
 
     @defer.inlineCallbacks
@@ -450,7 +450,7 @@ class TestChangerFsm(unittest.TestCase):
     # fsm_listener.coin_in      -    -    -    -    +    -    -    -    -    -
     # fsm_listener.dispensed    -    -    -    -    -    -    -    -    -    -
     # changer.start_accept      -    -    -    -    -    -    +    -    -    -
-    # changer.stop_accept       -    -    +    -    -    -    -    -    -    -
+    # changer.stop_accept       -    -    +    -    -    -    -    +    -    -
     # changer.dispense_amount   -    -    -    -    -    -    -    -    +    -
 
 
@@ -533,7 +533,7 @@ class TestChangerFsm(unittest.TestCase):
 
         self.changer_fsm.stop_accept()
         
-        yield self.check_outputs_defer()
+        yield self.check_outputs_defer(changer_stop_accept_expected=[()])
         
     @defer.inlineCallbacks
     def test_40_start_dispense_on_ready(self):
@@ -581,7 +581,7 @@ class TestChangerFsm(unittest.TestCase):
     # fsm_listener.coin_in      -    -    -    -    +    -    -    -    -    -
     # fsm_listener.dispensed    -    -    -    -    -    -    -    -    -    -
     # changer.start_accept      -    -    -    -    -    -    -    -    -    -
-    # changer.stop_accept       -    -    +    -    +    -    -    +    -    -
+    # changer.stop_accept       -    -    +    -    -    -    -    +    -    -
     # changer.dispense_amount   -    -    -    -    -    -    -    -    -    -
 
     @defer.inlineCallbacks
@@ -634,8 +634,7 @@ class TestChangerFsm(unittest.TestCase):
         dispatcher.send_minimal(
             sender=self.changer, signal='coin_in', amount=10)
         
-        yield self.check_outputs_defer(fsm_coin_in_expected=[({'amount':10},)],
-                       changer_stop_accept_expected=[()])
+        yield self.check_outputs_defer(fsm_coin_in_expected=[({'amount':10},)])
 
 
     @defer.inlineCallbacks

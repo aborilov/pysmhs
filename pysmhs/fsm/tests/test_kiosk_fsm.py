@@ -3,7 +3,7 @@ from louie import dispatcher
 #from unittest import TestCase
 from twisted.trial import unittest
 
-from kiosk.fsm.kiosk_fsm import KioskFSM
+from pysmhs.fsm.kiosk_fsm import KioskFSM
 
 try:
     from unittest.mock import MagicMock

@@ -6,7 +6,7 @@ from twisted.internet import reactor, defer, task
 # from unittest import TestCase
 from twisted.trial import unittest
 
-from kiosk.fsm.validator_fsm import BillValidatorFSM
+from pysmhs.fsm.validator_fsm import BillValidatorFSM
 
 try:
     from unittest.mock import MagicMock

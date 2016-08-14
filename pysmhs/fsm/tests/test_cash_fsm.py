@@ -5,7 +5,7 @@ from twisted.internet import reactor, defer, task
 #from unittest import TestCase
 from twisted.trial import unittest
 
-from kiosk.fsm.cash_fsm import CashFSM
+from pysmhs.fsm.cash_fsm import CashFSM
 
 try:
     from unittest.mock import MagicMock
@@ -2284,6 +2284,56 @@ class TestCashFsm(unittest.TestCase):
                            changer_fsm_start_dispense_expected=[((11,),),
                                                                 ((11,),),
                                                                 ((11,),)])
+
+    @defer.inlineCallbacks
+    def test_158_accept_again_after_accept_timeout(self):
+        '''
+        check that repeated acceptance is correct after accept timeout exceed
+        in FSM state 'accept_amount'
+        '''
+        
+        # start accept
+        self.set_fsm_state_accept_amount(amount=10, accept_timeout_sec=0.5)
+
+        # accepted amount not enough
+        dispatcher.send_minimal(
+            sender=self.changer_fsm, signal='coin_in', amount=9)
+
+        # wait more than accept timeout
+        yield self.sleep_defer(sleep_sec=1)
+
+        self.check_outputs(changer_fsm_start_accept_expected=[()],
+                           changer_fsm_stop_accept_expected=[()],
+                           validator_fsm_stop_accept_expected=[()],
+                           changer_fsm_start_dispense_expected=[((9,),)],
+                           fsm_not_accepted_expected=[()])
+        
+        yield self.sleep_defer(sleep_sec=0.1)
+        
+        # amount dispensed
+        dispatcher.send_minimal(
+            sender=self.changer_fsm, signal='amount_dispensed', amount=9)
+        
+        self.check_outputs()
+
+        # start next accept
+        self.cash_fsm.accept(amount=11)
+        self.validator_fsm.start_accept.reset_mock()
+        self.changer_fsm.start_accept.reset_mock()
+        
+        # accepted amount not enough
+        dispatcher.send_minimal(
+            sender=self.changer_fsm, signal='coin_in', amount=2)
+
+        self.check_outputs(changer_fsm_start_accept_expected=[()])
+        
+        # accept remaining amount
+        dispatcher.send_minimal(
+            sender=self.changer_fsm, signal='coin_in', amount=10)
+        
+        self.check_outputs(changer_fsm_stop_accept_expected=[()],
+                   validator_fsm_stop_accept_expected=[()],
+                   fsm_accepted_expected=[({'amount':12,},)])
 
 
     def set_fsm_state_wait_ready(self):

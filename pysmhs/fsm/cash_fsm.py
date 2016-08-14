@@ -67,6 +67,7 @@ class CashFSM(Machine):
 
         ]
         super(CashFSM, self).__init__(
+            name='cash_fsm',
             states=states,
             transitions=transitions,
             initial='init',
@@ -84,7 +85,7 @@ class CashFSM(Machine):
                            sender=changer_fsm, signal='initialized')
         dispatcher.connect(self._on_changer_error, 
                            sender=changer_fsm, signal='error')
-        dispatcher.connect(self.coin_in, sender=changer_fsm, signal='coin_in')
+        dispatcher.connect(self._on_coin_in, sender=changer_fsm, signal='coin_in')
         dispatcher.connect(self.amount_dispensed, 
                            sender=changer_fsm, signal='amount_dispensed')
         dispatcher.connect(self._on_validator_offline, 
@@ -93,7 +94,7 @@ class CashFSM(Machine):
                            sender=validator_fsm, signal='initialized')
         dispatcher.connect(self._on_validator_error, 
                            sender=validator_fsm, signal='error')
-        dispatcher.connect(self.bill_in, 
+        dispatcher.connect(self._on_bill_in, 
                            sender=validator_fsm, signal='bill_in')
         dispatcher.connect(self.check_bill, 
                            sender=validator_fsm, signal='check_bill')
@@ -144,6 +145,14 @@ class CashFSM(Machine):
         self.validator_state = DEVICE_STATE_ERROR
         self.validator_error(error_code, error_text)
 
+    def _on_coin_in(self, amount):
+        self.coin_in(amount)
+        self._fire_coin_in(amount)
+
+    def _on_bill_in(self, amount):
+        self.bill_in(amount)
+        self._fire_bill_in(amount)
+
     def _is_ready(self):
         return ((self.changer_state == DEVICE_STATE_READY) and
                 (self.validator_state == DEVICE_STATE_READY))
@@ -164,6 +173,7 @@ class CashFSM(Machine):
     def _start_accept(self, amount):
         self._start_acceptance_monitor()
         self._need_accept_amount = amount
+        self._accepted_amount = 0
         self._start_coin_accept()
         self._start_bill_accept()
 
@@ -180,7 +190,7 @@ class CashFSM(Machine):
     def _after_accept_timeout(self):
         self._stop_accept()
         if self._accepted_amount > 0:
-            self.changer_fsm.start_dispense(self._accepted_amount)
+            self._dispense_all()
         dispatcher.send_minimal(
             sender=self, signal='not_accepted')
 
@@ -231,15 +241,13 @@ class CashFSM(Machine):
 
     def _dispense_all(self):
         dispensed_amount = self._accepted_amount
-        self._accepted_amount = 0
-        self._need_accept_amount = 0
+        self._reset_mount_accept_info()
         self._dispense_amount(dispensed_amount)
 
     def _dispense_change(self):
 #         change_amount = self._accepted_amount - self._need_accept_amount
         change_amount = self.get_dispense_amount()
-        self._accepted_amount = 0
-        self._need_accept_amount = 0
+        self._reset_mount_accept_info()
         self._dispense_amount(change_amount)
 
     def _after_error(self, error_code, error_text):
@@ -272,6 +280,10 @@ class CashFSM(Machine):
             self._acceptance_monitor_id.cancel()
         except AlreadyCalled:
             pass
+        
+    def _reset_mount_accept_info(self):
+        self._accepted_amount = 0
+        self._need_accept_amount = 0
 
     #######################
     ## Public Methods
@@ -299,6 +311,16 @@ class CashFSM(Machine):
     #######################
     ## Events
     #######################
+
+    def _fire_coin_in(self, amount):
+        dispatcher.send_minimal(
+            sender=self, signal='coin_in', 
+            amount=amount)
+
+    def _fire_bill_in(self, amount):
+        dispatcher.send_minimal(
+            sender=self, signal='bill_in', 
+            amount=amount)
     
     def _dispense_amount_changed(self, amount):
         dispatcher.send_minimal(

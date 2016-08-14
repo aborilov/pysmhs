@@ -38,6 +38,7 @@ class BillValidatorFSM(Machine):
             ['offline',                'bill_confirm',    'offline',          None,           None,            None,            '_after_offline'    ],
         ]
         super(BillValidatorFSM, self).__init__(
+            name='bill_validator_fsm',
             states=states, 
             transitions=transitions, 
             initial='offline', 

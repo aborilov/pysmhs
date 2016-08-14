@@ -30,6 +30,7 @@ class KioskFSM(Machine):
 
         ]
         super(KioskFSM, self).__init__(
+            name='kiosk_fsm',
             states=states,
             transitions=transitions,
             initial='init',
@@ -62,6 +63,10 @@ class KioskFSM(Machine):
                            sender=cash_fsm, signal='bill_amount_changed')
         dispatcher.connect(self._bill_count_changed,
                            sender=cash_fsm, signal='bill_count_changed')
+        dispatcher.connect(self._coin_in, 
+                           sender=cash_fsm, signal='coin_in')
+        dispatcher.connect(self._bill_in, 
+                           sender=cash_fsm, signal='bill_in')
 
         # init parameters
         self._product = -1
@@ -159,3 +164,13 @@ class KioskFSM(Machine):
         dispatcher.send_minimal(
             sender=self, signal='bill_count_changed',
             count=count)
+
+    def _coin_in(self, amount):
+        dispatcher.send_minimal(
+            sender=self, signal='coin_in', 
+            amount=amount)
+
+    def _bill_in(self, amount):
+        dispatcher.send_minimal(
+            sender=self, signal='bill_in', 
+            amount=amount)

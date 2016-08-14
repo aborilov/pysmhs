@@ -19,7 +19,8 @@ class ChangerFSM(Machine):
             ['initialized',            'online',          'ready',            None,           None,            None,            '_after_init'       ],
             ['start_accept',           'ready',           'wait_coin',        None,           None,            None,            '_start_accept'     ],
             ['start_dispense',         'ready',           'dispense_amount',  None,           None,            None,            '_start_dispense'   ],
-            ['coin_in',                'wait_coin',       'ready',            None,           None,           '_stop_accept',   '_coin_in'          ],
+            ['stop_accept',            'ready',           'ready',            None,           None,           '_stop_accept',    None               ],
+            ['coin_in',                'wait_coin',       'ready',            None,           None,            None,            '_coin_in'          ],
             ['stop_accept',            'wait_coin',       'ready',            None,           None,           '_stop_accept',    None               ],
             ['start_dispense',         'wait_coin',       'wait_coin',        None,           None,           '_start_dispense', None               ],
             ['coin_out',               'dispense_amount', 'dispense_amount',  None,          '_is_dispensed', '_remove_amount',  None               ],
@@ -28,7 +29,7 @@ class ChangerFSM(Machine):
 
             ['start_dispense',         'offline',         'offline',          None,           None,            None,            '_amount_dispensed' ],
             ['start_dispense',         'online',          'online',           None,           None,            None,            '_amount_dispensed' ],
-            ['start_dispense',         'error',           'error',            None,           None,            None,            '_amount_dispensed' ],
+            ['start_dispense',         'error',           'error',            None,           None,           '_start_dispense', None               ],
 
             ['coin_in',                'ready',           'ready',            None,           None,           '_stop_accept',   '_coin_in'          ],
             ['coin_in',                'dispense_amount', 'dispense_amount',  None,           None,           '_stop_accept',   '_coin_in'          ],
@@ -45,6 +46,7 @@ class ChangerFSM(Machine):
 
         ]
         super(ChangerFSM, self).__init__(
+            name='changer_fsm',
             states=states, 
             transitions=transitions, 
             initial='offline', 
