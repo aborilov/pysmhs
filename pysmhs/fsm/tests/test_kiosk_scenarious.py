@@ -1,9 +1,9 @@
 from louie import dispatcher
 
-from twisted.internet import reactor, defer, task
+from twisted.internet import reactor, task
 
-#from unittest import TestCase
-from twisted.trial import unittest
+from unittest import TestCase
+# from twisted.trial import unittest
 
 from pysmhs.fsm.kiosk_fsm import KioskFSM
 from pysmhs.fsm.changer_fsm import ChangerFSM
@@ -28,7 +28,7 @@ PRODUCTS = {
             }
 
 
-class TestKioskFsm(unittest.TestCase):
+class TestKioskFsm(TestCase):
     
 
     def setUp(self):
@@ -66,6 +66,9 @@ class TestKioskFsm(unittest.TestCase):
         dispatcher.connect(self.fsm_listener.error, 
                            sender=self.kiosk_fsm, signal='error')
 
+        self.clock = task.Clock()
+        reactor.callLater = self.clock.callLater
+
         self.kiosk_fsm.start()
         
 
@@ -88,7 +91,6 @@ class TestKioskFsm(unittest.TestCase):
                            validator_start_accept_expected=[()])
         
     
-    @defer.inlineCallbacks
     def test_scenarious_1_1(self):
         '''
         1) Wait select product
@@ -117,11 +119,9 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
         
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(fsm_ready_expected=[()])
 
 
-    @defer.inlineCallbacks
     def test_scenarious_1_2(self):
         '''
         1) Wait select product
@@ -140,12 +140,10 @@ class TestKioskFsm(unittest.TestCase):
         
         #3
         self.check_bill_amount(PRODUCTS[product]-6)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(validator_start_accept_expected=[()],
                            validator_stack_bill_expected=[()])
         
         self.check_bill_amount(6)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_stop_accept_expected=[()],
                            validator_stack_bill_expected=[()])
@@ -154,11 +152,9 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
         
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(fsm_ready_expected=[()])
         
 
-    @defer.inlineCallbacks
     def test_scenarious_1_3(self):
         '''
         1) Wait select product
@@ -180,7 +176,6 @@ class TestKioskFsm(unittest.TestCase):
         self.check_outputs(changer_start_accept_expected=[()])
         
         self.check_bill_amount(6)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_stop_accept_expected=[()],
                            validator_stack_bill_expected=[()])
@@ -189,11 +184,9 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
         
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(fsm_ready_expected=[()])
 
 
-    @defer.inlineCallbacks
     def test_scenarious_2_1(self):
         '''
         1) Wait select product
@@ -223,7 +216,6 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
         
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
 
         #6
@@ -231,7 +223,6 @@ class TestKioskFsm(unittest.TestCase):
         self.check_outputs(fsm_ready_expected=[()])
 
 
-    @defer.inlineCallbacks
     def test_scenarious_2_2(self):
         '''
         1) Wait select product
@@ -251,11 +242,9 @@ class TestKioskFsm(unittest.TestCase):
         
         #3
         self.check_bill_amount(PRODUCTS[product]-6)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.reset_outputs()
         
         self.check_bill_amount(7)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_stop_accept_expected=[()],
                            validator_stack_bill_expected=[()])
@@ -264,16 +253,12 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
         
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
         
         #6
         self.fire_coin_out(1)
         self.check_outputs(fsm_ready_expected=[()])
 
-        
-
-    @defer.inlineCallbacks
     def test_scenarious_2_3(self):
         '''
         1) Wait select product
@@ -296,7 +281,6 @@ class TestKioskFsm(unittest.TestCase):
         self.reset_outputs()
 
         self.check_bill_amount(7)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_stop_accept_expected=[()],
                            validator_stack_bill_expected=[()])
@@ -305,15 +289,12 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
         
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
 
         #6
         self.fire_coin_out(1)
         self.check_outputs(fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_3_1(self):
         '''
         1) Wait select product
@@ -340,7 +321,7 @@ class TestKioskFsm(unittest.TestCase):
         self.accept_coin_amount(5)
         
         #4
-        yield self.sleep_defer(sleep_sec=0.5)
+        self.clock.advance(self.cash_fsm.accept_timeout_sec+0.1)
         
         #5
         self.check_outputs(changer_start_accept_expected=[()],
@@ -349,8 +330,6 @@ class TestKioskFsm(unittest.TestCase):
                changer_dispense_amount_expected=[((PRODUCTS[product]-1,),)],
                fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_3_2(self):
         '''
         1) Wait select product
@@ -372,14 +351,13 @@ class TestKioskFsm(unittest.TestCase):
         
         #3
         self.check_bill_amount(PRODUCTS[product]-6)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.reset_outputs()
         
         self.check_bill_amount(5)
         
         #4
-        yield self.sleep_defer(sleep_sec=0.5)
-        
+        self.clock.advance(self.cash_fsm.accept_timeout_sec+0.1)
+                
         #5
         self.check_outputs(validator_start_accept_expected=[()],
                    validator_stack_bill_expected=[()],
@@ -388,8 +366,6 @@ class TestKioskFsm(unittest.TestCase):
                    changer_dispense_amount_expected=[((PRODUCTS[product]-1,),)],
                    fsm_ready_expected=[()])
         
-
-    @defer.inlineCallbacks
     def test_scenarious_3_3(self):
         '''
         1) Wait select product
@@ -416,7 +392,7 @@ class TestKioskFsm(unittest.TestCase):
         self.check_bill_amount(5)
         
         #4
-        yield self.sleep_defer(sleep_sec=0.5)
+        self.clock.advance(self.cash_fsm.accept_timeout_sec+0.1)
         
         #5
         self.check_outputs(validator_start_accept_expected=[()],
@@ -426,8 +402,6 @@ class TestKioskFsm(unittest.TestCase):
                    changer_dispense_amount_expected=[((PRODUCTS[product]-1,),)],
                    fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_4_1(self):
         '''
         1) Wait select product
@@ -457,14 +431,13 @@ class TestKioskFsm(unittest.TestCase):
 
         #4
         self.check_bill_amount(6, accept_bill=False)
-        yield self.sleep_defer(sleep_sec=0.1)
         
         #5
         self.check_outputs(validator_return_bill_expected=[()],
                            validator_start_accept_expected=[()])
        
         #6
-        yield self.sleep_defer(sleep_sec=0.5)
+        self.clock.advance(self.cash_fsm.accept_timeout_sec+0.1)
         
         #7, 8
         self.check_outputs(fsm_reset_sell_expected=[()],
@@ -472,8 +445,6 @@ class TestKioskFsm(unittest.TestCase):
                    changer_dispense_amount_expected=[((PRODUCTS[product]-6,),)],
                    fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_4_2(self):
         '''
         1) Wait select product
@@ -497,22 +468,19 @@ class TestKioskFsm(unittest.TestCase):
         
         #3
         self.check_bill_amount(PRODUCTS[product]-9)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_bill_amount(3)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.reset_outputs()
 
         #4
         self.changer.can_dispense_amount = MagicMock(return_value=False)
         self.check_bill_amount(6, accept_bill=False)
-        yield self.sleep_defer(sleep_sec=0.1)
         
         #5
         self.check_outputs(validator_return_bill_expected=[()],
                            validator_start_accept_expected=[()])
         
         #6
-        yield self.sleep_defer(sleep_sec=0.5)
+        self.clock.advance(self.cash_fsm.accept_timeout_sec+0.1)
         
         #7, 8
         self.check_outputs(fsm_reset_sell_expected=[()],
@@ -520,8 +488,6 @@ class TestKioskFsm(unittest.TestCase):
                    changer_dispense_amount_expected=[((PRODUCTS[product]-6,),)],
                    fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_4_3(self):
         '''
         1) Wait select product
@@ -546,20 +512,18 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-9)
         self.check_bill_amount(3)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.reset_outputs()
 
         #4
         self.changer.can_dispense_amount = MagicMock(return_value=False)
         self.check_bill_amount(6, accept_bill=False)
-        yield self.sleep_defer(sleep_sec=0.1)
         
         #5
         self.check_outputs(validator_return_bill_expected=[()],
                            validator_start_accept_expected=[()])
         
         #6
-        yield self.sleep_defer(sleep_sec=0.5)
+        self.clock.advance(self.cash_fsm.accept_timeout_sec+0.1)
         
         #7, 8
         self.check_outputs(fsm_reset_sell_expected=[()],
@@ -567,8 +531,6 @@ class TestKioskFsm(unittest.TestCase):
                    changer_dispense_amount_expected=[((PRODUCTS[product]-6,),)],
                    fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_4_4(self):
         '''
         1) Wait select product
@@ -591,22 +553,19 @@ class TestKioskFsm(unittest.TestCase):
         
         #3
         self.check_bill_amount(PRODUCTS[product], accept_bill=False)
-        yield self.sleep_defer(sleep_sec=0.1)
         
         #4
         self.check_outputs(validator_return_bill_expected=[()],
                            validator_start_accept_expected=[()])
        
         #5
-        yield self.sleep_defer(sleep_sec=0.5)
+        self.clock.advance(self.cash_fsm.accept_timeout_sec+0.1)
         
         #6
         self.check_outputs(fsm_reset_sell_expected=[()],
                            changer_stop_accept_expected=[()],
                            fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_4_5(self):
         '''
         1) Wait select product
@@ -630,7 +589,6 @@ class TestKioskFsm(unittest.TestCase):
         
         #3
         self.check_bill_amount(PRODUCTS[product], accept_bill=False)
-        yield self.sleep_defer(sleep_sec=0.1)
         
         #4
         self.check_outputs(validator_return_bill_expected=[()],
@@ -640,7 +598,6 @@ class TestKioskFsm(unittest.TestCase):
         self.changer.can_dispense_amount = MagicMock(return_value=True)
         self.accept_coin_amount(PRODUCTS[product]-1)
         self.check_bill_amount(1)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_start_accept_expected=[()],
                            changer_stop_accept_expected=[()],
                            plc_prepare_expected=[((PRODUCT_1,),)],
@@ -650,11 +607,8 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
         
         #7
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_5_1(self):
         '''
         1) Wait select product
@@ -677,10 +631,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()])
         
         #4
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_5_2(self):
         '''
         1) Wait select product
@@ -704,10 +656,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()])
         
         #4
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_5_3(self):
         '''
         1) Wait select product
@@ -732,10 +682,8 @@ class TestKioskFsm(unittest.TestCase):
                changer_stop_accept_expected=[()])
         
         #4
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_5_4(self):
         '''
         1) Wait select product
@@ -758,10 +706,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()])
         
         #4
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_6_1(self):
         '''
         1) Wait select product
@@ -790,10 +736,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()])
         
         #5
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_6_2(self):
         '''
         1) Wait select product
@@ -823,10 +767,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()])
         
         #5
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
         
-
-    @defer.inlineCallbacks
     def test_scenarious_6_3(self):
         '''
         1) Wait select product
@@ -856,10 +798,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()])
         
         #5
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_6_4(self):
         '''
         1) Wait select product
@@ -888,10 +828,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()])
         
         #5
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_7_1(self):
         '''
         1) Wait select product
@@ -914,14 +852,11 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(2)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.reset_outputs()
 
         #4
         self.fire_changer_error(error_code=changer.ERROR_CODE_COIN_JAM, 
                                 error_text='error')
-        
-        yield self.sleep_defer(sleep_sec=0.1)
         
         #5, 6
         self.check_outputs(fsm_error_expected=[
@@ -931,10 +866,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_dispense_amount_expected=[((PRODUCTS[product]-1,),)])
         
         #7
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_7_2(self):
         '''
         1) Wait select product
@@ -957,14 +890,11 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(2)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.reset_outputs()
 
         #4
         self.fire_changer_error(error_code=changer.ERROR_CODE_TUBE_JAM, 
                                 error_text='error')
-        
-        yield self.sleep_defer(sleep_sec=0.1)
         
         #5, 6
         self.check_outputs(fsm_error_expected=[
@@ -974,10 +904,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_dispense_amount_expected=[((PRODUCTS[product]-1,),)])
         
         #7
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_8_1(self):
         '''
         1) Wait select product
@@ -1000,15 +928,12 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(2)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.reset_outputs()
 
         #4
         self.fire_changer_error(
                             error_code=changer.ERROR_CODE_DEFECTIVE_TUBE_SENSOR, 
                             error_text='error')
-        
-        yield self.sleep_defer(sleep_sec=0.1)
         
         #5, 6
         self.check_outputs(fsm_error_expected=[
@@ -1018,10 +943,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_dispense_amount_expected=[((PRODUCTS[product]-1,),)])
         
         #7
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_8_2(self):
         '''
         1) Wait select product
@@ -1044,15 +967,12 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(2)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.reset_outputs()
 
         #4
         self.fire_changer_error(
                             error_code=changer.ERROR_CODE_ROM_CHECKSUM_ERROR, 
                             error_text='error')
-        
-        yield self.sleep_defer(sleep_sec=0.1)
         
         #5, 6
         self.check_outputs(fsm_error_expected=[
@@ -1062,10 +982,8 @@ class TestKioskFsm(unittest.TestCase):
                    changer_dispense_amount_expected=[((PRODUCTS[product]-1,),)])
         
         #7
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_9_1(self):
         '''
         1) Wait select product
@@ -1088,7 +1006,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(3)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_start_accept_expected=[()],
@@ -1109,10 +1026,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()])
         
         #7
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_9_2(self):
         '''
         1) Wait select product
@@ -1135,7 +1050,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(3)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_start_accept_expected=[()],
@@ -1157,10 +1071,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()])
         
         #7
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_9_3(self):
         '''
         1) Wait select product
@@ -1183,7 +1095,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(3)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_start_accept_expected=[()],
@@ -1205,10 +1116,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()])
         
         #7
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_9_4(self):
         '''
         1) Wait select product
@@ -1231,7 +1140,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(3)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_start_accept_expected=[()],
@@ -1252,10 +1160,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()])
         
         #7
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_10_1(self):
         '''
         1) Wait select product
@@ -1279,7 +1185,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(4)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_start_accept_expected=[()],
@@ -1294,8 +1199,6 @@ class TestKioskFsm(unittest.TestCase):
         #5
         self.product_prepared()
         
-        yield self.sleep_defer(sleep_sec=0.1)
-        
         #6, 7
         self.check_outputs(fsm_error_expected=[
                        ({'error_code':changer.ERROR_CODE_DEFECTIVE_TUBE_SENSOR, 
@@ -1304,10 +1207,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_dispense_amount_expected=[((1,),)])
         
         #8
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_10_2(self):
         '''
         1) Wait select product
@@ -1331,7 +1232,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(4)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_start_accept_expected=[()],
@@ -1346,8 +1246,6 @@ class TestKioskFsm(unittest.TestCase):
         #5
         self.product_prepared()
         
-        yield self.sleep_defer(sleep_sec=0.1)
-        
         #6, 7
         self.check_outputs(fsm_error_expected=[
                            ({'error_code':changer.ERROR_CODE_ROM_CHECKSUM_ERROR, 
@@ -1356,10 +1254,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_dispense_amount_expected=[((1,),)])
         
         #8
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_11_1(self):
         '''
         1) Wait select product
@@ -1383,7 +1279,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(4)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_start_accept_expected=[()],
@@ -1397,8 +1292,6 @@ class TestKioskFsm(unittest.TestCase):
         #5
         self.product_prepared()
         
-        yield self.sleep_defer(sleep_sec=0.1)
-        
         #6, 7
         self.check_outputs(fsm_error_expected=[
                                    ({'error_code':changer.ERROR_CODE_COIN_JAM, 
@@ -1407,10 +1300,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_dispense_amount_expected=[((1,),)])
         
         #8
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_11_2(self):
         '''
         1) Wait select product
@@ -1434,7 +1325,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(4)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_start_accept_expected=[()],
@@ -1448,8 +1338,6 @@ class TestKioskFsm(unittest.TestCase):
         #5
         self.product_prepared()
         
-        yield self.sleep_defer(sleep_sec=0.1)
-        
         #6, 7
         self.check_outputs(fsm_error_expected=[
                                    ({'error_code':changer.ERROR_CODE_TUBE_JAM, 
@@ -1458,10 +1346,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_dispense_amount_expected=[((1,),)])
         
         #8
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_12_1(self):
         '''
         1) Wait select product
@@ -1485,7 +1371,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(4)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_start_accept_expected=[()],
@@ -1496,7 +1381,6 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
 
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
 
         #6
@@ -1511,10 +1395,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()],)
         
         #8
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_12_2(self):
         '''
         1) Wait select product
@@ -1538,7 +1420,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(4)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_start_accept_expected=[()],
@@ -1549,7 +1430,6 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
 
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
 
         #6
@@ -1565,10 +1445,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()],)
         
         #8
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_12_3(self):
         '''
         1) Wait select product
@@ -1592,7 +1470,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(4)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_start_accept_expected=[()],
@@ -1603,7 +1480,6 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
 
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
 
         #6
@@ -1619,10 +1495,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()],)
         
         #8
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_12_4(self):
         '''
         1) Wait select product
@@ -1646,7 +1520,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(4)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_start_accept_expected=[()],
@@ -1657,7 +1530,6 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
 
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
 
         #6
@@ -1672,10 +1544,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()],)
         
         #8
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_13_1(self):
         '''
         1) Wait select product
@@ -1699,7 +1569,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(4)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_start_accept_expected=[()],
@@ -1710,7 +1579,6 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
 
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
 
         #6
@@ -1727,10 +1595,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()],)
         
         #8
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_13_2(self):
         '''
         1) Wait select product
@@ -1754,7 +1620,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(4)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_start_accept_expected=[()],
@@ -1765,7 +1630,6 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
 
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
 
         #6
@@ -1783,10 +1647,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()],)
         
         #8
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_13_3(self):
         '''
         1) Wait select product
@@ -1810,7 +1672,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(4)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_start_accept_expected=[()],
@@ -1821,7 +1682,6 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
 
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
 
         #6
@@ -1839,10 +1699,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()],)
         
         #8
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_13_4(self):
         '''
         1) Wait select product
@@ -1866,7 +1724,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(4)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)],
                            changer_start_accept_expected=[()],
@@ -1877,7 +1734,6 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
 
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
 
         #6
@@ -1894,10 +1750,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()],)
         
         #8
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_14(self):
         '''
         1) Wait select product
@@ -1920,10 +1774,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()])
         
         #4
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_15_1(self):
         '''
         1) Wait select product
@@ -1944,8 +1796,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.fire_validator_error(error_code=1, error_text='error')
         
-        yield self.sleep_defer(sleep_sec=0.1)
-        
         #4
         self.check_outputs(validator_return_bill_expected=[()],
                            validator_stop_accept_expected=[()],
@@ -1954,10 +1804,8 @@ class TestKioskFsm(unittest.TestCase):
                                                  'error_text':'error'},)])
 
         #5
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_15_2(self):
         '''
         1) Wait select product
@@ -1984,8 +1832,6 @@ class TestKioskFsm(unittest.TestCase):
         #4
         self.fire_validator_error(error_code=1, error_text='error')
         
-        yield self.sleep_defer(sleep_sec=0.1)
-        
         #5, 6
         self.check_outputs(validator_return_bill_expected=[()],
                    validator_stop_accept_expected=[()],
@@ -1995,10 +1841,8 @@ class TestKioskFsm(unittest.TestCase):
                                          'error_text':'error'},)])
         
         #7
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_16(self):
         '''
         1) Wait select product
@@ -2022,7 +1866,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(4)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.reset_outputs()
         
         #4
@@ -2032,7 +1875,6 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
         
         #6, 7
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(validator_return_bill_expected=[()],
                            validator_stop_accept_expected=[()],
                            changer_stop_accept_expected=[()],
@@ -2044,10 +1886,8 @@ class TestKioskFsm(unittest.TestCase):
         self.check_outputs()
         
         #8
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_17(self):
         '''
         1) Wait select product
@@ -2071,7 +1911,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(4)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.reset_outputs()
         
@@ -2079,7 +1918,6 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
 
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
 
         #6
@@ -2093,10 +1931,8 @@ class TestKioskFsm(unittest.TestCase):
                            validator_stop_accept_expected=[()])
         
         #8
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_18(self):
         '''
         1) Wait select product
@@ -2120,7 +1956,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(4)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.reset_outputs()
         
@@ -2128,7 +1963,6 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
 
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
 
         #6
@@ -2136,7 +1970,6 @@ class TestKioskFsm(unittest.TestCase):
         self.check_outputs(fsm_ready_expected=[()])
         
         self.fire_validator_error(error_code=1, error_text='error')
-        yield self.sleep_defer(sleep_sec=0.1)
 
         #7
         self.check_outputs(fsm_error_expected=[({'error_code':1, 
@@ -2146,10 +1979,8 @@ class TestKioskFsm(unittest.TestCase):
                            changer_stop_accept_expected=[()])
         
         #8
-        yield self.check_kiosk_is_not_serviced()
+        self.check_kiosk_is_not_serviced()
 
-
-    @defer.inlineCallbacks
     def test_scenarious_19(self):
         '''
         1) Wait select product
@@ -2170,14 +2001,12 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(3)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.reset_outputs()
         
         #4
         self.product_not_prepared()
 
         #5
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(
                    changer_dispense_amount_expected=[((PRODUCTS[product],),)])
 
@@ -2185,8 +2014,6 @@ class TestKioskFsm(unittest.TestCase):
         self.fire_coin_out(PRODUCTS[product])
         self.check_outputs(fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_20(self):
         '''
         1) Wait select product
@@ -2212,19 +2039,16 @@ class TestKioskFsm(unittest.TestCase):
         
         #check bill not accepted
         self.check_bill_amount(PRODUCTS[product], accept_bill=False)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(validator_return_bill_expected=[()],
                            validator_start_accept_expected=[()])
         
         #4
-        yield self.sleep_defer(sleep_sec=0.2)
-
+        self.clock.advance(self.cash_fsm.accept_timeout_sec)
+        
         #5, 6
         self.check_outputs(fsm_reset_sell_expected=[()],
                            fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_21(self):
         '''
         1) Wait select product
@@ -2250,19 +2074,16 @@ class TestKioskFsm(unittest.TestCase):
         
         #check bill not accepted
         self.check_bill_amount(PRODUCTS[product], accept_bill=False)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(validator_return_bill_expected=[()],
                            validator_start_accept_expected=[()])
         
         #4
-        yield self.sleep_defer(sleep_sec=0.2)
+        self.clock.advance(self.cash_fsm.accept_timeout_sec)
 
         #5, 6
         self.check_outputs(fsm_reset_sell_expected=[()],
                            fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_22(self):
         '''
         1) Wait select product
@@ -2287,7 +2108,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.check_bill_amount(PRODUCTS[product]-2)
         self.accept_coin_amount(1)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.reset_outputs()
 
         #4
@@ -2295,19 +2115,16 @@ class TestKioskFsm(unittest.TestCase):
         
         #check bill not accepted
         self.check_bill_amount(PRODUCTS[product], accept_bill=False)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(validator_return_bill_expected=[()],
                            validator_start_accept_expected=[()])
         
         #5
-        yield self.sleep_defer(sleep_sec=0.4)
+        self.clock.advance(self.cash_fsm.accept_timeout_sec)
 
         #6, 7
         self.check_outputs(fsm_reset_sell_expected=[()],
                            fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_23(self):
         '''
         1) Wait select product
@@ -2328,9 +2145,7 @@ class TestKioskFsm(unittest.TestCase):
 
         #3
         self.check_bill_amount(PRODUCTS[product]-2)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.accept_coin_amount(2)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(changer_stop_accept_expected=[()],
                            validator_stack_bill_expected=[()],
@@ -2344,11 +2159,8 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
         
         #6
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_24_1(self):
         '''
         1) Wait select product
@@ -2371,9 +2183,7 @@ class TestKioskFsm(unittest.TestCase):
 
         #3
         self.check_bill_amount(PRODUCTS[product]-2)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.accept_coin_amount(3)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(changer_stop_accept_expected=[()],
                            validator_stack_bill_expected=[()],
@@ -2392,7 +2202,6 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
         
         #7
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
         
         self.fire_coin_out(1)
@@ -2400,8 +2209,6 @@ class TestKioskFsm(unittest.TestCase):
         #8
         self.check_outputs(fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_24_2(self):
         '''
         1) Wait select product
@@ -2422,9 +2229,7 @@ class TestKioskFsm(unittest.TestCase):
 
         #3
         self.check_bill_amount(PRODUCTS[product]-2)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.accept_coin_amount(3)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(changer_stop_accept_expected=[()],
                            validator_stack_bill_expected=[()],
@@ -2438,11 +2243,8 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
         
         #6
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_25(self):
         '''
         1) Wait select product
@@ -2468,7 +2270,6 @@ class TestKioskFsm(unittest.TestCase):
         #4
         self.accept_coin_amount(PRODUCTS[product]-2)
         self.accept_coin_amount(3)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(changer_stop_accept_expected=[()],
                            changer_start_accept_expected=[()],
@@ -2478,7 +2279,6 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
 
         #6        
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
         
         self.fire_coin_out(1)
@@ -2486,8 +2286,6 @@ class TestKioskFsm(unittest.TestCase):
         #7
         self.check_outputs(fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_26(self):
         '''
         1) Wait select product
@@ -2513,7 +2311,6 @@ class TestKioskFsm(unittest.TestCase):
         #4
         self.accept_coin_amount(PRODUCTS[product]-2)
         self.accept_coin_amount(3)
-        yield self.sleep_defer(sleep_sec=0.1)
 
         self.check_outputs(changer_stop_accept_expected=[()],
                            changer_start_accept_expected=[()],
@@ -2523,7 +2320,6 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
 
         #6        
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
         
         self.fire_coin_out(1)
@@ -2531,8 +2327,6 @@ class TestKioskFsm(unittest.TestCase):
         #7
         self.check_outputs(fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_27(self):
         '''
         1) Wait select product
@@ -2555,7 +2349,6 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.check_bill_amount(PRODUCTS[product]-2)
         self.accept_coin_amount(3)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.reset_outputs()
 
         #4
@@ -2565,7 +2358,6 @@ class TestKioskFsm(unittest.TestCase):
         self.product_prepared()
 
         #6        
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
         
         self.fire_coin_out(1)
@@ -2573,8 +2365,6 @@ class TestKioskFsm(unittest.TestCase):
         #7
         self.check_outputs(fsm_ready_expected=[()])
 
-
-    @defer.inlineCallbacks
     def test_scenarious_28(self):
         '''
         1) Wait select product
@@ -2597,13 +2387,11 @@ class TestKioskFsm(unittest.TestCase):
         #3
         self.check_bill_amount(PRODUCTS[product]-2)
         self.accept_coin_amount(3)
-        yield self.sleep_defer(sleep_sec=0.1)
         self.reset_outputs()
 
         #4
         self.product_prepared()
         
-        yield self.sleep_defer(sleep_sec=0.1)
         self.check_outputs(changer_dispense_amount_expected=[((1,),)])
 
         #5
@@ -2617,71 +2405,53 @@ class TestKioskFsm(unittest.TestCase):
 
         
     def set_kiosk_ready_state(self):
-        dispatcher.send_minimal(
-            sender=self.changer, signal='online')
-        dispatcher.send_minimal(
-            sender=self.changer, signal='initialized')
-        dispatcher.send_minimal(
-            sender=self.validator, signal='online')
-        dispatcher.send_minimal(
-            sender=self.validator, signal='initialized')
+        self.changer_fsm.online()
+        self.changer_fsm.initialized()
+        self.validator_fsm.online()
+        self.validator_fsm.initialized()
 
     
     def accept_coin_amount(self, amount):
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_in', amount=amount)
+        self.changer_fsm._on_coin_in(amount=amount)
 
 
     def fire_coin_out(self, amount):
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=amount)
+        self.changer_fsm._on_coin_out(amount=amount)
 
 
     def fire_changer_error(self, error_code=1, error_text='error_1'):
-        dispatcher.send_minimal(
-            sender=self.changer, 
-            signal='error', error_code=error_code, error_text=error_text)
+        self.changer_fsm.error(error_code=error_code, error_text=error_text)
 
 
     def fire_validator_error(self, error_code=1, error_text='error_1'):
-        dispatcher.send_minimal(
-            sender=self.validator, 
-            signal='error', error_code=error_code, error_text=error_text)
+        self.validator_fsm.error(error_code=error_code, error_text=error_text)
 
 
     def check_bill_amount(self, amount, accept_bill=True):
-        dispatcher.send_minimal(
-            sender=self.validator, signal='check_bill', amount=amount)
+        self.validator_fsm.check_bill(amount=amount)
         if accept_bill:
-            dispatcher.send_minimal(
-                sender=self.validator, signal='bill_in', amount=amount)
+            self.validator_fsm.bill_in(amount=amount)
 
     def product_prepared(self):
-        dispatcher.send_minimal(
-            sender=self.plc, signal='prepared')
+        self.kiosk_fsm.prepared()
 
 
     def product_not_prepared(self):
-        dispatcher.send_minimal(
-            sender=self.plc, signal='not_prepared')
+        self.kiosk_fsm.not_prepared()
 
 
     def set_changer_offline(self):
-        dispatcher.send_minimal(
-            sender=self.changer, signal='offline')
+        self.changer_fsm.offline()
         self.changer.can_dispense_amount = MagicMock(return_value=False)
 
 
     def set_validator_offline(self):
-        dispatcher.send_minimal(
-            sender=self.validator, signal='offline')
+        self.validator_fsm.offline()
 
 
     def set_changer_online(self):
-        dispatcher.send_minimal(
-            sender=self.changer, signal='online')
-        dispatcher.send_minimal(
-            sender=self.changer, signal='initialized')
+        self.changer_fsm.online()
+        self.changer_fsm.initialized()
         self.changer.can_dispense_amount = MagicMock(return_value=True)
 
 
@@ -2691,11 +2461,7 @@ class TestKioskFsm(unittest.TestCase):
         
         self.check_bill_amount(1)
         
-        def callback_func(dont_care):
-            self.check_outputs(validator_return_bill_expected=[()])
-            
-        return task.deferLater(reactor, 0.1, callback_func, None)
-        
+        self.check_outputs(validator_return_bill_expected=[()])
         
     def reset_outputs(self):
         self.fsm_listener.ready.reset_mock()
@@ -2712,8 +2478,6 @@ class TestKioskFsm(unittest.TestCase):
         self.validator.stop_accept.reset_mock()
         self.validator.stack_bill.reset_mock()
         self.validator.return_bill.reset_mock()
-        
-                      
         
     def check_outputs(self,
                       fsm_ready_expected=[],
@@ -2753,6 +2517,3 @@ class TestKioskFsm(unittest.TestCase):
         
         self.reset_outputs()
 
-
-    def sleep_defer(self, sleep_sec):
-        return task.deferLater(reactor, sleep_sec, defer.passthru, None)

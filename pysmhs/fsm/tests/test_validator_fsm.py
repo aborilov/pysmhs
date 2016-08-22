@@ -1,10 +1,7 @@
 
 from louie import dispatcher
 
-from twisted.internet import reactor, defer, task
-
-# from unittest import TestCase
-from twisted.trial import unittest
+from unittest import TestCase
 
 from pysmhs.fsm.validator_fsm import BillValidatorFSM
 
@@ -14,7 +11,7 @@ except ImportError:
     from mock import MagicMock
     
 
-class TestValidatorFsm(unittest.TestCase):
+class TestValidatorFsm(TestCase):
     
     def setUp(self):
         self.fsm_listener = MagicMock()
@@ -88,37 +85,31 @@ class TestValidatorFsm(unittest.TestCase):
 
 
     def test_2_validator_online_on_offline(self):
-        dispatcher.send_minimal(
-            sender=self.validator, signal='online')
+        self.validator_fsm.online()
 
         self.check_outputs(fsm_online_expected=[()])
 
 
     def test_3_validator_offline_on_offline(self):
-        dispatcher.send_minimal(
-            sender=self.validator, signal='offline')
+        self.validator_fsm.offline()
 
         self.check_outputs()
 
 
     def test_4_validator_error_on_offline(self):
-        dispatcher.send_minimal(
-            sender=self.validator, 
-            signal='error', error_code=12, error_text="error_12")
+        self.validator_fsm.error(error_code=12, error_text="error_12")
 
         self.check_outputs()
 
 
     def test_5_validator_initialized_on_offline(self):
-        dispatcher.send_minimal(
-            sender=self.validator, signal='initialized')
+        self.validator_fsm.initialized()
 
         self.check_outputs()
 
 
     def test_6_check_bill_on_offline(self):
-        dispatcher.send_minimal(
-            sender=self.validator, signal='check_bill', amount=1)
+        self.validator_fsm.check_bill(amount=1)
 
         self.check_outputs()
 
@@ -180,8 +171,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_11_validator_online_on_online(self):
         self.set_fsm_state_online()
         
-        dispatcher.send_minimal(
-            sender=self.validator, signal='online')
+        self.validator_fsm.online()
 
         self.check_outputs()
 
@@ -189,8 +179,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_12_validator_offline_on_online(self):
         self.set_fsm_state_online()
         
-        dispatcher.send_minimal(
-            sender=self.validator, signal='offline')
+        self.validator_fsm.offline()
 
         self.check_outputs(fsm_offline_expected=[()])
 
@@ -198,9 +187,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_13_validator_error_on_online(self):
         self.set_fsm_state_online()
         
-        dispatcher.send_minimal(
-            sender=self.validator, 
-            signal='error', error_code=12, error_text='error_12')
+        self.validator_fsm.error(error_code=12, error_text='error_12')
         
         self.check_outputs(fsm_error_expected=[({'error_code':12, 
                                                  'error_text':'error_12'},)],
@@ -211,16 +198,14 @@ class TestValidatorFsm(unittest.TestCase):
     def test_14_validator_initialized_on_online(self):
         self.set_fsm_state_online()
         
-        dispatcher.send_minimal(
-            sender=self.validator, signal='initialized')
+        self.validator_fsm.initialized()
         
         self.check_outputs(fsm_initialized_expected=[()],
                            validator_start_accept_expected=[()])
 
 
     def test_15_check_bill_on_online(self):
-        dispatcher.send_minimal(
-            sender=self.validator, signal='check_bill', amount=1)
+        self.validator_fsm.check_bill(amount=1)
 
         self.check_outputs()
 
@@ -282,8 +267,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_20_validator_online_on_error(self):
         self.set_fsm_state_error()
         
-        dispatcher.send_minimal(
-            sender=self.validator, signal='online')
+        self.validator_fsm.online()
 
         self.check_outputs()
 
@@ -291,8 +275,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_21_validator_offline_on_error(self):
         self.set_fsm_state_error()
         
-        dispatcher.send_minimal(
-            sender=self.validator, signal='offline')
+        self.validator_fsm.offline()
 
         self.check_outputs(fsm_offline_expected=[()])
 
@@ -300,9 +283,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_22_validator_error_on_error(self):
         self.set_fsm_state_error()
         
-        dispatcher.send_minimal(
-            sender=self.validator, 
-            signal='error', error_code=12, error_text="error_12")
+        self.validator_fsm.error(error_code=12, error_text="error_12")
 
         self.check_outputs()
 
@@ -310,8 +291,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_23_validator_initialized_on_error(self):
         self.set_fsm_state_error()
         
-        dispatcher.send_minimal(
-            sender=self.validator, signal='initialized')
+        self.validator_fsm.initialized()
 
         self.check_outputs()
 
@@ -319,8 +299,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_24_check_bill_on_error(self):
         self.set_fsm_state_error()
         
-        dispatcher.send_minimal(
-            sender=self.validator, signal='check_bill', amount=1)
+        self.validator_fsm.check_bill(amount=1)
 
         self.check_outputs(validator_return_bill_expected=[()])
 
@@ -391,8 +370,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_29_validator_online_on_ready(self):
         self.set_fsm_state_initialized()
 
-        dispatcher.send_minimal(
-            sender=self.validator, signal='online')
+        self.validator_fsm.online()
 
         self.check_outputs()
 
@@ -400,8 +378,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_30_validator_offline_on_ready(self):
         self.set_fsm_state_initialized()
 
-        dispatcher.send_minimal(
-            sender=self.validator, signal='offline')
+        self.validator_fsm.offline()
 
         self.check_outputs(fsm_offline_expected=[()])
 
@@ -409,9 +386,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_31_validator_error_on_ready(self):
         self.set_fsm_state_initialized()
 
-        dispatcher.send_minimal(
-            sender=self.validator, 
-            signal='error', error_code=12, error_text='error_12')
+        self.validator_fsm.error(error_code=12, error_text='error_12')
         
         self.check_outputs(fsm_error_expected=[({'error_code':12, 
                                                  'error_text':'error_12'},)],
@@ -422,8 +397,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_32_validator_initialized_on_ready(self):
         self.set_fsm_state_initialized()
 
-        dispatcher.send_minimal(
-            sender=self.validator, signal='initialized')
+        self.validator_fsm.initialized()
         
         self.check_outputs()
 
@@ -431,8 +405,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_33_check_bill_on_ready(self):
         self.set_fsm_state_initialized()
 
-        dispatcher.send_minimal(
-            sender=self.validator, signal='check_bill', amount=1)
+        self.validator_fsm.check_bill(amount=1)
         
         self.check_outputs(validator_return_bill_expected=[()])
 
@@ -503,8 +476,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_38_validator_online_on_wait_bill(self):
         self.set_fsm_state_wait_bill()
         
-        dispatcher.send_minimal(
-            sender=self.validator, signal='online')
+        self.validator_fsm.online()
 
         self.check_outputs()
 
@@ -512,8 +484,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_39_validator_offline_on_wait_bill(self):
         self.set_fsm_state_wait_bill()
         
-        dispatcher.send_minimal(
-            sender=self.validator, signal='offline')
+        self.validator_fsm.offline()
 
         self.check_outputs(fsm_offline_expected=[()])
 
@@ -521,9 +492,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_40_validator_error_on_wait_bill(self):
         self.set_fsm_state_wait_bill()
 
-        dispatcher.send_minimal(
-            sender=self.validator, 
-            signal='error', error_code=12, error_text='error_12')
+        self.validator_fsm.error(error_code=12, error_text='error_12')
         
         self.check_outputs(fsm_error_expected=[({'error_code':12, 
                                                  'error_text':'error_12'},)],
@@ -534,8 +503,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_41_validator_initialized_on_wait_bill(self):
         self.set_fsm_state_wait_bill()
         
-        dispatcher.send_minimal(
-            sender=self.validator, signal='initialized')
+        self.validator_fsm.initialized()
 
         self.check_outputs()
 
@@ -543,8 +511,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_42_check_bill_on_wait_bill(self):
         self.set_fsm_state_wait_bill()
         
-        dispatcher.send_minimal(
-            sender=self.validator, signal='check_bill', amount=1)
+        self.validator_fsm.check_bill(amount=1)
 
         self.check_outputs(fsm_check_bill_expected=[({'amount':1,},)])
 
@@ -615,8 +582,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_47_validator_online_on_bill_confirm(self):
         self.set_fsm_state_bill_confirm()
         
-        dispatcher.send_minimal(
-            sender=self.validator, signal='online')
+        self.validator_fsm.online()
 
         self.check_outputs()
 
@@ -624,8 +590,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_48_validator_offline_on_bill_confirm(self):
         self.set_fsm_state_bill_confirm()
         
-        dispatcher.send_minimal(
-            sender=self.validator, signal='offline')
+        self.validator_fsm.offline()
 
         self.check_outputs(fsm_offline_expected=[()])
 
@@ -633,9 +598,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_49_validator_error_on_bill_confirm(self):
         self.set_fsm_state_bill_confirm()
 
-        dispatcher.send_minimal(
-            sender=self.validator, 
-            signal='error', error_code=12, error_text='error_12')
+        self.validator_fsm.error(error_code=12, error_text='error_12')
         
         self.check_outputs(fsm_error_expected=[({'error_code':12, 
                                                  'error_text':'error_12'},)],
@@ -646,8 +609,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_50_validator_initialized_on_bill_confirm(self):
         self.set_fsm_state_bill_confirm()
         
-        dispatcher.send_minimal(
-            sender=self.validator, signal='initialized')
+        self.validator_fsm.initialized()
 
         self.check_outputs()
 
@@ -655,8 +617,7 @@ class TestValidatorFsm(unittest.TestCase):
     def test_51_check_bill_on_bill_confirm(self):
         self.set_fsm_state_bill_confirm()
         
-        dispatcher.send_minimal(
-            sender=self.validator, signal='check_bill', amount=1)
+        self.validator_fsm.check_bill(amount=1)
 
         self.check_outputs()
 
@@ -686,34 +647,27 @@ class TestValidatorFsm(unittest.TestCase):
 
 
 
-    @defer.inlineCallbacks
     def test_55_permit_bill_on_bill_confirm(self):
         self.set_fsm_state_bill_confirm(amount=10)
         
         self.validator_fsm.permit_bill()
         
-        yield self.sleep_defer(sleep_sec=0.5)
-
         self.check_outputs(validator_stack_bill_expected=[()])
         self.validator.stack_bill.reset_mock()
 
-        dispatcher.send_minimal(
-            sender=self.validator, signal='bill_in', amount=10)
+        self.validator_fsm.bill_in(amount=10)
 
         self.check_outputs(fsm_bill_in_expected=[({'amount':10,},)])
 
 
     def set_fsm_state_online(self):
-        dispatcher.send_minimal(
-            sender=self.validator, signal='online')
+        self.validator_fsm.online()
         self.fsm_listener.online.reset_mock()
         
         
     def set_fsm_state_error(self):
         self.set_fsm_state_online()
-        dispatcher.send_minimal(
-            sender=self.validator, 
-            signal='error', error_code='12', error_text='error_12')
+        self.validator_fsm.error(error_code='12', error_text='error_12')
         self.fsm_listener.error.reset_mock()
         self.validator.stop_accept.reset_mock()
         self.validator.return_bill.reset_mock()
@@ -721,8 +675,7 @@ class TestValidatorFsm(unittest.TestCase):
         
     def set_fsm_state_initialized(self):
         self.set_fsm_state_online()
-        dispatcher.send_minimal(
-            sender=self.validator, signal='initialized')
+        self.validator_fsm.initialized()
         self.fsm_listener.initialized.reset_mock()
         self.validator.start_accept.reset_mock()
 
@@ -735,8 +688,7 @@ class TestValidatorFsm(unittest.TestCase):
 
     def set_fsm_state_bill_confirm(self, amount=10):
         self.set_fsm_state_wait_bill()
-        dispatcher.send_minimal(
-            sender=self.validator, signal='check_bill', amount=amount)
+        self.validator_fsm.check_bill(amount=amount)
         self.fsm_listener.check_bill.reset_mock()
 
 
@@ -771,7 +723,3 @@ class TestValidatorFsm(unittest.TestCase):
                           self.validator.stack_bill.call_args_list)
         self.assertEquals(validator_return_bill_expected, 
                           self.validator.return_bill.call_args_list)
-
-
-    def sleep_defer(self, sleep_sec):
-        return task.deferLater(reactor, sleep_sec, defer.passthru, None)

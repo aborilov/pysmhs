@@ -44,17 +44,20 @@ class BillValidatorFSM(Machine):
             initial='offline', 
             ignore_invalid_triggers=True)
         self.validator = validator
-        dispatcher.connect(self.online, sender=validator, signal='online')
-        dispatcher.connect(self.initialized, 
-                           sender=validator, signal='initialized')
-        dispatcher.connect(self.error, sender=validator, signal='error')
-        dispatcher.connect(self.offline, sender=validator, signal='offline')
-        dispatcher.connect(self.check_bill, 
-                           sender=validator, signal='check_bill')
-        dispatcher.connect(self.bill_in, 
-                           sender=validator, signal='bill_in')
+        self._connect_input_signals(sender=validator, receiver=self)
 
         self._accepted_amount = 0
+
+    def _connect_input_signals(self, sender, receiver):
+        dispatcher.connect(receiver.online, sender=sender, signal='online')
+        dispatcher.connect(receiver.initialized, 
+                           sender=sender, signal='initialized')
+        dispatcher.connect(receiver.error, sender=sender, signal='error')
+        dispatcher.connect(receiver.offline, sender=sender, signal='offline')
+        dispatcher.connect(receiver.check_bill, 
+                           sender=sender, signal='check_bill')
+        dispatcher.connect(receiver.bill_in, 
+                           sender=sender, signal='bill_in')
 
     def start(self):
         self.validator.start_device()

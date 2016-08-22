@@ -39,37 +39,40 @@ class KioskFSM(Machine):
         self.plc = plc
         self.cash_fsm = cash_fsm
         self.products = products
-
-        dispatcher.connect(self.cash_fsm_error, sender=cash_fsm, signal='error')
-        dispatcher.connect(self.cash_fsm_ready, sender=cash_fsm, signal='ready')
-        dispatcher.connect(self.amount_not_accepted,
-                           sender=cash_fsm, signal='not_accepted')
-        dispatcher.connect(self.amount_accepted,
-                           sender=cash_fsm, signal='accepted')
-        dispatcher.connect(self.amount_dispensed,
-                           sender=cash_fsm, signal='dispensed')
-        dispatcher.connect(self.prepared, sender=plc, signal='prepared')
-        dispatcher.connect(self.not_prepared, sender=plc, signal='not_prepared')
-
-        dispatcher.connect(self._dispense_amount_changed,
-                           sender=cash_fsm, signal='dispense_amount_changed')
-        dispatcher.connect(self._deposit_amount_changed,
-                           sender=cash_fsm, signal='deposit_amount_changed')
-        dispatcher.connect(self._total_amount_changed,
-                           sender=cash_fsm, signal='total_amount_changed')
-        dispatcher.connect(self._coin_amount_changed,
-                           sender=cash_fsm, signal='coin_amount_changed')
-        dispatcher.connect(self._bill_amount_changed,
-                           sender=cash_fsm, signal='bill_amount_changed')
-        dispatcher.connect(self._bill_count_changed,
-                           sender=cash_fsm, signal='bill_count_changed')
-        dispatcher.connect(self._coin_in, 
-                           sender=cash_fsm, signal='coin_in')
-        dispatcher.connect(self._bill_in, 
-                           sender=cash_fsm, signal='bill_in')
+        
+        self._connect_input_signals(cash_fsm, plc, self)
 
         # init parameters
         self._product = -1
+
+    def _connect_input_signals(self, cash_fsm, plc, receiver):
+        dispatcher.connect(receiver.cash_fsm_error, sender=cash_fsm, signal='error')
+        dispatcher.connect(receiver.cash_fsm_ready, sender=cash_fsm, signal='ready')
+        dispatcher.connect(receiver.amount_not_accepted,
+                           sender=cash_fsm, signal='not_accepted')
+        dispatcher.connect(receiver.amount_accepted,
+                           sender=cash_fsm, signal='accepted')
+        dispatcher.connect(receiver.amount_dispensed,
+                           sender=cash_fsm, signal='dispensed')
+        dispatcher.connect(receiver.prepared, sender=plc, signal='prepared')
+        dispatcher.connect(receiver.not_prepared, sender=plc, signal='not_prepared')
+
+        dispatcher.connect(receiver._dispense_amount_changed,
+                           sender=cash_fsm, signal='dispense_amount_changed')
+        dispatcher.connect(receiver._deposit_amount_changed,
+                           sender=cash_fsm, signal='deposit_amount_changed')
+        dispatcher.connect(receiver._total_amount_changed,
+                           sender=cash_fsm, signal='total_amount_changed')
+        dispatcher.connect(receiver._coin_amount_changed,
+                           sender=cash_fsm, signal='coin_amount_changed')
+        dispatcher.connect(receiver._bill_amount_changed,
+                           sender=cash_fsm, signal='bill_amount_changed')
+        dispatcher.connect(receiver._bill_count_changed,
+                           sender=cash_fsm, signal='bill_count_changed')
+        dispatcher.connect(receiver._coin_in, 
+                           sender=cash_fsm, signal='coin_in')
+        dispatcher.connect(receiver._bill_in, 
+                           sender=cash_fsm, signal='bill_in')
 
     def _after_started(self):
         self.cash_fsm.start()

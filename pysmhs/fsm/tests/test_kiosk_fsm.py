@@ -1,7 +1,7 @@
 from louie import dispatcher
 
-#from unittest import TestCase
-from twisted.trial import unittest
+from unittest import TestCase
+# from twisted.trial import unittest
 
 from pysmhs.fsm.kiosk_fsm import KioskFSM
 
@@ -20,7 +20,7 @@ PRODUCTS = {
             PRODUCT_2 : 100
             }
 
-class TestKioskFsm(unittest.TestCase):
+class TestKioskFsm(TestCase):
     
 
     def setUp(self):
@@ -95,51 +95,43 @@ class TestKioskFsm(unittest.TestCase):
 
 
     def test_3_cash_ready_on_init(self):
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='ready')
+        self.kiosk_fsm.cash_fsm_ready()
 
         self.check_outputs()
 
 
     def test_4_cash_error_on_init(self):
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, 
-            signal='error', error_code=12, error_text='error_12')
+        self.kiosk_fsm.cash_fsm_error(error_code=12, error_text='error_12')
 
         self.check_outputs()
 
 
     def test_5_not_accepted_on_init(self):
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='not_accepted')
+        self.kiosk_fsm.amount_not_accepted()
 
         self.check_outputs()
 
 
     def test_6_accepted_on_init(self):
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='accepted')
+        self.kiosk_fsm.amount_accepted()
 
         self.check_outputs()
 
 
     def test_7_dispensed_on_init(self):
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='dispensed')
+        self.kiosk_fsm.amount_dispensed()
 
         self.check_outputs()
 
 
     def test_8_prepared_on_init(self):
-        dispatcher.send_minimal(
-            sender=self.plc, signal='prepared')
+        self.kiosk_fsm.prepared()
 
         self.check_outputs()
 
 
     def test_9_not_prepared_on_init(self):
-        dispatcher.send_minimal(
-            sender=self.plc, signal='not_prepared')
+        self.kiosk_fsm.not_prepared()
 
         self.check_outputs()
 
@@ -198,8 +190,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_13_cash_ready_on_wait_ready(self):
         self.set_fsm_state_wait_ready()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='ready')
+        self.kiosk_fsm.cash_fsm_ready()
 
         self.check_outputs(fsm_ready_expected=[()])
 
@@ -207,9 +198,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_14_cash_error_on_wait_ready(self):
         self.set_fsm_state_wait_ready()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, 
-            signal='error', error_code=12, error_text='error_12')
+        self.kiosk_fsm.cash_fsm_error(error_code=12, error_text='error_12')
 
         self.check_outputs()
 
@@ -217,8 +206,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_15_not_accepted_on_wait_ready(self):
         self.set_fsm_state_wait_ready()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='not_accepted')
+        self.kiosk_fsm.amount_not_accepted()
 
         self.check_outputs()
 
@@ -226,8 +214,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_16_accepted_on_wait_ready(self):
         self.set_fsm_state_wait_ready()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='accepted')
+        self.kiosk_fsm.amount_accepted()
 
         self.check_outputs()
 
@@ -235,8 +222,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_17_dispensed_on_wait_ready(self):
         self.set_fsm_state_wait_ready()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='dispensed')
+        self.kiosk_fsm.amount_dispensed()
 
         self.check_outputs()
 
@@ -244,8 +230,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_18_prepared_on_wait_ready(self):
         self.set_fsm_state_wait_ready()
         
-        dispatcher.send_minimal(
-            sender=self.plc, signal='prepared')
+        self.kiosk_fsm.prepared()
 
         self.check_outputs()
 
@@ -253,8 +238,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_19_not_prepared_on_wait_ready(self):
         self.set_fsm_state_wait_ready()
         
-        dispatcher.send_minimal(
-            sender=self.plc, signal='not_prepared')
+        self.kiosk_fsm.not_prepared()
 
         self.check_outputs()
 
@@ -317,8 +301,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_23_cash_ready_on_error(self):
         self.set_fsm_state_error()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='ready')
+        self.kiosk_fsm.cash_fsm_ready()
 
         self.check_outputs()
 
@@ -326,9 +309,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_24_cash_error_on_error(self):
         self.set_fsm_state_error()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, 
-            signal='error', error_code=12, error_text='error_12')
+        self.kiosk_fsm.cash_fsm_error(error_code=12, error_text='error_12')
 
         self.check_outputs()
 
@@ -336,8 +317,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_25_not_accepted_on_error(self):
         self.set_fsm_state_error()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='not_accepted')
+        self.kiosk_fsm.amount_not_accepted()
 
         self.check_outputs()
 
@@ -345,8 +325,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_26_accepted_on_error(self):
         self.set_fsm_state_error()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='accepted')
+        self.kiosk_fsm.amount_accepted()
 
         self.check_outputs()
 
@@ -354,8 +333,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_27_dispensed_on_error(self):
         self.set_fsm_state_error()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='dispensed')
+        self.kiosk_fsm.amount_dispensed()
 
         self.check_outputs()
 
@@ -363,8 +341,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_28_prepared_on_error(self):
         self.set_fsm_state_error()
         
-        dispatcher.send_minimal(
-            sender=self.plc, signal='prepared')
+        self.kiosk_fsm.prepared()
 
         self.check_outputs()
 
@@ -372,8 +349,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_29_not_prepared_on_error(self):
         self.set_fsm_state_error()
         
-        dispatcher.send_minimal(
-            sender=self.plc, signal='not_prepared')
+        self.kiosk_fsm.not_prepared()
 
         self.check_outputs()
 
@@ -436,8 +412,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_33_cash_ready_on_ready(self):
         self.set_fsm_state_ready()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='ready')
+        self.kiosk_fsm.cash_fsm_ready()
 
         self.check_outputs()
 
@@ -445,9 +420,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_34_cash_error_on_ready(self):
         self.set_fsm_state_ready()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, 
-            signal='error', error_code=12, error_text='error_12')
+        self.kiosk_fsm.cash_fsm_error(error_code=12, error_text='error_12')
 
         self.check_outputs(
            fsm_error_expected=[({'error_code':12, 
@@ -458,8 +431,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_35_not_accepted_on_ready(self):
         self.set_fsm_state_ready()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='not_accepted')
+        self.kiosk_fsm.amount_not_accepted()
 
         self.check_outputs()
 
@@ -467,8 +439,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_36_accepted_on_ready(self):
         self.set_fsm_state_ready()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='accepted')
+        self.kiosk_fsm.amount_accepted()
 
         self.check_outputs()
 
@@ -476,8 +447,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_37_dispensed_on_ready(self):
         self.set_fsm_state_ready()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='dispensed')
+        self.kiosk_fsm.amount_dispensed()
 
         self.check_outputs()
 
@@ -485,8 +455,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_38_prepared_on_ready(self):
         self.set_fsm_state_ready()
         
-        dispatcher.send_minimal(
-            sender=self.plc, signal='prepared')
+        self.kiosk_fsm.prepared()
 
         self.check_outputs()
 
@@ -494,8 +463,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_39_not_prepared_on_ready(self):
         self.set_fsm_state_ready()
         
-        dispatcher.send_minimal(
-            sender=self.plc, signal='not_prepared')
+        self.kiosk_fsm.not_prepared()
 
         self.check_outputs()
 
@@ -560,8 +528,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_43_cash_ready_on_start_sell(self):
         self.set_fsm_state_start_sell(product=PRODUCT_1)
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='ready')
+        self.kiosk_fsm.cash_fsm_ready()
 
         self.check_outputs()
 
@@ -569,9 +536,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_44_cash_error_on_start_sell(self):
         self.set_fsm_state_start_sell(product=PRODUCT_1)
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, 
-            signal='error', error_code=12, error_text='error_12')
+        self.kiosk_fsm.cash_fsm_error(error_code=12, error_text='error_12')
 
         self.check_outputs(
            fsm_error_expected=[({'error_code':12, 
@@ -582,8 +547,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_45_not_accepted_on_start_sell(self):
         self.set_fsm_state_start_sell(product=PRODUCT_1)
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='not_accepted')
+        self.kiosk_fsm.amount_not_accepted()
 
         self.check_outputs(fsm_reset_sell_expected=[()],
                            fsm_ready_expected=[()])
@@ -592,8 +556,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_46_accepted_on_start_sell(self):
         self.set_fsm_state_start_sell(product=PRODUCT_1)
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='accepted')
+        self.kiosk_fsm.amount_accepted()
 
         self.check_outputs(plc_prepare_expected=[((PRODUCT_1,),)])
 
@@ -601,8 +564,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_47_dispensed_on_start_sell(self):
         self.set_fsm_state_start_sell(product=PRODUCT_1)
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='dispensed')
+        self.kiosk_fsm.amount_dispensed()
 
         self.check_outputs()
 
@@ -610,8 +572,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_48_prepared_on_start_sell(self):
         self.set_fsm_state_start_sell(product=PRODUCT_1)
         
-        dispatcher.send_minimal(
-            sender=self.plc, signal='prepared')
+        self.kiosk_fsm.prepared()
 
         self.check_outputs()
 
@@ -619,8 +580,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_49_not_prepared_on_start_sell(self):
         self.set_fsm_state_start_sell(product=PRODUCT_1)
         
-        dispatcher.send_minimal(
-            sender=self.plc, signal='not_prepared')
+        self.kiosk_fsm.not_prepared()
 
         self.check_outputs()
 
@@ -683,8 +643,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_53_cash_ready_on_start_prepare(self):
         self.set_fsm_state_start_prepare()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='ready')
+        self.kiosk_fsm.cash_fsm_ready()
 
         self.check_outputs()
 
@@ -692,9 +651,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_54_cash_error_on_start_prepare(self):
         self.set_fsm_state_start_prepare()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, 
-            signal='error', error_code=12, error_text='error_12')
+        self.kiosk_fsm.cash_fsm_error(error_code=12, error_text='error_12')
 
         self.check_outputs(
            fsm_error_expected=[({'error_code':12, 'error_text':'error_12'},)],
@@ -704,8 +661,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_55_not_accepted_on_start_prepare(self):
         self.set_fsm_state_start_prepare()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='not_accepted')
+        self.kiosk_fsm.amount_not_accepted()
 
         self.check_outputs()
 
@@ -713,8 +669,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_56_accepted_on_start_prepare(self):
         self.set_fsm_state_start_prepare()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='accepted')
+        self.kiosk_fsm.amount_accepted()
 
         self.check_outputs()
 
@@ -722,8 +677,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_57_dispensed_on_start_prepare(self):
         self.set_fsm_state_start_prepare()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='dispensed')
+        self.kiosk_fsm.amount_dispensed()
 
         self.check_outputs()
 
@@ -731,8 +685,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_58_prepared_on_start_prepare(self):
         self.set_fsm_state_start_prepare()
         
-        dispatcher.send_minimal(
-            sender=self.plc, signal='prepared')
+        self.kiosk_fsm.prepared()
 
         self.check_outputs(cash_fsm_dispense_change_expected=[()])
 
@@ -740,8 +693,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_59_not_prepared_on_start_prepare(self):
         self.set_fsm_state_start_prepare()
         
-        dispatcher.send_minimal(
-            sender=self.plc, signal='not_prepared')
+        self.kiosk_fsm.not_prepared()
 
         self.check_outputs(cash_fsm_dispense_all_expected=[()])
 
@@ -804,8 +756,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_63_cash_ready_on_start_dispense(self):
         self.set_fsm_state_start_dispense()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='ready')
+        self.kiosk_fsm.cash_fsm_ready()
 
         self.check_outputs()
 
@@ -813,9 +764,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_64_cash_error_on_start_dispense(self):
         self.set_fsm_state_start_dispense()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, 
-            signal='error', error_code=12, error_text='error_12')
+        self.kiosk_fsm.cash_fsm_error(error_code=12, error_text='error_12')
 
         self.check_outputs(fsm_error_expected=[({'error_code':12, 
                                                  'error_text':'error_12'},)])
@@ -824,8 +773,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_65_not_accepted_on_start_dispense(self):
         self.set_fsm_state_start_dispense()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='not_accepted')
+        self.kiosk_fsm.amount_not_accepted()
 
         self.check_outputs()
 
@@ -833,8 +781,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_66_accepted_on_start_dispense(self):
         self.set_fsm_state_start_dispense()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='accepted')
+        self.kiosk_fsm.amount_accepted()
 
         self.check_outputs()
 
@@ -842,8 +789,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_67_dispensed_on_start_dispense(self):
         self.set_fsm_state_start_dispense()
         
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='dispensed')
+        self.kiosk_fsm.amount_dispensed()
 
         self.check_outputs(fsm_ready_expected=[()])
 
@@ -851,8 +797,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_68_prepared_on_start_dispense(self):
         self.set_fsm_state_start_dispense()
         
-        dispatcher.send_minimal(
-            sender=self.plc, signal='prepared')
+        self.kiosk_fsm.prepared()
 
         self.check_outputs()
 
@@ -860,8 +805,7 @@ class TestKioskFsm(unittest.TestCase):
     def test_69_not_prepared_on_start_dispense(self):
         self.set_fsm_state_start_dispense()
         
-        dispatcher.send_minimal(
-            sender=self.plc, signal='not_prepared')
+        self.kiosk_fsm.not_prepared()
 
         self.check_outputs()
 
@@ -889,16 +833,13 @@ class TestKioskFsm(unittest.TestCase):
         
     def set_fsm_state_ready(self):
         self.set_fsm_state_wait_ready()
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='ready')
+        self.kiosk_fsm.cash_fsm_ready()
         self.fsm_listener.ready.reset_mock()
 
 
     def set_fsm_state_error(self):
         self.set_fsm_state_ready()
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, 
-            signal='error', error_code='12', error_text='error_12')
+        self.kiosk_fsm.cash_fsm_error(error_code='12', error_text='error_12')
         self.fsm_listener.error.reset_mock()
         self.cash_fsm.dispense_all.reset_mock()
 
@@ -913,8 +854,7 @@ class TestKioskFsm(unittest.TestCase):
                                     product=PRODUCT_1, 
                                     amount=PRODUCTS[PRODUCT_1]):
         self.set_fsm_state_start_sell(product=product)
-        dispatcher.send_minimal(
-            sender=self.cash_fsm, signal='accepted', amount=amount)
+        self.kiosk_fsm.amount_accepted(amount=amount)
         self.plc.prepare.reset_mock()
 
 
@@ -922,8 +862,7 @@ class TestKioskFsm(unittest.TestCase):
                                      product=PRODUCT_1, 
                                      amount=PRODUCTS[PRODUCT_1]):
         self.set_fsm_state_start_prepare(product=product, amount=amount)
-        dispatcher.send_minimal(
-            sender=self.plc, signal='prepared')
+        self.kiosk_fsm.prepared()
         self.cash_fsm.dispense_change.reset_mock()
 
 

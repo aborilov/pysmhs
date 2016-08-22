@@ -2,7 +2,6 @@ import logging
 
 from louie import dispatcher
 from transitions import Machine
-from twisted.internet import reactor
 
 
 logger = logging.getLogger('kiosk')
@@ -52,17 +51,23 @@ class ChangerFSM(Machine):
             initial='offline', 
             ignore_invalid_triggers=True)
         self.changer = changer
-        dispatcher.connect(self.online, sender=changer, signal='online')
-        dispatcher.connect(self.initialized, 
-                           sender=changer, signal='initialized')
-        dispatcher.connect(self.error, sender=changer, signal='error')
-        dispatcher.connect(self.offline, sender=changer, signal='offline')
-        dispatcher.connect(self._on_coin_in, sender=changer, signal='coin_in')
-        dispatcher.connect(self._on_coin_out, sender=changer, signal='coin_out')
-
+        self._connect_input_signals(sender=changer, receiver=self)
+        
         # init parameters
         self._dispensed_amount = 0
         self._need_dispense_amount = 0
+        
+    def _connect_input_signals(self, sender, receiver):
+        dispatcher.connect(receiver.online, sender=sender, signal='online')
+        dispatcher.connect(receiver.initialized, 
+                           sender=sender, signal='initialized')
+        dispatcher.connect(receiver.error, sender=sender, signal='error')
+        dispatcher.connect(receiver.offline, sender=sender, signal='offline')
+        dispatcher.connect(receiver._on_coin_in,
+                           sender=sender, signal='coin_in')
+        dispatcher.connect(receiver._on_coin_out,
+                           sender=sender, signal='coin_out')
+        
 
     def _on_coin_in(self, amount):
         self.coin_in(amount=amount)
@@ -112,10 +117,11 @@ class ChangerFSM(Machine):
     def _stop_accept(self, amount=-1):
         self.changer.stop_accept()
 
-    def _start_dispense(self, amount):
+    def _start_dispense(self, amount=0):
         self._need_dispense_amount = amount
         self._dispensed_amount = 0
-        reactor.callLater(0, self._dispense_amount_impl, amount=amount)#@UndefinedVariable
+#         reactor.callLater(0, self._dispense_amount_impl, amount=amount)#@UndefinedVariable
+        self._dispense_amount_impl(amount=amount)
 
     def _dispense_amount_impl(self, amount):
         if amount <= 0:

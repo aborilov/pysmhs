@@ -79,39 +79,42 @@ class CashFSM(Machine):
         self.changer_state = DEVICE_STATE_OFFLINE
         self.validator_state = DEVICE_STATE_OFFLINE
 
-        dispatcher.connect(self._on_changer_offline,
-                           sender=changer_fsm, signal='offline')
-        dispatcher.connect(self._on_changer_ready, 
-                           sender=changer_fsm, signal='initialized')
-        dispatcher.connect(self._on_changer_error, 
-                           sender=changer_fsm, signal='error')
-        dispatcher.connect(self._on_coin_in, sender=changer_fsm, signal='coin_in')
-        dispatcher.connect(self.amount_dispensed, 
-                           sender=changer_fsm, signal='amount_dispensed')
-        dispatcher.connect(self._on_validator_offline, 
-                           sender=validator_fsm, signal='offline')
-        dispatcher.connect(self._on_validator_ready, 
-                           sender=validator_fsm, signal='initialized')
-        dispatcher.connect(self._on_validator_error, 
-                           sender=validator_fsm, signal='error')
-        dispatcher.connect(self._on_bill_in, 
-                           sender=validator_fsm, signal='bill_in')
-        dispatcher.connect(self.check_bill, 
-                           sender=validator_fsm, signal='check_bill')
-
-        dispatcher.connect(self._coin_amount_changed, 
-                           sender=changer_fsm, signal='total_amount_changed')
-        dispatcher.connect(self._bill_amount_changed, 
-                           sender=validator_fsm, signal='total_amount_changed')
-        dispatcher.connect(self._bill_count_changed, 
-                           sender=validator_fsm, signal='bill_count_changed')
-
+        self._connect_input_signals(changer_fsm, validator_fsm, self)
         # init parameters
         self._need_accept_amount = 0
         self._accepted_amount = 0
         self.accept_timeout_sec = 60
 
         self._acceptance_monitor_id = None
+
+    def _connect_input_signals(self, changer_fsm, validator_fsm, receiver):
+        dispatcher.connect(receiver._on_changer_offline,
+                           sender=changer_fsm, signal='offline')
+        dispatcher.connect(receiver._on_changer_ready, 
+                           sender=changer_fsm, signal='initialized')
+        dispatcher.connect(receiver._on_changer_error, 
+                           sender=changer_fsm, signal='error')
+        dispatcher.connect(receiver._on_coin_in,
+                           sender=changer_fsm, signal='coin_in')
+        dispatcher.connect(receiver.amount_dispensed, 
+                           sender=changer_fsm, signal='amount_dispensed')
+        dispatcher.connect(receiver._on_validator_offline, 
+                           sender=validator_fsm, signal='offline')
+        dispatcher.connect(receiver._on_validator_ready, 
+                           sender=validator_fsm, signal='initialized')
+        dispatcher.connect(receiver._on_validator_error, 
+                           sender=validator_fsm, signal='error')
+        dispatcher.connect(receiver._on_bill_in, 
+                           sender=validator_fsm, signal='bill_in')
+        dispatcher.connect(receiver.check_bill, 
+                           sender=validator_fsm, signal='check_bill')
+
+        dispatcher.connect(receiver._coin_amount_changed, 
+                           sender=changer_fsm, signal='total_amount_changed')
+        dispatcher.connect(receiver._bill_amount_changed, 
+                           sender=validator_fsm, signal='total_amount_changed')
+        dispatcher.connect(receiver._bill_count_changed, 
+                           sender=validator_fsm, signal='bill_count_changed')
 
     def _after_started(self):
         self.changer_fsm.start()
@@ -208,7 +211,8 @@ class CashFSM(Machine):
     def _amount_dispensed(self, amount=0):
         dispatcher.send_minimal(
             sender=self, signal='dispensed', amount=amount)
-        self._dispense_amount_changed(self.get_dispense_amount())
+        if amount > 0:
+            self._dispense_amount_changed(self.get_dispense_amount())
 
     def _is_enough(self, amount):
         return self._need_accept_amount <= self._accepted_amount + amount

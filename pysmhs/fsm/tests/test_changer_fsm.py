@@ -1,10 +1,7 @@
 
 from louie import dispatcher
 
-from twisted.internet import reactor, defer, task
-
-#from unittest import TestCase
-from twisted.trial import unittest
+from unittest import TestCase
 
 from pysmhs.fsm.changer_fsm import ChangerFSM
 
@@ -15,7 +12,7 @@ except ImportError:
     from mock import MagicMock
     
 
-class TestChangerFsm(unittest.TestCase):
+class TestChangerFsm(TestCase):
     
     def setUp(self):
         self.fsm_listener = MagicMock()
@@ -81,87 +78,59 @@ class TestChangerFsm(unittest.TestCase):
     # changer.dispense_amount   -    -    -    -    -    -    -    -    -    -    -
 
 
-    @defer.inlineCallbacks
     def test_1_on_offline(self):
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
-
-    @defer.inlineCallbacks
     def test_2_changer_online_on_offline(self):
-        dispatcher.send_minimal(
-            sender=self.changer, signal='online')
+        self.changer_fsm.online()
 
-        yield self.check_outputs_defer(fsm_online_expected=[()])
+        self.check_outputs(fsm_online_expected=[()])
         
-
-    @defer.inlineCallbacks
     def test_3_changer_offline_on_offline(self):
-        dispatcher.send_minimal(
-            sender=self.changer, signal='offline')
-        
-        yield self.check_outputs_defer()
+        self.changer_fsm.offline()
 
+        self.check_outputs()
 
-    @defer.inlineCallbacks
     def test_4_changer_error_on_offline(self):
-        dispatcher.send_minimal(
-            sender=self.changer, 
-            signal='error', error_code=12, error_text="error_12")
-        
-        yield self.check_outputs_defer()
+        self.changer_fsm.error(error_code=12, error_text="error_12")
+
+        self.check_outputs()
     
-    
-    @defer.inlineCallbacks
     def test_5_changer_initialized_on_offline(self):
-        dispatcher.send_minimal(
-            sender=self.changer, signal='initialized')
-        
-        yield self.check_outputs_defer()
+        self.changer_fsm.initialized()
 
+        self.check_outputs()
 
-    @defer.inlineCallbacks
     def test_6_coin_in_on_offline(self):
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_in', amount=1)
-        
-        yield self.check_outputs_defer()
+        self.changer_fsm._on_coin_in(amount=1)
 
+        self.check_outputs()
 
-    @defer.inlineCallbacks
     def test_7_coin_out_on_offline(self):
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=1)
-        
-        yield self.check_outputs_defer()
+        self.changer_fsm._on_coin_out(amount=1)
 
+        self.check_outputs()
 
-    @defer.inlineCallbacks
     def test_8_start_accept_on_offline(self):
         self.changer_fsm.start_accept()
-        
-        yield self.check_outputs_defer()
 
+        self.check_outputs()
 
-    @defer.inlineCallbacks
     def test_9_stop_accept_on_offline(self):
         self.changer_fsm.stop_accept()
-        
-        yield self.check_outputs_defer()
 
+        self.check_outputs()
 
-    @defer.inlineCallbacks
     def test_10_start_dispense_on_offline(self):
         self.changer_fsm.start_dispense(amount=20)
-        
-        yield self.check_outputs_defer(
+
+        self.check_outputs(
                    fsm_amount_dispensed_expected=[({'amount': 0,},)])
 
-
-    @defer.inlineCallbacks
     def test_11_stop_dispense_on_offline(self):
         self.changer_fsm.stop_dispense()
-        
-        yield self.check_outputs_defer()
+
+        self.check_outputs()
 
 
     #                          12   13   14   15   16   17   18   19   20   21
@@ -195,104 +164,87 @@ class TestChangerFsm(unittest.TestCase):
     # changer.dispense_amount   -    -    -    -    -    -    -    -    -    -
 
 
-    @defer.inlineCallbacks
     def test_12_changer_online_on_online(self):
         self.set_fsm_state_online()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='online')
+        self.changer_fsm.online()
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_13_changer_offline_on_online(self):
         self.set_fsm_state_online()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='offline')
+        self.changer_fsm.offline()
         
-        yield self.check_outputs_defer(fsm_offline_expected=[()])
+        self.check_outputs(fsm_offline_expected=[()])
 
 
-    @defer.inlineCallbacks
     def test_14_changer_error_on_online(self):
         self.set_fsm_state_online()
 
-        dispatcher.send_minimal(
-            sender=self.changer,
-            signal='error', error_code=12, error_text='error_12')
+        self.changer_fsm.error(error_code=12, error_text='error_12')
         
-        yield self.check_outputs_defer(
+        self.check_outputs(
            fsm_error_expected=[({'error_code':12, 'error_text':'error_12'},)],
            changer_stop_accept_expected=[()])
         
 
-    @defer.inlineCallbacks
     def test_15_changer_initialized_on_online(self):
         self.set_fsm_state_online()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='initialized')
+        self.changer_fsm.initialized()
         
-        yield self.check_outputs_defer(fsm_initialized_expected=[()])
+        self.check_outputs(fsm_initialized_expected=[()])
 
 
-    @defer.inlineCallbacks
     def test_16_coin_in_on_online(self):
         self.set_fsm_state_online()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_in', amount=1)
+        self.changer_fsm._on_coin_in(amount=1)
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_17_coin_out_on_online(self):
         self.set_fsm_state_online()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=1)
+        self.changer_fsm._on_coin_out(amount=1)
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_18_start_accept_on_online(self):
         self.set_fsm_state_online()
 
         self.changer_fsm.start_accept()
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_19_stop_accept_on_online(self):
         self.set_fsm_state_online()
 
         self.changer_fsm.stop_accept()
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_20_start_dispense_on_online(self):
         self.set_fsm_state_online()
 
         self.changer_fsm.start_dispense(amount=10)
         
-        yield self.check_outputs_defer(
+        self.check_outputs(
                            fsm_amount_dispensed_expected=[({'amount': 0,},)])
 
 
-    @defer.inlineCallbacks
     def test_21_stop_dispense_on_online(self):
         self.set_fsm_state_online()
 
         self.changer_fsm.stop_dispense()
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
     #                          22   23   24   25   26   27   28   29   30   31
@@ -325,102 +277,84 @@ class TestChangerFsm(unittest.TestCase):
     # changer.stop_accept       -    -    -    -    -    -    -    -    -    -
     # changer.dispense_amount   -    -    -    -    -    -    -    -    -    -
 
-    @defer.inlineCallbacks
     def test_22_changer_online_on_error(self):
         self.set_fsm_state_error()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='online')
+        self.changer_fsm.online()
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_23_changer_offline_on_error(self):
         self.set_fsm_state_error()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='offline')
+        self.changer_fsm.offline()
         
-        yield self.check_outputs_defer(fsm_offline_expected=[()])
+        self.check_outputs(fsm_offline_expected=[()])
 
 
-    @defer.inlineCallbacks
     def test_24_changer_error_on_error(self):
         self.set_fsm_state_error()
 
-        dispatcher.send_minimal(
-            sender=self.changer, 
-            signal='error', error_code='12', error_text='error_12')
+        self.changer_fsm.error(error_code='12', error_text='error_12')
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_25_changer_initialized_on_error(self):
         self.set_fsm_state_error()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='initialized')
+        self.changer_fsm.initialized()
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_26_coin_in_on_error(self):
         self.set_fsm_state_error()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_in', amount=10)
+        self.changer_fsm._on_coin_in(amount=10)
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_27_coin_out_on_error(self):
         self.set_fsm_state_error()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=10)
+        self.changer_fsm._on_coin_out(amount=10)
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_28_start_accept_on_error(self):
         self.set_fsm_state_error()
 
         self.changer_fsm.start_accept()
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_29_stop_accept_on_error(self):
         self.set_fsm_state_error()
 
         self.changer_fsm.stop_accept()
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_30_start_dispense_on_error(self):
         self.set_fsm_state_error()
 
         self.changer_fsm.start_dispense(amount=10)
         
-        yield self.check_outputs_defer(sleep_sec=0.1,
-                       changer_dispense_amount_expected=[((10,),)])
+        self.check_outputs(changer_dispense_amount_expected=[((10,),)])
 
 
-    @defer.inlineCallbacks
     def test_31_stop_dispense_on_error(self):
         self.set_fsm_state_error()
 
         self.changer_fsm.stop_dispense()
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
     #                          32   33   34   35   36   37   38   39   40   41
@@ -454,104 +388,87 @@ class TestChangerFsm(unittest.TestCase):
     # changer.dispense_amount   -    -    -    -    -    -    -    -    +    -
 
 
-    @defer.inlineCallbacks
     def test_32_changer_online_on_ready(self):
         self.set_fsm_state_initialized()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='online')
+        self.changer_fsm.online()
 
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_33_changer_offline_on_ready(self):
         self.set_fsm_state_initialized()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='offline')
+        self.changer_fsm.offline()
         
-        yield self.check_outputs_defer(fsm_offline_expected=[()])
+        self.check_outputs(fsm_offline_expected=[()])
 
 
-    @defer.inlineCallbacks
     def test_34_changer_error_on_ready(self):
         self.set_fsm_state_initialized()
 
-        dispatcher.send_minimal(
-            sender=self.changer, 
-            signal='error', error_code=12, error_text='error_12')
+        self.changer_fsm.error(error_code=12, error_text='error_12')
         
-        yield self.check_outputs_defer(
+        self.check_outputs(
            fsm_error_expected=[({'error_code':12, 'error_text':'error_12'},)],
            changer_stop_accept_expected=[()])
 
 
-    @defer.inlineCallbacks
     def test_35_changer_initialized_on_ready(self):
         self.set_fsm_state_initialized()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='initialized')
+        self.changer_fsm.initialized()
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
         
         
-    @defer.inlineCallbacks
     def test_36_coin_in_on_ready(self):
         self.set_fsm_state_initialized()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_in', amount=10)
+        self.changer_fsm._on_coin_in(amount=10)
         
-        yield self.check_outputs_defer(fsm_coin_in_expected=[({'amount':10},)],
+        self.check_outputs(fsm_coin_in_expected=[({'amount':10},)],
                            changer_stop_accept_expected=[()])
 
 
-    @defer.inlineCallbacks
     def test_37_coin_out_on_ready(self):
         self.set_fsm_state_initialized()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=10)
+        self.changer_fsm._on_coin_out(amount=10)
 
-        yield self.check_outputs_defer()
+        self.check_outputs()
         
         
-    @defer.inlineCallbacks
     def test_38_start_accept_on_ready(self):
         self.set_fsm_state_initialized()
 
         self.changer_fsm.start_accept()
         
-        yield self.check_outputs_defer(changer_start_accept_expected=[()])
+        self.check_outputs(changer_start_accept_expected=[()])
         
         
-    @defer.inlineCallbacks
     def test_39_stop_accept_on_ready(self):
         self.set_fsm_state_initialized()
 
         self.changer_fsm.stop_accept()
         
-        yield self.check_outputs_defer(changer_stop_accept_expected=[()])
+        self.check_outputs(changer_stop_accept_expected=[()])
         
-    @defer.inlineCallbacks
     def test_40_start_dispense_on_ready(self):
         self.set_fsm_state_initialized()
 
         self.changer_fsm.start_dispense(amount=10)
         
-        yield self.check_outputs_defer(
+        self.check_outputs(
                    changer_dispense_amount_expected=[((10,),)])
     
 
-    @defer.inlineCallbacks
     def test_41_stop_dispense_on_ready(self):
         self.set_fsm_state_initialized()
 
         self.changer_fsm.stop_dispense()
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
         
 
     #                          42   43   44   45   46   47   48   49   50   51
@@ -584,103 +501,86 @@ class TestChangerFsm(unittest.TestCase):
     # changer.stop_accept       -    -    +    -    -    -    -    +    -    -
     # changer.dispense_amount   -    -    -    -    -    -    -    -    -    -
 
-    @defer.inlineCallbacks
     def test_42_changer_online_on_wait_coin(self):
         self.set_fsm_state_wait_coin()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='online')
+        self.changer_fsm.online()
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_43_changer_offline_on_wait_coin(self):
         self.set_fsm_state_wait_coin()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='offline')
+        self.changer_fsm.offline()
         
-        yield self.check_outputs_defer(fsm_offline_expected=[()])
+        self.check_outputs(fsm_offline_expected=[()])
 
 
-    @defer.inlineCallbacks
     def test_44_changer_error_on_wait_coin(self):
         self.set_fsm_state_wait_coin()
 
-        dispatcher.send_minimal(
-            sender=self.changer, 
-            signal='error', error_code=12, error_text='error_12')
+        self.changer_fsm.error(error_code=12, error_text='error_12')
         
-        yield self.check_outputs_defer(
+        self.check_outputs(
            fsm_error_expected=[({'error_code':12, 'error_text':'error_12'},)],
            changer_stop_accept_expected=[()])
 
 
-    @defer.inlineCallbacks
     def test_45_changer_initialized_on_wait_coin(self):
         self.set_fsm_state_wait_coin()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='initialized')
+        self.changer_fsm.initialized()
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_46_coin_in_on_wait_coin(self):
         self.set_fsm_state_wait_coin()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_in', amount=10)
+        self.changer_fsm._on_coin_in(amount=10)
         
-        yield self.check_outputs_defer(fsm_coin_in_expected=[({'amount':10},)])
+        self.check_outputs(fsm_coin_in_expected=[({'amount':10},)])
 
 
-    @defer.inlineCallbacks
     def test_47_coin_out_on_wait_coin(self):
         self.set_fsm_state_wait_coin()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=10)
+        self.changer_fsm._on_coin_out(amount=10)
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_48_start_accept_on_wait_coin(self):
         self.set_fsm_state_wait_coin()
 
         self.changer_fsm.start_accept()
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_49_stop_accept_on_wait_coin(self):
         self.set_fsm_state_wait_coin()
 
         self.changer_fsm.stop_accept()
         
-        yield self.check_outputs_defer(changer_stop_accept_expected=[()])
+        self.check_outputs(changer_stop_accept_expected=[()])
 
 
-    @defer.inlineCallbacks
     def test_50_start_dispense_on_wait_coin(self):
         self.set_fsm_state_wait_coin()
 
         self.changer_fsm.start_dispense(amount=10)
         
-        yield self.check_outputs_defer(changer_dispense_amount_expected=[((10,),)])
+        self.check_outputs(changer_dispense_amount_expected=[((10,),)])
 
 
-    @defer.inlineCallbacks
     def test_51_start_dispense_on_wait_coin(self):
         self.set_fsm_state_wait_coin()
 
         self.changer_fsm.stop_dispense()
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
     #                          52   53   54   55   56   57   58   59   60   61   62   63   64   65   66   67
@@ -715,207 +615,172 @@ class TestChangerFsm(unittest.TestCase):
     # changer.dispense_amount   -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
 
 
-    @defer.inlineCallbacks
     def test_52_changer_online_on_dispense_amount(self):
-        yield self.set_fsm_state_dispense_amount_defer()
+        self.set_fsm_state_dispense_amount()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='online')
+        self.changer_fsm.online()
         
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_53_changer_offline_on_dispense_amount(self):
-        yield self.set_fsm_state_dispense_amount_defer()
+        self.set_fsm_state_dispense_amount()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='offline')
+        self.changer_fsm.offline()
             
-        yield self.check_outputs_defer(fsm_offline_expected=[()])
+        self.check_outputs(fsm_offline_expected=[()])
 
 
-    @defer.inlineCallbacks
     def test_54_changer_error_on_dispense_amount(self):
-        yield self.set_fsm_state_dispense_amount_defer()
+        self.set_fsm_state_dispense_amount()
 
-        dispatcher.send_minimal(
-            sender=self.changer, 
-            signal='error', error_code=12, error_text='error_12')
+        self.changer_fsm.error(error_code=12, error_text='error_12')
             
-        yield self.check_outputs_defer(
+        self.check_outputs(
            fsm_error_expected=[({'error_code':12, 'error_text':'error_12'},)],
            changer_stop_accept_expected=[()])
 
 
-    @defer.inlineCallbacks
     def test_55_changer_initialized_on_dispense_amount(self):
-        yield self.set_fsm_state_dispense_amount_defer()
+        self.set_fsm_state_dispense_amount()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='initialized')
+        self.changer_fsm.initialized()
             
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_56_coin_in_on_dispense_amount(self):
-        yield self.set_fsm_state_dispense_amount_defer()
+        self.set_fsm_state_dispense_amount()
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_in', amount=10)
+        self.changer_fsm._on_coin_in(amount=10)
             
-        yield self.check_outputs_defer(fsm_coin_in_expected=[({'amount':10},)],
+        self.check_outputs(fsm_coin_in_expected=[({'amount':10},)],
                                        changer_stop_accept_expected=[()])
 
 
-    @defer.inlineCallbacks
     def test_57_coin_out_on_dispense_amount(self):
         '''
         dispensed amount not enough
         '''
-        yield self.set_fsm_state_dispense_amount_defer(10)
+        self.set_fsm_state_dispense_amount(10)
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=1)
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=8)
+        self.changer_fsm._on_coin_out(amount=1)
+        self.changer_fsm._on_coin_out(amount=8)
             
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_58_coin_out_on_dispense_amount(self):
         '''
         dispensed amount not enough
         '''
-        yield self.set_fsm_state_dispense_amount_defer(10)
+        self.set_fsm_state_dispense_amount(10)
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=1)
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=8)
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=1)
+        self.changer_fsm._on_coin_out(amount=1)
+        self.changer_fsm._on_coin_out(amount=8)
+        self.changer_fsm._on_coin_out(amount=1)
             
-        yield self.check_outputs_defer( 
+        self.check_outputs( 
                            fsm_amount_dispensed_expected=[({'amount':10},)])
 
 
-    @defer.inlineCallbacks
     def test_59_coin_out_on_dispense_amount(self):
         '''
         dispensed amount not enough
         '''
-        yield self.set_fsm_state_dispense_amount_defer(10)
+        self.set_fsm_state_dispense_amount(10)
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=1)
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=8)
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=2)
+        self.changer_fsm._on_coin_out(amount=1)
+        self.changer_fsm._on_coin_out(amount=8)
+        self.changer_fsm._on_coin_out(amount=2)
             
-        yield self.check_outputs_defer( 
+        self.check_outputs( 
                            fsm_amount_dispensed_expected=[({'amount':11},)])
 
 
-    @defer.inlineCallbacks
     def test_60_coin_out_on_dispense_amount(self):
         '''
         dispensed amount not enough
         '''
-        yield self.set_fsm_state_dispense_amount_defer(10)
+        self.set_fsm_state_dispense_amount(10)
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=10)
+        self.changer_fsm._on_coin_out(amount=10)
             
-        yield self.check_outputs_defer( 
+        self.check_outputs( 
                            fsm_amount_dispensed_expected=[({'amount':10},)])
 
 
-    @defer.inlineCallbacks
     def test_61_coin_out_on_dispense_amount(self):
-        yield self.set_fsm_state_dispense_amount_defer(10)
+        self.set_fsm_state_dispense_amount(10)
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=11)
+        self.changer_fsm._on_coin_out(amount=11)
             
-        yield self.check_outputs_defer(
+        self.check_outputs(
                            fsm_amount_dispensed_expected=[({'amount':11},)])
 
 
-    @defer.inlineCallbacks
     def test_62_start_accept_on_dispense_amount(self):
-        yield self.set_fsm_state_dispense_amount_defer()
+        self.set_fsm_state_dispense_amount()
 
         self.changer_fsm.start_accept()
             
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_63_stop_accept_on_dispense_amount(self):
-        yield self.set_fsm_state_dispense_amount_defer()
+        self.set_fsm_state_dispense_amount()
 
         self.changer_fsm.stop_accept()
             
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_64_start_dispense_on_dispense_amount(self):
-        yield self.set_fsm_state_dispense_amount_defer()
+        self.set_fsm_state_dispense_amount()
 
         self.changer_fsm.start_dispense()
             
-        yield self.check_outputs_defer()
+        self.check_outputs()
 
 
-    @defer.inlineCallbacks
     def test_65_stop_dispense_on_dispense_amount(self):
         '''
         no any amount dispensed before stopping
         '''
-        yield self.set_fsm_state_dispense_amount_defer(10)
+        self.set_fsm_state_dispense_amount(10)
 
         self.changer_fsm.stop_dispense()
             
-        yield self.check_outputs_defer(
+        self.check_outputs(
                            fsm_amount_dispensed_expected=[({'amount':0,},)])
 
 
-    @defer.inlineCallbacks
     def test_66_stop_dispense_on_dispense_amount(self):
         '''
         minimal amount dispensed before stopping
         '''
-        yield self.set_fsm_state_dispense_amount_defer(10)
+        self.set_fsm_state_dispense_amount(10)
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=1)
+        self.changer_fsm._on_coin_out(amount=1)
     
         self.changer_fsm.stop_dispense()
             
-        yield self.check_outputs_defer(
+        self.check_outputs(
                            fsm_amount_dispensed_expected=[({'amount':1,},)])
 
 
-    @defer.inlineCallbacks
     def test_67_stop_dispense_on_dispense_amount(self):
         '''
         some amount dispensed before stopping
         '''
-        yield self.set_fsm_state_dispense_amount_defer(10)
+        self.set_fsm_state_dispense_amount(10)
 
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=1)
-        dispatcher.send_minimal(
-            sender=self.changer, signal='coin_out', amount=8)
+        self.changer_fsm._on_coin_out(amount=1)
+        self.changer_fsm._on_coin_out(amount=8)
     
         self.changer_fsm.stop_dispense()
             
-        yield self.check_outputs_defer(
+        self.check_outputs(
                            fsm_amount_dispensed_expected=[({'amount':9,},)])
 
     #                          68
@@ -939,35 +804,30 @@ class TestChangerFsm(unittest.TestCase):
     # changer.stop_accept       -
     # changer.dispense_amount   -
     
-    @defer.inlineCallbacks
     def test_68_start_zero_dispense_on_ready(self):
         self.set_fsm_state_initialized()
 
         self.changer_fsm.start_dispense(amount=0)
         
-        yield self.check_outputs_defer(
+        self.check_outputs(
                            fsm_amount_dispensed_expected=[({'amount':0},)])
     
         
     def set_fsm_state_online(self):
-        dispatcher.send_minimal(
-            sender=self.changer, signal='online')
+        self.changer_fsm.online()
         self.fsm_listener.online.reset_mock()
         
         
     def set_fsm_state_error(self):
         self.set_fsm_state_online()
-        dispatcher.send_minimal(
-            sender=self.changer, 
-            signal='error', error_code='12', error_text='error_12')
+        self.changer_fsm.error(error_code='12', error_text='error_12')
         self.fsm_listener.error.reset_mock()
         self.changer.stop_accept.reset_mock()
         
         
     def set_fsm_state_initialized(self):
         self.set_fsm_state_online()
-        dispatcher.send_minimal(
-            sender=self.changer, signal='initialized')
+        self.changer_fsm.initialized()
         self.fsm_listener.initialized.reset_mock()
 
 
@@ -977,17 +837,13 @@ class TestChangerFsm(unittest.TestCase):
         self.changer.start_accept.reset_mock()
 
 
-    def set_fsm_state_dispense_amount_defer(self, amount=10):
+    def set_fsm_state_dispense_amount(self, amount=10):
         self.set_fsm_state_initialized()
         self.changer_fsm.start_dispense(amount=amount)
-        
-        def callback_func(dont_care):
-            self.changer.dispense_amount.reset_mock()
-
-        return task.deferLater(reactor, 0, callback_func, None)
+        self.changer.dispense_amount.reset_mock()
 
             
-    def check_outputs_defer(self, sleep_sec=0,
+    def check_outputs(self,
                       fsm_online_expected=[],
                       fsm_offline_expected=[],
                       fsm_error_expected=[],
@@ -998,25 +854,22 @@ class TestChangerFsm(unittest.TestCase):
                       changer_stop_accept_expected=[],
                       changer_dispense_amount_expected=[]):
         
-        def callback_func(dont_care):
-            self.assertEquals(fsm_online_expected, 
-                              self.fsm_listener.online.call_args_list)
-            self.assertEquals(fsm_offline_expected, 
-                              self.fsm_listener.offline.call_args_list)
-            self.assertEquals(fsm_error_expected, 
-                              self.fsm_listener.error.call_args_list)
-            self.assertEquals(fsm_initialized_expected, 
-                              self.fsm_listener.initialized.call_args_list)
-            self.assertEquals(fsm_coin_in_expected, 
-                              self.fsm_listener.coin_in.call_args_list)
-            self.assertEquals(fsm_amount_dispensed_expected, 
-                              self.fsm_listener.amount_dispensed.call_args_list)
-            self.assertEquals(changer_start_accept_expected, 
-                              self.changer.start_accept.call_args_list)
-            self.assertEquals(changer_stop_accept_expected, 
-                              self.changer.stop_accept.call_args_list)
-            self.assertEquals(changer_dispense_amount_expected, 
-                              self.changer.dispense_amount.call_args_list)
-
-        return task.deferLater(reactor, sleep_sec, callback_func, None)
+        self.assertEquals(fsm_online_expected, 
+                          self.fsm_listener.online.call_args_list)
+        self.assertEquals(fsm_offline_expected, 
+                          self.fsm_listener.offline.call_args_list)
+        self.assertEquals(fsm_error_expected, 
+                          self.fsm_listener.error.call_args_list)
+        self.assertEquals(fsm_initialized_expected, 
+                          self.fsm_listener.initialized.call_args_list)
+        self.assertEquals(fsm_coin_in_expected, 
+                          self.fsm_listener.coin_in.call_args_list)
+        self.assertEquals(fsm_amount_dispensed_expected, 
+                          self.fsm_listener.amount_dispensed.call_args_list)
+        self.assertEquals(changer_start_accept_expected, 
+                          self.changer.start_accept.call_args_list)
+        self.assertEquals(changer_stop_accept_expected, 
+                          self.changer.stop_accept.call_args_list)
+        self.assertEquals(changer_dispense_amount_expected, 
+                          self.changer.dispense_amount.call_args_list)
             
