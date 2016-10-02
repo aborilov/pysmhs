@@ -21,7 +21,9 @@ setup(
         "pymodbus",
         "pyserial",
         "python-dateutil",
-        "louie"
+        "louie",
+        "transitions",
+        "pymdbpc"
     ],
     scripts=["bin/pysmhs"]
     )

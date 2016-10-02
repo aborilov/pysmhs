@@ -12,7 +12,7 @@
         description = "Dummy handler"
         configfile = dummy_config.txt
 [kioskhandler]
-    run = 1
+    run = 0
     [[params]]
         description = "Kiosk handler"
         configfile = kiosk_config.txt
@@ -39,7 +39,7 @@
     run = 1
     [[params]]
         description = "WebServer handler"
-        port = 8080
+        port = 80
         wwwPath = pysmhs/www
 
 [datehandler]
@@ -50,7 +50,7 @@
 
 [actionhandler]
     parent = "corehandler"
-    run = 0
+    run = 1
         [[params]]
             description = "action handler"
             configfile = actions.txt

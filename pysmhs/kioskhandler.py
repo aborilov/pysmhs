@@ -127,11 +127,6 @@ class kioskhandler(AbstractHandler):
     def __init__(self, parent=None, params={}):
         logger.info("Init kiosk handler")
         self.proto = MDB()
-        SerialPort(
-            #  self.proto, '/dev/ttyUSB0', reactor,
-            self.proto, '/dev/ttyMDB', reactor,
-            baudrate='38400', parity=PARITY_NONE,
-            bytesize=EIGHTBITS, stopbits=STOPBITS_ONE)
         self.changer = RUChanger(proto=self.proto)
 
 #     validator = RUBillValidator(proto=self.proto)
@@ -146,6 +141,11 @@ class kioskhandler(AbstractHandler):
 
     def start(self):
         AbstractHandler.start(self)
+        SerialPort(
+            #  self.proto, '/dev/ttyUSB0', reactor,
+            self.proto, '/dev/ttyMDB', reactor,
+            baudrate='38400', parity=PARITY_NONE,
+            bytesize=EIGHTBITS, stopbits=STOPBITS_ONE)
         reactor.callLater(0, self.kiosk_fsm.start)
         reactor.callLater(0.2, self.validator.initialize)
         dispatcher.connect(self.total_process, signal='total_amount_changed')
