@@ -7,6 +7,6 @@ COPY ["config", "/pysmhs/config/"]
 COPY ["config", "/usr/local/etc/pysmhs/"]
 COPY ["bin", "/pysmhs/bin/"]
 COPY ["setup.py", "MANIFEST.in", "/pysmhs/"]
-RUN cd /pysmhs/ && python setup.py install
+RUN cd /pysmhs/ && python setup.py sdist && pip install dist/pysmhs-1.0.4.tar.gz
 EXPOSE 80
 CMD ["pysmhs"]
