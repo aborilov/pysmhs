@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>{{ title }}</title>
+  <link href="/css/bootstrap.min.css" rel="stylesheet" media="screen">
+  <link href="/css/bootstrapSwitch.css" rel="stylesheet" media="screen">
+  <link href="/css/bootstrap-responsive.css" rel="stylesheet">
+</head>
+
+<body>
+<script src="/js/jquery-latest.js"></script>
+<script src="/js/bootstrapSwitch.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<div class="container">
+<table class="table table-hover table-condensed table-striped" id="myswitch">
+    {% for handler in tags %}
+        <thead>
+        <tr><th colspan="2" ><div class="text-center">{{ handler }}</div></th></tr>
+        </thead>
+        <tbody>
+        {% for tag in tags[handler] %}
+            <tr>
+                <td >{{ tag }}</td>
+                <td>
+                    {% if tags[handler][tag] == '1' or tags[handler][tag] == '0' %}
+                        <div class="switch">
+                            <input id="{{ handler }}_{{ tag }}" type="checkbox"
+                        {% if tags[handler][tag] == '1' %}
+                        checked="checked"
+                        {% endif %}></div>
+                    {% else %}
+                    {{ tags[handler][tag] }}
+                    {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    {% endfor %}
+</table>
+</div>
+
+<script>
+$(document).ready(function() {
+        // alert('hello');
+        $('#myswitch').on('switch-change', function (e, data) {
+            var $el = $(data.el), value = data.value;
+            // console.log(e, $el, value);
+            data = {};
+            data['action'] = 'setTag';
+            if (value) {
+                data[$el.attr('id')] = '1';
+            }else{
+                data[$el.attr('id')] = '0';
+            }
+                $.get('get', data);
+        });
+    });
+// $('#normal-toggle-button').toggleButtons();
+// alert($('#normal-toggle-button'));
+</script>
+</body>
+</html>
