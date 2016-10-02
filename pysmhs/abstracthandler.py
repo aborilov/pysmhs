@@ -14,8 +14,9 @@ logfiles_num = 5
 logfile_size = 1048576
 logger = logging.getLogger()
 logger.setLevel(logging.DEBUG)
-handler = logging.handlers.RotatingFileHandler(
-    'smhs.log', maxBytes=logfile_size, backupCount=logfiles_num)
+#  handler = logging.handlers.RotatingFileHandler(
+    #  'smhs.log', maxBytes=logfile_size, backupCount=logfiles_num)
+handler = logging.StreamHandler(sys.stdout)
 form = logging.Formatter(
     '%(asctime)s %(name)-12s %(levelname)s:%(message)s')
 handler.setFormatter(form)
