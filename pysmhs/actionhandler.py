@@ -15,37 +15,30 @@ class actionhandler(AbstractHandler):
         self.actions = {'setter': self.setter,
                         'switcher': self.switcher,
                         'sleep': self.sleep}
-        self.temp_tags = {}
 
     def process(self, signal, event):
-        for event in events:
-            logger.debug(event)
-            self.temp_tags[event['tag']] = event['value']
-            for tag, params in self.config.items():
-                if 'condition' in params:
-                    params = params.copy()
-                    cond = params.pop('condition')
-                    if event['tag'] in cond:
-                        logger.debug("check cond %s" % cond)
-                        try:
-                            logger.debug("eval %s" % eval(cond))
-                            if eval(cond):
-                                self._settag(tag, '1')
-                        except Exception, e:
-                            logger.error(
-                                "Error(%s) while eval(%s)" % (e, cond))
-        self.temp_tags = {}
+        logger.debug(event)
+        for tag, params in self.config.items():
+            if 'condition' in params:
+                params = params.copy()
+                cond = params.pop('condition')
+                if event.keys()[0] in cond:
+                    logger.debug("check cond %s" % cond)
+                    try:
+                        if eval(cond):
+                            self._settag(tag, '1')
+                    except Exception, e:
+                        logger.exception(
+                            "Error(%s) while eval(%s)" % (e, cond))
         logger.debug('End of process')
-
-    def gettag(self, tag):
-        if tag in self.temp_tags:
-            return int(self.temp_tags[tag])
-        return AbstractHandler.gettag(self, tag)
 
     def _settag(self, tag, value):
         AbstractHandler._settag(self, tag, value)
         if str(value) == '1':
             self.run_action(tag)
+
+    def gettag(self, tag):
+        return self.parent.gettag(tag)
 
     def run_action(self, tag):
         params = self.config[tag].copy()

@@ -84,7 +84,7 @@ class corehandler(AbstractHandler):
             else:
                 self.handlers[tag].stop()
 
-    def _gettag(self, tag):
+    def gettag(self, tag):
         l = tag.split("_")
         if len(l) == 2:
             if l[0] == type(self).__name__:
