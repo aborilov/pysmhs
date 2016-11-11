@@ -21,12 +21,20 @@ class KioskFSM(Machine):
             ['amount_accepted',          'start_sell',      'start_prepare',    None,                None,                None,              '_prepare'              ],
             ['not_prepared',             'start_prepare',   'start_dispense',   None,                None,                None,              '_dispense_all'         ],
             ['prepared',                 'start_prepare',   'start_dispense',   None,                None,                None,              '_dispense_change'      ],
-            ['amount_dispensed',         'start_dispense',  'ready',            None,                None,                None,              '_after_ready'          ],
+            ['amount_dispensed',         'start_dispense',  'ready',            None,                'has_error',         None,              '_after_ready'          ],
+            ['amount_dispensed',         'start_dispense',  'error',            'has_error',         None,                None,              '_after_error'          ],
 
             ['cash_fsm_error',           'ready',           'error',            None,                None,                '_dispense_all',   '_after_error'          ],
-            ['cash_fsm_error',           'start_sell',      'error',            None,                None,                '_dispense_all',   '_after_error'          ],
-            ['cash_fsm_error',           'start_prepare',   'error',            None,                None,                '_dispense_change','_after_error'          ],
-            ['cash_fsm_error',           'start_dispense',  'error',            None,                None,                None,              '_after_error'          ],
+            ['cash_fsm_error',           'start_sell',      'start_sell',       None,                None,                None,              '_save_error'           ],
+            ['cash_fsm_error',           'start_prepare',   'start_prepare',    None,                None,                None,              '_save_error'           ],
+            ['cash_fsm_error',           'start_dispense',  'start_dispense',   None,                None,                None,              '_save_error'           ],
+            ['cash_fsm_error',           'wait_ready',      'error',            None,                None,                None,              '_after_error'          ],
+
+            ['cash_fsm_fatal',           'ready',           'error',            None,                None,                '_dispense_all',   '_after_error'          ],
+            ['cash_fsm_fatal',           'start_sell',      'error',            None,                None,                '_dispense_all',   '_after_error'          ],
+            ['cash_fsm_fatal',           'start_prepare',   'start_prepare',    None,                None,                None,              '_save_error'           ],
+            ['cash_fsm_fatal',           'start_dispense',  'error',            None,                None,                None,              '_after_error'          ],
+            ['cash_fsm_fatal',           'wait_ready',      'error',            None,                None,                None,              '_after_error'          ],
 
         ]
         super(KioskFSM, self).__init__(
@@ -45,8 +53,13 @@ class KioskFSM(Machine):
         # init parameters
         self._product = -1
 
+        self._has_error = False
+        self._error_code = 0
+        self._error_text = ""
+
     def _connect_input_signals(self, cash_fsm, plc, receiver):
         dispatcher.connect(receiver.cash_fsm_error, sender=cash_fsm, signal='error')
+        dispatcher.connect(receiver.cash_fsm_fatal, sender=cash_fsm, signal='fatal')
         dispatcher.connect(receiver.cash_fsm_ready, sender=cash_fsm, signal='ready')
         dispatcher.connect(receiver.amount_not_accepted,
                            sender=cash_fsm, signal='not_accepted')
@@ -108,10 +121,18 @@ class KioskFSM(Machine):
     def _dispense_change(self, error_code=0, error_text=''):
         self.cash_fsm.dispense_change()
 
-    def _after_error(self, error_code, error_text):
+    def _after_error(self, error_code=None, error_text=None, amount=0):
+        ec = self._error_code if self.has_error() else error_code
+        et = self._error_text if self.has_error() else error_text
+        self._save_error(error_code=ec, error_text=et)
         dispatcher.send_minimal(
             sender=self, signal='error',
-            error_code=error_code, error_text=error_text)
+            error_code=ec, error_text=et)
+
+    def _save_error(self, error_code, error_text):
+        self._error_code = error_code
+        self._error_text = error_text
+        self._has_error = True
 
     #######################
     ## Public Methods
@@ -133,6 +154,9 @@ class KioskFSM(Machine):
 
     def set_bill_amount(self, amount=0):
         return self.cash_fsm.set_bill_amount(amount=amount)
+
+    def has_error(self, amount=0):
+        return self._has_error
 
     #######################
     ## Events

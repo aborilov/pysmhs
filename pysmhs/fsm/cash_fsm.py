@@ -55,15 +55,16 @@ class CashFSM(Machine):
 
             ['dispense_all',             'error',           'error',            None,            None,               None,                '_dispense_all'         ],
             ['dispense_change',          'error',           'error',            None,            None,               None,                '_dispense_change'      ],
+            ['amount_dispensed',         'error',           'error',            None,            None,               None,                '_amount_dispensed'     ],
 
-            ['changer_error',            'ready',           'error',            None,            None,               None,                '_after_error'          ],
-            ['changer_error',            'accept_amount',   'error',            None,            None,               None,                '_after_error'          ],
-            ['changer_error',            'wait_dispense',   'error',            None,            None,               None,                '_after_error'          ],
-            ['changer_error',            'start_dispense',  'error',            None,            None,               None,                '_after_error'          ],
-            ['validator_error',          'ready',           'error',            None,            None,               None,                '_after_error'          ],
-            ['validator_error',          'accept_amount',   'error',            None,            None,               None,                '_after_error'          ],
-            ['validator_error',          'wait_dispense',   'error',            None,            None,               None,                '_after_error'          ],
-            ['validator_error',          'start_dispense',  'error',            None,            None,               None,                '_after_error'          ],
+            ['changer_error',            'ready',           'error',            None,            None,               None,                '_after_fatal'          ],
+            ['changer_error',            'accept_amount',   'error',            None,            None,               None,                '_after_fatal'          ],
+            ['changer_error',            'wait_dispense',   'error',            None,            None,               None,                '_after_fatal'          ],
+            ['changer_error',            'start_dispense',  'error',            None,            None,               None,                '_after_fatal'          ],
+            ['validator_error',          'ready',           'ready',            None,            None,               None,                '_after_error'          ],
+            ['validator_error',          'accept_amount',   'accept_amount',    None,            None,               None,                '_after_error'          ],
+            ['validator_error',          'wait_dispense',   'wait_dispense',    None,            None,               None,                '_after_error'          ],
+            ['validator_error',          'start_dispense',  'start_dispense',   None,            None,               None,                '_after_error'          ],
 
         ]
         super(CashFSM, self).__init__(
@@ -255,10 +256,16 @@ class CashFSM(Machine):
         self._dispense_amount(change_amount)
 
     def _after_error(self, error_code, error_text):
+        self.validator_fsm.stop_accept()
+        dispatcher.send_minimal(
+            sender=self, signal='error', 
+            error_code=error_code, error_text=error_text)
+
+    def _after_fatal(self, error_code, error_text):
         self._stop_acceptance_monitor()
         self._stop_accept()
         dispatcher.send_minimal(
-            sender=self, signal='error', 
+            sender=self, signal='fatal',
             error_code=error_code, error_text=error_text)
 
     def _start_acceptance_monitor(self):

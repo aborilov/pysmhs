@@ -1173,16 +1173,16 @@ class TestKioskFsm(TestCase):
         7) Go to error state
         8) Check kiosk is not serviced
         '''
-        #1        
+        # 1
         self.set_kiosk_ready_state()
         self.reset_outputs()
 
-        #2
+        # 2
         product=PRODUCT_1
         self.kiosk_fsm.sell(product=product)
         self.reset_outputs()
         
-        #3
+        # 3
         self.accept_coin_amount(PRODUCTS[product]-3)
         self.check_bill_amount(4)
 
@@ -1191,22 +1191,19 @@ class TestKioskFsm(TestCase):
                            changer_stop_accept_expected=[()],
                            validator_stack_bill_expected=[()])
         
-        #4
-        self.fire_changer_error(
-                            error_code=changer.ERROR_CODE_DEFECTIVE_TUBE_SENSOR, 
-                            error_text='error')
+        # 4
+        self.fire_changer_error(error_code=changer.ERROR_CODE_DEFECTIVE_TUBE_SENSOR,
+                                error_text='error')
 
-        #5
+        # 5
         self.product_prepared()
-        
-        #6, 7
-        self.check_outputs(fsm_error_expected=[
-                       ({'error_code':changer.ERROR_CODE_DEFECTIVE_TUBE_SENSOR, 
-                         'error_text':'error'},)],
-                           changer_stop_accept_expected=[()],
-                           changer_dispense_amount_expected=[((1,),)])
-        
-        #8
+
+        # 6, 7
+        self.check_outputs(changer_dispense_amount_expected=[((1,),)],
+                           fsm_error_expected=[({'error_code':changer.ERROR_CODE_DEFECTIVE_TUBE_SENSOR,
+                                                 'error_text':'error'},)],
+                           changer_stop_accept_expected=[()])
+        # 8
         self.check_kiosk_is_not_serviced()
 
     def test_scenarious_10_2(self):
@@ -1770,40 +1767,55 @@ class TestKioskFsm(TestCase):
         self.check_outputs(fsm_error_expected=[({'error_code':1, 
                                                  'error_text':'error'},)],
                            validator_return_bill_expected=[()],
-                           validator_stop_accept_expected=[()],
-                           changer_stop_accept_expected=[()])
+                           validator_stop_accept_expected=[()])
         
         #4
         self.check_kiosk_is_not_serviced()
 
     def test_scenarious_15_1(self):
         '''
-        1) Wait select product
-        2) Select product
-        3) Get Error from validator
-        4) Go to error state
-        5) Check kiosk is not serviced
-        '''
-        #1        
+         1) Wait select product
+         2) Select product
+         3) Get Error from validator
+         4) Payment of coins on more amount
+         5) Prepare product
+         6) Dispense change
+         7) Go to error state
+         8) Check kiosk is not serviced
+         '''
+        # 1
         self.set_kiosk_ready_state()
-        self.reset_outputs()
 
-        #2
-        product=PRODUCT_1
+        # 2
+        product = PRODUCT_1
         self.kiosk_fsm.sell(product=product)
         self.reset_outputs()
-        
-        #3
+
+        # 3
         self.fire_validator_error(error_code=1, error_text='error')
-        
-        #4
-        self.check_outputs(validator_return_bill_expected=[()],
-                           validator_stop_accept_expected=[()],
-                           changer_stop_accept_expected=[()],
-                           fsm_error_expected=[({'error_code':1, 
+        self.check_outputs(validator_stop_accept_expected=[()],
+                           validator_return_bill_expected=[()])
+
+        # 4
+        self.accept_coin_amount(PRODUCTS[product] - 6)
+        self.reset_outputs()
+
+        self.accept_coin_amount(7)
+        self.check_outputs(changer_stop_accept_expected=[()],
+                           plc_prepare_expected=[((PRODUCT_1,),)])
+
+        # 5
+        self.product_prepared()
+
+        # 6
+        self.check_outputs(changer_dispense_amount_expected=[((1,),)])
+
+        # 7
+        self.fire_coin_out(1)
+        self.check_outputs(fsm_error_expected=[({'error_code':1,
                                                  'error_text':'error'},)])
 
-        #5
+        #8
         self.check_kiosk_is_not_serviced()
 
     def test_scenarious_15_2(self):
@@ -1812,35 +1824,47 @@ class TestKioskFsm(TestCase):
         2) Select product
         3) Start payment
         4) Get Error from validator
-        5) Return accepted amount
-        6) Go to error state
-        7) Check kiosk is not serviced
+        5) Payment of coins on more amount
+        6) Prepare product
+        7) Dispense change
+        8) Go to error state
+        9) Check kiosk is not serviced
         '''
-        #1        
+        # 1
         self.set_kiosk_ready_state()
         self.reset_outputs()
 
-        #2
+        # 2
         product=PRODUCT_1
         self.kiosk_fsm.sell(product=product)
         self.reset_outputs()
 
-        #3
-        self.accept_coin_amount(PRODUCTS[product]-3)
-        self.check_outputs(changer_start_accept_expected=[()])
-        
-        #4
+        # 3
+        self.accept_coin_amount(PRODUCTS[product] - 1)
+        self.reset_outputs()
+
+        # 4
         self.fire_validator_error(error_code=1, error_text='error')
-        
-        #5, 6
-        self.check_outputs(validator_return_bill_expected=[()],
-                   validator_stop_accept_expected=[()],
-                   changer_stop_accept_expected=[()],
-                   changer_dispense_amount_expected=[((PRODUCTS[product]-3,),)],
-                   fsm_error_expected=[({'error_code':1, 
-                                         'error_text':'error'},)])
-        
-        #7
+        self.check_outputs(validator_stop_accept_expected=[()],
+                           validator_return_bill_expected=[()])
+
+        # 5
+        self.accept_coin_amount(2)
+        self.check_outputs(changer_stop_accept_expected=[()],
+                           plc_prepare_expected=[((PRODUCT_1,),)])
+
+        # 6
+        self.product_prepared()
+
+        # 7
+        self.check_outputs(changer_dispense_amount_expected=[((1,),)])
+
+        # 8
+        self.fire_coin_out(1)
+        self.check_outputs(fsm_error_expected=[({'error_code':1,
+                                                 'error_text':'error'},)])
+
+        # 9
         self.check_kiosk_is_not_serviced()
 
     def test_scenarious_16(self):
@@ -1854,38 +1878,37 @@ class TestKioskFsm(TestCase):
         7) Go to error state
         8) Check kiosk is not serviced
         '''
-        #1        
+        # 1
         self.set_kiosk_ready_state()
         self.reset_outputs()
 
-        #2
-        product=PRODUCT_1
+        # 2
+        product = PRODUCT_1
         self.kiosk_fsm.sell(product=product)
         self.reset_outputs()
 
-        #3
-        self.accept_coin_amount(PRODUCTS[product]-3)
-        self.check_bill_amount(4)
+        # 3
+        self.accept_coin_amount(PRODUCTS[product]-1)
+        self.accept_coin_amount(2)
         self.reset_outputs()
         
-        #4
+        # 4
         self.fire_validator_error(error_code=1, error_text='error')
-        
-        #5
+        self.check_outputs(validator_stop_accept_expected=[()],
+                           validator_return_bill_expected=[()])
+
+        # 5
         self.product_prepared()
-        
-        #6, 7
-        self.check_outputs(validator_return_bill_expected=[()],
-                           validator_stop_accept_expected=[()],
-                           changer_stop_accept_expected=[()],
-                           changer_dispense_amount_expected=[((1,),)],
-                           fsm_error_expected=[({'error_code':1, 
+
+        # 6
+        self.check_outputs(changer_dispense_amount_expected=[((1,),)])
+        self.fire_coin_out(1)
+
+        # 7
+        self.check_outputs(fsm_error_expected=[({'error_code':1,
                                                  'error_text':'error'},)])
 
-        self.fire_coin_out(1)
-        self.check_outputs()
-        
-        #8
+        # 8
         self.check_kiosk_is_not_serviced()
 
     def test_scenarious_17(self):
@@ -1975,8 +1998,7 @@ class TestKioskFsm(TestCase):
         self.check_outputs(fsm_error_expected=[({'error_code':1, 
                                                  'error_text':'error'},)],
                            validator_return_bill_expected=[()],
-                           validator_stop_accept_expected=[()],
-                           changer_stop_accept_expected=[()])
+                           validator_stop_accept_expected=[()])
         
         #8
         self.check_kiosk_is_not_serviced()

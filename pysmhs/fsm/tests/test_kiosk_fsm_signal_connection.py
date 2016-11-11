@@ -19,6 +19,7 @@ class TestKioskFsm(TestCase):
 
         self.mock = MagicMock()
         self.mock.cash_fsm_error = MagicMock(spec="cash_fsm_error")
+        self.mock.cash_fsm_fatal = MagicMock(spec="cash_fsm_fatal")
         self.mock.cash_fsm_ready = MagicMock(spec="cash_fsm_ready")
         self.mock.amount_not_accepted = MagicMock(spec="amount_not_accepted")
         self.mock.amount_accepted = MagicMock(spec="amount_accepted")
@@ -229,6 +230,19 @@ class TestKioskFsm(TestCase):
         
         self.assertEquals([({'amount':10,},)],
                           self.mock._bill_in.call_args_list)
+
+
+    def test_16_connection_by_cash_fatal(self):
+        '''
+        test connection between cash_fsm and kiosk_fsm by signal 'fatal'
+        '''
+        dispatcher.send_minimal(sender=self.cash_fsm, signal='fatal',
+                                error_code='code',
+                                error_text='text')
+
+        self.assertEquals([({'error_code': 'code',
+                             'error_text': 'text', },)],
+                          self.mock.cash_fsm_fatal.call_args_list)
 
 
 class KioskFSMStub(KioskFSM):

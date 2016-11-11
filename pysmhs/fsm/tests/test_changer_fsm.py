@@ -72,7 +72,7 @@ class TestChangerFsm(TestCase):
     # fsm_listener.error        -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.ready        -    -    -    -    -    -    -    -    -    -    -    
     # fsm_listener.coin_in      -    -    -    -    -    -    -    -    -    -    -
-    # fsm_listener.dispensed    -    -    -    -    -    -    -    -    -    -    -
+    # fsm_listener.dispensed    -    -    -    -    -    -    -    -    -    +    -
     # changer.start_accept      -    -    -    -    -    -    -    -    -    -    -
     # changer.stop_accept       -    -    -    -    -    -    -    -    -    -    -
     # changer.dispense_amount   -    -    -    -    -    -    -    -    -    -    -
@@ -158,7 +158,7 @@ class TestChangerFsm(TestCase):
     # fsm_listener.error        -    -    +    -    -    -    -    -    -    -
     # fsm_listener.ready        -    -    -    +    -    -    -    -    -    -    
     # fsm_listener.coin_in      -    -    -    -    -    -    -    -    -    -
-    # fsm_listener.dispensed    -    -    -    -    -    -    -    -    -    -
+    # fsm_listener.dispensed    -    -    -    -    -    -    -    -    +    -
     # changer.start_accept      -    -    -    -    -    -    -    -    -    -
     # changer.stop_accept       -    -    +    -    -    -    -    -    -    -
     # changer.dispense_amount   -    -    -    -    -    -    -    -    -    -
@@ -235,8 +235,7 @@ class TestChangerFsm(TestCase):
 
         self.changer_fsm.start_dispense(amount=10)
         
-        self.check_outputs(
-                           fsm_amount_dispensed_expected=[({'amount': 0,},)])
+        self.check_outputs(fsm_amount_dispensed_expected=[({'amount': 0,},)])
 
 
     def test_21_stop_dispense_on_online(self):
@@ -272,10 +271,10 @@ class TestChangerFsm(TestCase):
     # fsm_listener.error        -    -    -    -    -    -    -    -    -    -
     # fsm_listener.ready        -    -    -    -    -    -    -    -    -    -    
     # fsm_listener.coin_in      -    -    -    -    -    -    -    -    -    -
-    # fsm_listener.dispensed    -    -    -    -    -    -    -    -    -    -
+    # fsm_listener.dispensed    -    -    -    -    -    -    -    -    +    -
     # changer.start_accept      -    -    -    -    -    -    -    -    -    -
     # changer.stop_accept       -    -    -    -    -    -    -    -    -    -
-    # changer.dispense_amount   -    -    -    -    -    -    -    -    -    -
+    # changer.dispense_amount   -    -    -    -    -    -    -    -    +    -
 
     def test_22_changer_online_on_error(self):
         self.set_fsm_state_error()
@@ -346,7 +345,8 @@ class TestChangerFsm(TestCase):
 
         self.changer_fsm.start_dispense(amount=10)
         
-        self.check_outputs(changer_dispense_amount_expected=[((10,),)])
+        self.check_outputs(changer_dispense_amount_expected=[((10,),)],
+                           fsm_amount_dispensed_expected=[({'amount': 0, },)])
 
 
     def test_31_stop_dispense_on_error(self):

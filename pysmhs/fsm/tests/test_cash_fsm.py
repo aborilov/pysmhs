@@ -23,6 +23,7 @@ class TestCashFsm(unittest.TestCase):
         self.fsm_listener.not_accepted = MagicMock(spec="not_accepted")
         self.fsm_listener.dispensed = MagicMock(spec="dispensed")
         self.fsm_listener.error = MagicMock(spec="error")
+        self.fsm_listener.fatal = MagicMock(spec="fatal")
         
         self.changer_fsm = MagicMock()
         self.changer_fsm.start = MagicMock()
@@ -51,7 +52,9 @@ class TestCashFsm(unittest.TestCase):
                            sender=self.cash_fsm, signal='not_accepted')
         dispatcher.connect(self.fsm_listener.error, 
                            sender=self.cash_fsm, signal='error')
-        dispatcher.connect(self.fsm_listener.dispensed, 
+        dispatcher.connect(self.fsm_listener.fatal,
+                           sender=self.cash_fsm, signal='fatal')
+        dispatcher.connect(self.fsm_listener.dispensed,
                            sender=self.cash_fsm, signal='dispensed')
         
         self.clock = task.Clock()
@@ -94,6 +97,7 @@ class TestCashFsm(unittest.TestCase):
     # fsm_listener.not_accepted   -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.dispensed      -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.error          -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
+    # fsm_listener.fatal          -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start           -    +    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start_accept    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.stop_accept     -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
@@ -224,6 +228,7 @@ class TestCashFsm(unittest.TestCase):
     # fsm_listener.not_accepted   -    -    -    -
     # fsm_listener.dispensed      -    -    -    -
     # fsm_listener.error          -    -    -    -
+    # fsm_listener.fatal          -    -    -    -
     # changer_fsm.start           -    +    +    +
     # changer_fsm.start_accept    -    -    -    -
     # changer_fsm.stop_accept     -    -    -    -
@@ -303,6 +308,7 @@ class TestCashFsm(unittest.TestCase):
     # fsm_listener.not_accepted   -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.dispensed      -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.error          -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
+    # fsm_listener.fatal          -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start           -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start_accept    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.stop_accept     -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
@@ -459,6 +465,7 @@ class TestCashFsm(unittest.TestCase):
     # fsm_listener.not_accepted   -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.dispensed      -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.error          -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
+    # fsm_listener.fatal          -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start           -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start_accept    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.stop_accept     -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
@@ -636,8 +643,9 @@ class TestCashFsm(unittest.TestCase):
     # fsm_listener.ready          -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.accepted       -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.not_accepted   -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
-    # fsm_listener.dispensed      -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
+    # fsm_listener.dispensed      -    -    -    -    -    -    +    -    -    -    -    -    -    -    -    -
     # fsm_listener.error          -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
+    # fsm_listener.fatal          -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start           -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start_accept    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.stop_accept     -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
@@ -699,7 +707,7 @@ class TestCashFsm(unittest.TestCase):
         
         self.cash_fsm.amount_dispensed(amount=10)
 
-        self.check_outputs()
+        self.check_outputs(fsm_dispensed_expected=[({'amount':10,},)])
 
     def test_61_validator_online_on_error(self):
         # test deleted
@@ -811,10 +819,11 @@ class TestCashFsm(unittest.TestCase):
     # fsm_listener.accepted       -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.not_accepted   -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.dispensed      -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
-    # fsm_listener.error          -    -    -    +    -    -    -    -    -    +    -    -    -    -    -    -
+    # fsm_listener.error          -    -    -    -    -    -    -    -    -    +    -    -    -    -    -    -
+    # fsm_listener.fatal          -    -    -    +    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start           -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start_accept    -    -    -    -    -    -    -    -    -    -    -    -    -    +    -    -
-    # changer_fsm.stop_accept     -    -    -    +    -    -    -    -    -    +    -    -    -    -    -    -
+    # changer_fsm.stop_accept     -    -    -    +    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start_dispense  -    -    -    -    -    +    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.stop_dispense   -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # validator_fsm.start         -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
@@ -849,7 +858,7 @@ class TestCashFsm(unittest.TestCase):
         
         self.cash_fsm._on_changer_error(error_code=12, error_text='error_12')
 
-        self.check_outputs(fsm_error_expected=[({'error_code':12,
+        self.check_outputs(fsm_fatal_expected=[({'error_code':12,
                                                  'error_text':'error_12'},)],
                            changer_fsm_stop_accept_expected=[()],
                            validator_fsm_stop_accept_expected=[()])
@@ -899,7 +908,6 @@ class TestCashFsm(unittest.TestCase):
 
         self.check_outputs(fsm_error_expected=[({'error_code':12,
                                                  'error_text':'error_12'},)],
-                           changer_fsm_stop_accept_expected=[()],
                            validator_fsm_stop_accept_expected=[()])
 
 
@@ -981,10 +989,11 @@ class TestCashFsm(unittest.TestCase):
     # fsm_listener.accepted       -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.not_accepted   -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.dispensed      -    -    -    -    -    -    -    -    -    -    -    -    -
-    # fsm_listener.error          -    -    -    +    -    -    -    -    +    -    -    -    -
+    # fsm_listener.error          -    -    -    -    -    -    -    -    +    -    -    -    -
+    # fsm_listener.fatal          -    -    -    +    -    -    -    -    -    -    -    -    -
     # changer_fsm.start           -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start_accept    -    -    -    -    +    -    -    -    -    -    -    -    -
-    # changer_fsm.stop_accept     -    -    -    +    -    -    -    -    +    -    -    -    -
+    # changer_fsm.stop_accept     -    -    -    +    -    -    -    -    -    -    -    -    -
     # changer_fsm.start_dispense  -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.stop_dispense   -    -    -    -    -    -    -    -    -    -    -    -    -
     # validator_fsm.start         -    -    -    -    -    -    -    -    -    -    -    -    -
@@ -1019,7 +1028,7 @@ class TestCashFsm(unittest.TestCase):
         
         self.cash_fsm._on_changer_error(error_code=12, error_text='error_12')
 
-        self.check_outputs(fsm_error_expected=[({'error_code':12, 
+        self.check_outputs(fsm_fatal_expected=[({'error_code':12,
                                                  'error_text':'error_12'},)],
                            changer_fsm_stop_accept_expected=[()],
                            validator_fsm_stop_accept_expected=[()])
@@ -1061,7 +1070,6 @@ class TestCashFsm(unittest.TestCase):
 
         self.check_outputs(fsm_error_expected=[({'error_code':12, 
                                                  'error_text':'error_12'},)],
-                           changer_fsm_stop_accept_expected=[()],
                            validator_fsm_stop_accept_expected=[()])
 
 
@@ -1126,6 +1134,7 @@ class TestCashFsm(unittest.TestCase):
     # fsm_listener.not_accepted                   -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.dispensed                      -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.error                          -    -    -    -    -    -    -    -    -    -    -    -    -    -
+    # fsm_listener.fatal                          -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start                           -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start_accept                    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.stop_accept                     -    -    +    +    +    +    -    -    +    +    +    +    -    -
@@ -1362,6 +1371,7 @@ class TestCashFsm(unittest.TestCase):
     # fsm_listener.not_accepted                   +    +    +    +    -
     # fsm_listener.dispensed                      -    -    -    -    -
     # fsm_listener.error                          -    -    -    -    -
+    # fsm_listener.fatal                          -    -    -    -    -
     # changer_fsm.start                           -    -    -    -    -
     # changer_fsm.start_accept                    -    -    -    -    -
     # changer_fsm.stop_accept                     -    -    -    -    -
@@ -1510,10 +1520,11 @@ class TestCashFsm(unittest.TestCase):
     # fsm_listener.accepted       -    -    -    -    -    +    -    -    -    -    -    +    -    -    -    -
     # fsm_listener.not_accepted   -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.dispensed      -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
-    # fsm_listener.error          -    -    -    +    -    -    -    -    -    +    -    -    -    -    -    -
+    # fsm_listener.error          -    -    -    -    -    -    -    -    -    +    -    -    -    -    -    -
+    # fsm_listener.fatal          -    -    -    +    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start           -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start_accept    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
-    # changer_fsm.stop_accept     -    -    -    +    -    -    -    -    -    +    -    -    -    -    -    -
+    # changer_fsm.stop_accept     -    -    -    +    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start_dispense  -    -    -    -    -    -    -    -    -    -    -    -    -    -    +    +
     # changer_fsm.stop_dispense   -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # validator_fsm.start         -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
@@ -1549,7 +1560,7 @@ class TestCashFsm(unittest.TestCase):
          
         self.cash_fsm._on_changer_error(error_code=12, error_text='error_12')
  
-        self.check_outputs(fsm_error_expected=[({'error_code':12, 
+        self.check_outputs(fsm_fatal_expected=[({'error_code':12,
                                                  'error_text':'error_12'},)],
                            changer_fsm_stop_accept_expected=[()],
                            validator_fsm_stop_accept_expected=[()])
@@ -1599,7 +1610,6 @@ class TestCashFsm(unittest.TestCase):
  
         self.check_outputs(fsm_error_expected=[({'error_code':12, 
                                                  'error_text':'error_12'},)],
-                           changer_fsm_stop_accept_expected=[()],
                            validator_fsm_stop_accept_expected=[()])
  
  
@@ -1690,10 +1700,11 @@ class TestCashFsm(unittest.TestCase):
     # fsm_listener.accepted       -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.not_accepted   -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # fsm_listener.dispensed      -    -    +    -    -    -    +    -    -    -    -    -    -    -    -    -
-    # fsm_listener.error          -    -    -    +    -    -    -    -    -    +    -    -    -    -    -    -
+    # fsm_listener.error          -    -    -    -    -    -    -    -    -    +    -    -    -    -    -    -
+    # fsm_listener.fatal          -    -    -    +    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start           -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start_accept    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
-    # changer_fsm.stop_accept     -    -    -    +    -    -    -    -    -    +    -    -    -    -    -    -
+    # changer_fsm.stop_accept     -    -    -    +    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.start_dispense  -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # changer_fsm.stop_dispense   -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
     # validator_fsm.start         -    -    -    -    -    -    -    -    -    -    -    -    -    -    -    -
@@ -1729,7 +1740,7 @@ class TestCashFsm(unittest.TestCase):
          
         self.cash_fsm._on_changer_error(error_code=12, error_text='error_12')
  
-        self.check_outputs(fsm_error_expected=[({'error_code':12, 
+        self.check_outputs(fsm_fatal_expected=[({'error_code':12,
                                                  'error_text':'error_12'},)],
                            changer_fsm_stop_accept_expected=[()],
                            validator_fsm_stop_accept_expected=[()])
@@ -1779,7 +1790,6 @@ class TestCashFsm(unittest.TestCase):
  
         self.check_outputs(fsm_error_expected=[({'error_code':12, 
                                                  'error_text':'error_12'},)],
-                           changer_fsm_stop_accept_expected=[()],
                            validator_fsm_stop_accept_expected=[()])
  
  
@@ -1848,6 +1858,7 @@ class TestCashFsm(unittest.TestCase):
     # fsm_listener.not_accepted                   +
     # fsm_listener.dispensed                      -
     # fsm_listener.error                          -
+    # fsm_listener.fatal                          -
     # changer_fsm.start                           -
     # changer_fsm.start_accept                    -
     # changer_fsm.stop_accept                     -
@@ -1945,6 +1956,7 @@ class TestCashFsm(unittest.TestCase):
     # fsm_listener.not_accepted                   -    -    -    -    -
     # fsm_listener.dispensed                      -    -    -    -    -
     # fsm_listener.error                          -    -    -    -    -
+    # fsm_listener.fatal                          -    -    -    -    -
     # changer_fsm.start                           -    -    -    -    -
     # changer_fsm.start_accept                    +    +    +    +    +
     # changer_fsm.stop_accept                     -    +    -    -    -
@@ -2108,6 +2120,7 @@ class TestCashFsm(unittest.TestCase):
         self.changer_fsm.stop_accept.reset_mock()
         self.validator_fsm.stop_accept.reset_mock()
         self.fsm_listener.error.reset_mock()
+        self.fsm_listener.fatal.reset_mock()
         
         
     def set_fsm_state_ready(self, accept_timeout_sec=0):
@@ -2145,6 +2158,7 @@ class TestCashFsm(unittest.TestCase):
                       fsm_not_accepted_expected=[],
                       fsm_dispensed_expected=[],
                       fsm_error_expected=[],
+                      fsm_fatal_expected=[],
                       changer_fsm_start_expected=[],
                       changer_fsm_start_accept_expected=[],
                       changer_fsm_stop_accept_expected=[],
@@ -2165,7 +2179,9 @@ class TestCashFsm(unittest.TestCase):
                           self.fsm_listener.dispensed.call_args_list)
         self.assertEquals(fsm_error_expected, 
                           self.fsm_listener.error.call_args_list)
-        self.assertEquals(changer_fsm_start_expected, 
+        self.assertEquals(fsm_fatal_expected,
+                          self.fsm_listener.fatal.call_args_list)
+        self.assertEquals(changer_fsm_start_expected,
                           self.changer_fsm.start.call_args_list)
         self.assertEquals(changer_fsm_start_accept_expected, 
                           self.changer_fsm.start_accept.call_args_list)
@@ -2194,6 +2210,7 @@ class TestCashFsm(unittest.TestCase):
         self.fsm_listener.not_accepted.reset_mock()
         self.fsm_listener.dispensed.reset_mock()
         self.fsm_listener.error.reset_mock()
+        self.fsm_listener.fatal.reset_mock()
         self.changer_fsm.start.reset_mock()
         self.changer_fsm.start_accept.reset_mock()
         self.changer_fsm.stop_accept.reset_mock()
