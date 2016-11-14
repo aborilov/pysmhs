@@ -26,14 +26,14 @@ class actionhandler(AbstractHandler):
                     logger.debug("check cond %s" % cond)
                     try:
                         if eval(cond):
-                            self._settag(tag, '1')
+                            self.settag(tag, '1')
                     except Exception, e:
                         logger.exception(
                             "Error(%s) while eval(%s)" % (e, cond))
         logger.debug('End of process')
 
-    def _settag(self, tag, value):
-        AbstractHandler._settag(self, tag, value)
+    def settag(self, tag, value):
+        AbstractHandler.settag(self, tag, value)
         if str(value) == '1':
             self.run_action(tag)
 
@@ -57,7 +57,7 @@ class actionhandler(AbstractHandler):
                 logger.debug(
                     'Wrong action name and order - %s' % i)
         logger.debug('have after actions %s' % sorted(params))
-        self._settag(tag, '0')
+        self.settag(tag, '0')
 
     def loadtags(self):
         for tag in self.config:
@@ -69,13 +69,13 @@ class actionhandler(AbstractHandler):
 
     def setter(self, params):
         for tag, value in params.items():
-            self.settag(tag, value)
+            self.parent.settag(tag, value)
 
     def _inverttag(self, tag):
         if str(self.gettag(tag)) == '0':
-            self.settag(tag, '1')
+            self.parent.settag(tag, '1')
         else:
-            self.settag(tag, '0')
+            self.parent.settag(tag, '0')
 
     def sleep(self, params):
         logger.debug('before timeout')
