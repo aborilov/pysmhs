@@ -27,7 +27,8 @@ class CashFSM(Machine):
             ['coin_in',                  'ready',           'ready',            None,            None,              '_dispense_amount',   None                    ],
 #             ['bill_in',                  'ready',           'ready',            None,            None,              '_ban_bill',          None                    ],
             ['accept',                   'ready',           'accept_amount',    None,            None,               None,                '_start_accept'         ],
-            ['accept_timeout',           'accept_amount',   'ready',            None,            None,               None,                '_after_accept_timeout' ],
+            ['accept_timeout',           'accept_amount',   'ready',            None,            None,               None,                ['_after_accept_timeout',
+                                                                                                                                           '_reset_amount_accept_info']],
             ['changer_ready',            'accept_amount',   'accept_amount',    None,            None,               None,                '_start_coin_accept'    ],
             ['validator_ready',          'accept_amount',   'accept_amount',    None,            None,               None,                '_start_bill_accept'    ],
             ['coin_in',                  'accept_amount',   'accept_amount',    None,            '_is_enough',      '_start_coin_accept', '_add_amount'           ],
@@ -43,8 +44,10 @@ class CashFSM(Machine):
             ['bill_in',                  'wait_dispense',   'wait_dispense',    None,            None,              '_add_amount',        '_amount_accepted'      ],
             ['dispense_all',             'wait_dispense',   'start_dispense',   None,            None,               None,                '_dispense_all'         ],
             ['dispense_change',          'wait_dispense',   'start_dispense',   None,            None,               None,                '_dispense_change'      ],
-            ['amount_dispensed',         'start_dispense',  'ready',            None,            None,               None,                '_amount_dispensed'     ],
-            ['changer_offline',          'start_dispense',  'ready',            None,            None,               None,                '_amount_dispensed'     ],
+            ['amount_dispensed',         'start_dispense',  'ready',            None,            None,               None,                ['_amount_dispensed',
+                                                                                                                                           '_reset_amount_accept_info']],
+            ['changer_offline',          'start_dispense',  'ready',            None,            None,               None,                ['_amount_dispensed',
+                                                                                                                                           '_reset_amount_accept_info']],
 
             ['check_bill',               'init',            'init',             None,            None,              '_ban_bill',          None                    ],
             ['check_bill',               'wait_ready',      'wait_ready',       None,            None,              '_ban_bill',          None                    ],
@@ -246,13 +249,13 @@ class CashFSM(Machine):
 
     def _dispense_all(self):
         dispensed_amount = self._accepted_amount
-        self._reset_mount_accept_info()
+        self._reset_amount_accept_info()
         self._dispense_amount(dispensed_amount)
 
     def _dispense_change(self):
 #         change_amount = self._accepted_amount - self._need_accept_amount
         change_amount = self.get_dispense_amount()
-        self._reset_mount_accept_info()
+        self._reset_amount_accept_info()
         self._dispense_amount(change_amount)
 
     def _after_error(self, error_code, error_text):
@@ -292,7 +295,7 @@ class CashFSM(Machine):
         except AlreadyCalled:
             pass
         
-    def _reset_mount_accept_info(self):
+    def _reset_amount_accept_info(self, amount=0):
         self._accepted_amount = 0
         self._need_accept_amount = 0
 
@@ -344,12 +347,14 @@ class CashFSM(Machine):
             amount=amount)
         
     def _total_amount_changed(self, amount):
+        logger.debug("_total_amount_changed: {}".format(amount))
         dispatcher.send_minimal(
             sender=self, signal='total_amount_changed', 
             amount=amount)
 
     def _coin_amount_changed(self, amount):
         total_amount = amount + self.get_bill_amount()
+        logger.debug("_coin_amount_changed: {}".format(total_amount))
         dispatcher.send_minimal(
             sender=self, signal='coin_amount_changed', 
             amount=amount)

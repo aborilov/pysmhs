@@ -152,6 +152,7 @@ class ChangerFSM(Machine):
     #######################
     
     def _total_amount_changed(self, amount):
+        logger.debug("_total_amount_changed: {}".format(amount))
         dispatcher.send_minimal(
             sender=self, signal='total_amount_changed', 
             amount=amount)

@@ -149,7 +149,7 @@ class kioskhandler(AbstractHandler):
         reactor.callLater(0, self.kiosk_fsm.start)
         reactor.callLater(0.2, self.validator.initialize)
         dispatcher.connect(self.total_process, signal='total_amount_changed')
-        #  dispatcher.connect(self.deposit_process, signal='deposit_amount_changed')
+        dispatcher.connect(self.deposit_process, signal='deposit_amount_changed')
 
     def total_process(self, amount):
         self.settag('total', amount)
@@ -161,7 +161,7 @@ class kioskhandler(AbstractHandler):
     def loadtags(self):
         amount = self.kiosk_fsm.get_total_amount()
         self._tags['total'] = amount
-        #  self._tags['deposit'] = 0
+        self._tags['deposit'] = 0
 
     def process(self, signal, event):
         if signal == 'plchandler':
