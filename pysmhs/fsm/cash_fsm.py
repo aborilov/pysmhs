@@ -298,6 +298,7 @@ class CashFSM(Machine):
     def _reset_amount_accept_info(self, amount=0):
         self._accepted_amount = 0
         self._need_accept_amount = 0
+        self._deposit_amount_changed(amount=0)
 
     #######################
     ## Public Methods

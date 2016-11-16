@@ -257,10 +257,14 @@ class TestKioskMethods(TestCase):
         self.fsm_listener.deposit_amount_changed.reset_mock()
 
         self.product_prepared()
-        
+
+        self.assertEquals([({'amount':0,},)],
+                self.fsm_listener.deposit_amount_changed.call_args_list)
+        self.fsm_listener.deposit_amount_changed.reset_mock()
+
         self.fire_coin_out(1)
 
-        self.assertEquals([], 
+        self.assertEquals([({'amount':0,},)],
                 self.fsm_listener.deposit_amount_changed.call_args_list)
 
     def test_amount_dispensed_1(self):
