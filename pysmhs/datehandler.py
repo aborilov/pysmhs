@@ -18,7 +18,7 @@ class datehandler(AbstractHandler):
     midnight = time(00, 00, 00)
 
     def updatedate(self):
-        logger.debug("UPDATE")
+        #  logger.debug("UPDATE")
         now = datetime.now().replace(microsecond=0)
         self._tags['date'] = now.strftime("%d.%m.%Y %H:%M:%S")
         self.checktags(now)

@@ -17,11 +17,14 @@ class actionhandler(AbstractHandler):
                         'sleep': self.sleep}
 
     def process(self, signal, event):
-        logger.debug(event)
+        # need more common way
+        source_tag = "{}_{}".format(signal, event.keys()[0])
         for tag, params in self.config.items():
+            source_param = params.get('source', None)
+            if source_param and source_tag != source_param:
+                return
             if 'condition' in params:
-                params = params.copy()
-                cond = params.pop('condition')
+                cond = params.get('condition')
                 if event.keys()[0] in cond:
                     logger.debug("check cond %s" % cond)
                     try:
@@ -30,7 +33,6 @@ class actionhandler(AbstractHandler):
                     except Exception, e:
                         logger.exception(
                             "Error(%s) while eval(%s)" % (e, cond))
-        logger.debug('End of process')
 
     def settag(self, tag, value):
         AbstractHandler.settag(self, tag, value)
@@ -43,8 +45,9 @@ class actionhandler(AbstractHandler):
     def run_action(self, tag):
         params = self.config[tag].copy()
         logger.debug('have actions %s' % sorted(params))
-        if 'condition' in params:
-            params.pop('condition')
+        # just need to pop to have ability to sort actions
+        params.pop('condition')
+        params.pop('source')
         for i in sorted(params):
             logger.debug('Now in %s' % i)
             l = i.split(".")

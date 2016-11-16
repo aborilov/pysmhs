@@ -45,6 +45,12 @@ class AbstractHandler(object):
         logger.debug("Have parent - " + str(self.parent))
         self.loadtags()
 
+    def _process(self, signal, event):
+        try:
+            return self.process(signal, event)
+        except Exception:
+            logger.exception("Error while process")
+
     def process(self, signal, event):
         '''
         Method need to be implemented
@@ -101,7 +107,7 @@ class AbstractHandler(object):
         signals = self.params.get('listensignals', (dispatcher.All,))
         for signal in signals:
             try:
-                dispatcher.disconnect(self.process, signal=signal)
+                dispatcher.disconnect(self._process, signal=signal)
             except:
                 logger.exception("Error while try to disconnect listener")
 
@@ -115,4 +121,4 @@ class AbstractHandler(object):
         for signal in signals:
             logger.debug('{} start listen for {}'.format(
                 self.__class__.__name__, signal))
-            dispatcher.connect(self.process, signal=signal)
+            dispatcher.connect(self._process, signal=signal)
