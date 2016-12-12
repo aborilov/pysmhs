@@ -162,6 +162,17 @@ class kioskhandler(AbstractHandler):
         amount = self.kiosk_fsm.get_total_amount()
         self._tags['total'] = amount
         self._tags['deposit'] = 0
+        self._tags['accept_amount'] = 0
+
+    def settag(self, tag, value):
+        if tag == 'accept_amount':
+            try:
+                self.kiosk_fsm.accept_amount(amount=int(value))
+                AbstractHandler.settag(self, tag, 0)
+            except:
+                logger.exception("Invalid amount: {}".format(value))
+        else:
+            AbstractHandler.settag(self, tag, value)
 
     def process(self, signal, event):
         if signal == 'plchandler':

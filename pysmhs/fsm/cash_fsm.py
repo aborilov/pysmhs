@@ -94,30 +94,30 @@ class CashFSM(Machine):
     def _connect_input_signals(self, changer_fsm, validator_fsm, receiver):
         dispatcher.connect(receiver._on_changer_offline,
                            sender=changer_fsm, signal='offline')
-        dispatcher.connect(receiver._on_changer_ready, 
+        dispatcher.connect(receiver._on_changer_ready,
                            sender=changer_fsm, signal='initialized')
-        dispatcher.connect(receiver._on_changer_error, 
+        dispatcher.connect(receiver._on_changer_error,
                            sender=changer_fsm, signal='error')
         dispatcher.connect(receiver._on_coin_in,
                            sender=changer_fsm, signal='coin_in')
-        dispatcher.connect(receiver.amount_dispensed, 
+        dispatcher.connect(receiver.amount_dispensed,
                            sender=changer_fsm, signal='amount_dispensed')
-        dispatcher.connect(receiver._on_validator_offline, 
+        dispatcher.connect(receiver._on_validator_offline,
                            sender=validator_fsm, signal='offline')
-        dispatcher.connect(receiver._on_validator_ready, 
+        dispatcher.connect(receiver._on_validator_ready,
                            sender=validator_fsm, signal='initialized')
-        dispatcher.connect(receiver._on_validator_error, 
+        dispatcher.connect(receiver._on_validator_error,
                            sender=validator_fsm, signal='error')
-        dispatcher.connect(receiver._on_bill_in, 
+        dispatcher.connect(receiver._on_bill_in,
                            sender=validator_fsm, signal='bill_in')
-        dispatcher.connect(receiver.check_bill, 
+        dispatcher.connect(receiver.check_bill,
                            sender=validator_fsm, signal='check_bill')
 
-        dispatcher.connect(receiver._coin_amount_changed, 
+        dispatcher.connect(receiver._coin_amount_changed,
                            sender=changer_fsm, signal='total_amount_changed')
-        dispatcher.connect(receiver._bill_amount_changed, 
+        dispatcher.connect(receiver._bill_amount_changed,
                            sender=validator_fsm, signal='total_amount_changed')
-        dispatcher.connect(receiver._bill_count_changed, 
+        dispatcher.connect(receiver._bill_count_changed,
                            sender=validator_fsm, signal='bill_count_changed')
 
     def _after_started(self):
@@ -229,7 +229,7 @@ class CashFSM(Machine):
         if not self.changer_fsm.can_dispense_amount(accepted_amount):
             return False
         change_amount = accepted_amount - self._need_accept_amount
-        if (change_amount > 0 and 
+        if (change_amount > 0 and
             not self.changer_fsm.can_dispense_amount(change_amount)):
             return False
         return True
@@ -261,7 +261,7 @@ class CashFSM(Machine):
     def _after_error(self, error_code, error_text):
         self.validator_fsm.stop_accept()
         dispatcher.send_minimal(
-            sender=self, signal='error', 
+            sender=self, signal='error',
             error_code=error_code, error_text=error_text)
 
     def _after_fatal(self, error_code, error_text):
@@ -294,7 +294,7 @@ class CashFSM(Machine):
             self._acceptance_monitor_id.cancel()
         except AlreadyCalled:
             pass
-        
+
     def _reset_amount_accept_info(self, amount=0):
         self._accepted_amount = 0
         self._need_accept_amount = 0
@@ -307,7 +307,7 @@ class CashFSM(Machine):
     def get_dispense_amount(self):
         change_amount = self._accepted_amount - self._need_accept_amount
         return change_amount if change_amount > 0 else 0
-    
+
     def get_deposit_amount(self):
         return self._accepted_amount
 
@@ -329,46 +329,46 @@ class CashFSM(Machine):
 
     def _fire_coin_in(self, amount):
         dispatcher.send_minimal(
-            sender=self, signal='coin_in', 
+            sender=self, signal='coin_in',
             amount=amount)
 
     def _fire_bill_in(self, amount):
         dispatcher.send_minimal(
-            sender=self, signal='bill_in', 
+            sender=self, signal='bill_in',
             amount=amount)
-    
+
     def _dispense_amount_changed(self, amount):
         dispatcher.send_minimal(
-            sender=self, signal='dispense_amount_changed', 
+            sender=self, signal='dispense_amount_changed',
             amount=amount)
 
     def _deposit_amount_changed(self, amount):
         dispatcher.send_minimal(
-            sender=self, signal='deposit_amount_changed', 
+            sender=self, signal='deposit_amount_changed',
             amount=amount)
-        
+
     def _total_amount_changed(self, amount):
         logger.debug("_total_amount_changed: {}".format(amount))
         dispatcher.send_minimal(
-            sender=self, signal='total_amount_changed', 
+            sender=self, signal='total_amount_changed',
             amount=amount)
 
     def _coin_amount_changed(self, amount):
         total_amount = amount + self.get_bill_amount()
         logger.debug("_coin_amount_changed: {}".format(total_amount))
         dispatcher.send_minimal(
-            sender=self, signal='coin_amount_changed', 
+            sender=self, signal='coin_amount_changed',
             amount=amount)
         self._total_amount_changed(amount=total_amount)
 
     def _bill_amount_changed(self, amount):
         total_amount = amount + self.get_coin_amount()
         dispatcher.send_minimal(
-            sender=self, signal='bill_amount_changed', 
+            sender=self, signal='bill_amount_changed',
             amount=amount)
         self._total_amount_changed(amount=total_amount)
 
     def _bill_count_changed(self, count):
         dispatcher.send_minimal(
-            sender=self, signal='bill_count_changed', 
+            sender=self, signal='bill_count_changed',
             count=count)
