@@ -1,4 +1,4 @@
-Jinja2==2.7.1
+Jinja2==2.11.3
 MarkupSafe==0.18
 PyDispatcher==2.0.3
 Twisted==13.1.0
